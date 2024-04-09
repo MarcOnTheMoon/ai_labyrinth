@@ -5,6 +5,9 @@
 *.FCStd
 *.FCStd1
 
+# Ignore Word files
+*.docx
+
 # Ignore UMLet source files (UML diagrams)
 *.uxf
 
