@@ -9,7 +9,7 @@
 *.docx
 
 # Ignore UMLet source files (UML diagrams)
-*.uxf
+#*.uxf
 
 # Ignore temporary Python files
 __pycache__
