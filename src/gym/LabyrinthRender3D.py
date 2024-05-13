@@ -8,10 +8,10 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.04.02
+@version: 2024.04.15
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
-from vpython import scene, box, cylinder, sphere, rotate
+from vpython import *
 from vpython import vector as vec
 from math import pi
 import time
@@ -27,15 +27,18 @@ class LabyrinthRender3D:
         'box'       : vec(0.9, 0.0, 0.0),
         'wheels'    : vec(0.2, 0.2, 0.2),
         'field'     : vec(0.9, 0.8, 0.6),
+        'topfield'  : vec(1.0, 1.0, 1.0),
+        'walls'     : vec(0.2, 0.2, 0.2),
+        'holes'     : vec(0.1, 0.1, 0.1),
         'on_field'  : vec(1.0, 0.8, 0.6),
         'arrow_x'   : vec(0.0, 0.0, 1.0),
         'arrow_y'   : vec(1.0, 0.0, 0.0),
-        'ball'      : vec(1.0, 0.5, 0.0)
+    #    'ball'      : vec(1.0, 0.5, 0.0)
     }
 
     # ========== Constructor ==================================================
 
-    def __init__(self, geometry, scene_width=800, scene_height=600, scene_range=20):
+    def __init__(self, geometry, scene_width=800, scene_height=600, scene_range=20, ball_position = None):
         """
         Constructor.
 
@@ -49,6 +52,8 @@ class LabyrinthRender3D:
             Height of the display area in pixel. The default is 600.
         scene_range : float, optional
             Virtual distance of the camera viewing the scene. The default is 20.
+        ball_position: vec(x, y, z)
+            sets the starting position of the ball
 
         Returns
         -------
@@ -70,6 +75,10 @@ class LabyrinthRender3D:
 
         # Set geometry and render objects
         self.__ball_radius = geometry.ball.radius
+        if ball_position != None:
+            self.__ball_position = ball_position
+        else:
+            self.__ball_position = vec(0,0,0)
         self.__x_degree = 0.0
         self.__y_degree = 0.0
         self.__axis_x = vec(0, -1, 0)
@@ -97,7 +106,7 @@ class LabyrinthRender3D:
         self.__render_field(geometry)
 
         # Render ball at start location
-        self.__render_ball(0., 0.)
+        self.__render_ball(self.__ball_position.x, self.__ball_position.y) # field with 2 holes
 
     # ========== Render static objects ========================================
 
@@ -122,12 +131,12 @@ class LabyrinthRender3D:
         thickness = geometry.box.boarder
         wheel_radius = geometry.box.wheel_radius
         wheel_depth = geometry.box.wheel_depth
-        dz = 1.0
+        dz = 1.0 #boarder height (Randhöhe)
 
         # Ground plate
         center = vec(0, 0, -(height - thickness/2) + dz)
         box(pos=center, length=field_x, height=field_y, width=thickness, color=self.colors['field'])
-        
+
         # Upper and lower plate
         upper = vec(0,  (field_y + thickness)/2, -height/2 + dz)
         lower = vec(0, -(field_y + thickness)/2, -height/2 + dz)
@@ -146,7 +155,7 @@ class LabyrinthRender3D:
         cylinder(pos=front, axis=vec(0, -1, 0), radius=wheel_radius, length=wheel_depth, color=self.colors['wheels'])
         cylinder(pos=right, axis=vec(1,  0, 0), radius=wheel_radius, length=wheel_depth, color=self.colors['wheels'])
 
-    # -------------------------------------------------------------------------
+    # ========== Render dynamic objects =======================================
 
     def __render_field(self, geometry):
         """
@@ -162,19 +171,44 @@ class LabyrinthRender3D:
         None.
 
         """
+
+        self.__labyrinth_elements = []
+
+        # Field
         # Init geometric values
         field_x = geometry.field.size_x
         field_y = geometry.field.size_y
         plate_depth = geometry.field.plate_depth
-
         # Render plate (Coordinate system's origin on top of plate)
         center = vec(0, 0, -plate_depth/2)
-        self.__field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['field'])
-               
+        self.__field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['topfield'])
+        self.__labyrinth_elements.append(self.__field)
+
+        # Walls
+        walls_data = geometry.walls.walls_data
+        # Render all walls
+        for wall_data in walls_data:
+            wall = box(pos=wall_data["pos"], size=wall_data["size"], color=self.colors['walls'])
+            self.__labyrinth_elements.append(wall)
+
+        #Holes
+        holes_data = geometry.holes.holes_data
+        holes_radius = geometry.holes.holes_radius
+        # Render all holes
+        for hole_data in holes_data:
+            hole = cylinder(pos=hole_data["pos"], axis=hole_data["axis"], radius=holes_radius, color=self.colors['holes'])
+            self.__labyrinth_elements.append(hole)
+
+        #Connect the labyrinth elements into a complete labyrinth board with background picture
+        #labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte2Loch)
+        labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte8Loch)
+        #labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte21Loch)
+            # Note! save image in: ...\miniconda3\Lib\site-packages\vpython\vpython_libraries
+            #       and store image path in vpython.py in section textures,
+            #       the python script can be found under ...\miniconda3\Lib\site-packages\vpython
+        self.__labyrinth = labyrinth
         # Rotate plate
         self.rotate_by(x_degree=geometry.field.rotation_x_deg, y_degree=geometry.field.rotation_y_deg)
-
-    # ========== Render dynamic objects =======================================
 
     def __render_ball(self, x, y):
         """
@@ -196,38 +230,27 @@ class LabyrinthRender3D:
         None.
 
         """
-        position = vec(x, y, self.__ball_radius)
-        self.__ball = sphere(pos=position, radius=self.__ball_radius, color=self.colors['ball'])
+        if self.__ball_position == None:
+            position = vec(x, y, self.__ball_radius)
+        else:
+            position = self.__ball_position
+            position.z = self.__ball_radius
+        self.__ball = sphere(pos=position, radius=self.__ball_radius, texture=textures.metal)
 
-    # ========== Move  dynamic objects ========================================
+    def ball_visibility(self, visible):
+        self.__ball.visible = visible
 
-    def move_ball(self, x, y):
-        """
-        Move the ball to a specific location.
+    # ========== Move dynamic objects ========================================
 
-        Parameters
-        ----------
-        x : float
-            x-coordinate of ball's center.
-        y : float
-            y-coordinate of ball's center.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.__ball.pos = vec(x, y, self.__ball_radius)
-
-    # -------------------------------------------------------------------------
+    #dynamic Field
 
     def rotate_by(self, x_degree=None, y_degree=None):
         """
         Rotate the field by the angles passed as parameters.
-        
+
         To keep all sides parallel to the outer box, rotations of the physical
         game and this environment are done as follows:
-            
+
         - Left/right with fixed rotation axis along y-direction (0, -1, 0)
         - Front/back around axis (1, 0, dz) tilting with left/right rotation
 
@@ -246,13 +269,13 @@ class LabyrinthRender3D:
         if x_degree != None:
             x_rad = x_degree * pi/180.
             self.__x_degree = self.__x_degree + x_degree
-            self.__field.rotate(angle=x_rad, axis=self.__axis_x, origin=vec(0, 0, 0))
+            self.__labyrinth.rotate(angle=x_rad, axis=self.__axis_x, origin=vec(0, 0, 0))
             self.__axis_y = rotate(self.__axis_y, angle=x_rad, axis=self.__axis_x)
 
         if y_degree != None:
             y_rad = y_degree * pi/180.
             self.__y_degree = self.__y_degree + y_degree
-            self.__field.rotate(angle=y_rad, axis=self.__axis_y, origin=vec(0, 0, 0))
+            self.__labyrinth.rotate(angle=y_rad, axis=self.__axis_y, origin=vec(0, 0, 0))
 
     # -------------------------------------------------------------------------
 
@@ -276,8 +299,40 @@ class LabyrinthRender3D:
             delta_x = x_degree - self.__x_degree
         if y_degree != None:
             delta_y = y_degree - self.__y_degree
-            
+
         self.rotate_by(x_degree=delta_x, y_degree=delta_y)
+
+    def get_x_rad(self):
+        return self.__x_degree * pi/180.0
+
+    def get_y_rad(self):
+        return self.__y_degree * pi/180.0
+
+    # -------------------------------------------------------------------------
+
+    #dynamic ball
+    def move_ball(self, x, y, x_rad = None, y_rad = None):
+        """
+        Move the ball to a specific location.
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of ball's center.
+        y : float
+            y-coordinate of ball's center.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.__ball.pos = vec(x, y, self.__ball_radius)
+
+        if x_rad != None:
+            self.__ball.rotate(angle=x_rad, axis=self.__axis_x, origin=vec(0,0,0))
+        if y_rad != None:
+            self.__ball.rotate(angle=y_rad, axis=self.__axis_y, origin=vec(0,0,0))
 
 # -----------------------------------------------------------------------------
 # Main (sample)
@@ -292,11 +347,11 @@ if __name__ == '__main__':
     # Do some sample movements
     number_steps = 25
     alpha = 0.25
-    
+
     for i in range(number_steps):
         render.rotate_by(x_degree=alpha)
         time.sleep(0.05)
-    for i in range(2* number_steps):
+    for i in range(2 * number_steps):
         render.rotate_by(x_degree=-alpha)
         time.sleep(0.05)
     for i in range(number_steps):
@@ -308,4 +363,3 @@ if __name__ == '__main__':
     for i in range(number_steps):
         render.rotate_by(y_degree=alpha)
         time.sleep(0.01)
-        
