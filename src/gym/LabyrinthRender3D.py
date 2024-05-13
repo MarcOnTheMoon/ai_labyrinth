@@ -8,10 +8,10 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.04.15
+@version: 2024.05.13
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
-from vpython import *
+from vpython import scene, box, cylinder, sphere, rotate, compound, textures
 from vpython import vector as vec
 from math import pi
 import time
@@ -32,13 +32,13 @@ class LabyrinthRender3D:
         'holes'     : vec(0.1, 0.1, 0.1),
         'on_field'  : vec(1.0, 0.8, 0.6),
         'arrow_x'   : vec(0.0, 0.0, 1.0),
-        'arrow_y'   : vec(1.0, 0.0, 0.0),
+        'arrow_y'   : vec(1.0, 0.0, 0.0)
     #    'ball'      : vec(1.0, 0.5, 0.0)
     }
 
     # ========== Constructor ==================================================
 
-    def __init__(self, geometry, scene_width=800, scene_height=600, scene_range=20, ball_position = None):
+    def __init__(self, geometry, scene_width=800, scene_height=600, scene_range=20, ball_position=None):
         """
         Constructor.
 
@@ -172,43 +172,45 @@ class LabyrinthRender3D:
 
         """
 
-        self.__labyrinth_elements = []
-
-        # Field
         # Init geometric values
         field_x = geometry.field.size_x
         field_y = geometry.field.size_y
         plate_depth = geometry.field.plate_depth
-        # Render plate (Coordinate system's origin on top of plate)
+
+        # Render plate (Coordinate system's origin on top surface of plate)
         center = vec(0, 0, -plate_depth/2)
         self.__field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['topfield'])
+
+        # Init list of elements
+        self.__labyrinth_elements = []
         self.__labyrinth_elements.append(self.__field)
 
-        # Walls
-        walls_data = geometry.walls.walls_data
-        # Render all walls
+        # Add walls
+        walls_data = geometry.walls.data
         for wall_data in walls_data:
             wall = box(pos=wall_data["pos"], size=wall_data["size"], color=self.colors['walls'])
             self.__labyrinth_elements.append(wall)
 
-        #Holes
-        holes_data = geometry.holes.holes_data
-        holes_radius = geometry.holes.holes_radius
-        # Render all holes
+        # Add holes
+        holes_data = geometry.holes.data
+        holes_radius = geometry.holes.radius
         for hole_data in holes_data:
             hole = cylinder(pos=hole_data["pos"], axis=hole_data["axis"], radius=holes_radius, color=self.colors['holes'])
             self.__labyrinth_elements.append(hole)
 
-        #Connect the labyrinth elements into a complete labyrinth board with background picture
-        #labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte2Loch)
-        labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte8Loch)
-        #labyrinth = compound(self.__labyrinth_elements, texture=textures.spielplatte21Loch)
-            # Note! save image in: ...\miniconda3\Lib\site-packages\vpython\vpython_libraries
-            #       and store image path in vpython.py in section textures,
-            #       the python script can be found under ...\miniconda3\Lib\site-packages\vpython
+        # Compile all elements into a board with background picture
+        if geometry.layout == '2 holes':
+            labyrinth = compound(self.__labyrinth_elements, texture='textures/2_holes.png')
+        elif geometry.layout == '8 holes':
+            labyrinth = compound(self.__labyrinth_elements, texture='textures/8_holes.png')
+        elif geometry.layout == '21 holes':
+            labyrinth = compound(self.__labyrinth_elements, texture='textures/21_holes.png')
         self.__labyrinth = labyrinth
+
         # Rotate plate
         self.rotate_by(x_degree=geometry.field.rotation_x_deg, y_degree=geometry.field.rotation_y_deg)
+
+    # -------------------------------------------------------------------------
 
     def __render_ball(self, x, y):
         """
@@ -241,8 +243,6 @@ class LabyrinthRender3D:
         self.__ball.visible = visible
 
     # ========== Move dynamic objects ========================================
-
-    #dynamic Field
 
     def rotate_by(self, x_degree=None, y_degree=None):
         """
@@ -310,7 +310,6 @@ class LabyrinthRender3D:
 
     # -------------------------------------------------------------------------
 
-    #dynamic ball
     def move_ball(self, x, y, x_rad = None, y_rad = None):
         """
         Move the ball to a specific location.
@@ -340,7 +339,7 @@ class LabyrinthRender3D:
 
 if __name__ == '__main__':
     # Render initial pinball environment
-    geometry = LabyrinthGeometry()
+    geometry = LabyrinthGeometry(layout='8 holes')
     render = LabyrinthRender3D(geometry)
     time.sleep(2.0)
 
