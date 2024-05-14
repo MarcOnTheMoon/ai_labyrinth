@@ -27,23 +27,52 @@ class LabyrinthBallPhysics:
         ----------
         geometry : LabyrinthGeometry
             Geometry for calculations
+        time_step_secs : float
+            Time period between steps [s]
 
         Returns
         -------
         None.
 
         """
-        # TODO Physical unit of velocity?
-        self.__geometry = geometry
-        self.game_state = 0                     # 0 init state, -1 ball lost
+        # Timing
         self.dt = time_step_secs                # Time step [s]
-        self.__g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
-        self.__5_7g = 5.0 / 7.0 * self.__g      # constant for ball acceleration
-        self.__urr = 0.00118                    # Rolling friction coefficient
-        self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity
+
+        # Ball state
+        # TODO Physical unit of velocity?
+        self.is_ball_in_hole = False            # Ball has fallen into hole if True
         self.__position = vec(0.0, 0.0, 0.0)    # Ball's position
+        self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity
+        
+        # Physical constants
+        self.__g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
+        self.__5_7g = 5.0 / 7.0 * self.__g      # constant for ball acceleration [cm/s²]
+        self.__urr = 0.00118                    # Rolling friction coefficient
+
+        # Geometry        
+        self.__geometry = geometry
         self.calc_corners()
 
+    # -------------------------------------------------------------------------
+    
+    def reset(self, position):
+        """
+        Reset ball physics.
+
+        Parameters
+        ----------
+        position : vpython.vector
+            Position of ball.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.__position = position
+        self.__velocity = vec(0.0, 0.0, 0.0)
+        self.is_ball_in_hole = False
+        
     # -------------------------------------------------------------------------
     
     def calc_corners(self):
@@ -243,7 +272,7 @@ class LabyrinthBallPhysics:
             hole_center = hole_data["pos"]
             if ((self.__position.x - hole_center.x) * (self.__position.x - hole_center.x) + (self.__position.y - hole_center.y) * (self.__position.y - hole_center.y)) < self.__geometry.holes.radius * self.__geometry.holes.radius:
                 print("holecollision")
-                self.game_state = -1
+                self.is_ball_in_hole = True
 
 
     # -------------------------------------------------------------------------
@@ -357,25 +386,25 @@ if __name__ == '__main__':
     x_rad = render.get_x_rad()
     y_rad = render.get_y_rad()
     for i in range(50):
-        if myBall.game_state != -1:
+        if myBall.is_ball_in_hole == False:
             time.sleep(myBall.dt)
             pos = myBall.calc_move(x_rad, y_rad)
             print("pos",pos)
             render.move_ball(pos.x, pos.y, x_rad=x_rad, y_rad=y_rad)
-    if myBall.game_state != -1:
+    if myBall.is_ball_in_hole == False:
         render.rotate_by(x_degree= -2.5, y_degree=0.5)
         x_rad = render.get_x_rad()
         y_rad = render.get_y_rad()
 
     for i in range(2000):
-        if myBall.game_state != -1:
+        if myBall.is_ball_in_hole == False:
             time.sleep(myBall.dt)
             pos = myBall.calc_move(x_rad, y_rad)
             print("pos",pos)
             render.move_ball(pos.x, pos.y, x_rad=x_rad, y_rad=y_rad)
 
 
-    if myBall.game_state == -1:
+    if myBall.is_ball_in_hole == False:
         render.rotate_to(0,0)
         print("gameover")
         render.ball_visibility(False)

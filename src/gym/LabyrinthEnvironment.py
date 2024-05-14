@@ -136,7 +136,8 @@ class LabyrinthEnvironment(gym.Env):
         self.__y_degree = 0.0
 
         # Ball
-        self.__ball_position = self.__ball_physics.calc_move(x_rad=0.0, y_rad=0.0, position=self.__ball_start_position)
+        self.__ball_position = self.__ball_start_position
+        self.__ball_physics.reset(position=self.__ball_start_position)
 
         # Rendering (ball in hole became invisible)
         if self.render_mode == '3D':
@@ -161,7 +162,7 @@ class LabyrinthEnvironment(gym.Env):
             self.__render_3d.rotate_to(self.__x_degree, self.__y_degree)
             
             # Ball visibility
-            if self.__ball_physics.game_state == -1:
+            if self.__ball_physics.is_ball_in_hole:
                 self.__render_3d.ball_visibility(False)
                 
             # Ball position
@@ -217,7 +218,7 @@ class LabyrinthEnvironment(gym.Env):
         is_ball_at_destination = is_destination_x and is_destination_y
 
         # Ball has fallen into a hole?
-        is_ball_in_hole = (self.__ball_physics.game_state == -1)
+        is_ball_in_hole = self.__ball_physics.is_ball_in_hole
 
         # Reward
         if is_ball_at_destination:
