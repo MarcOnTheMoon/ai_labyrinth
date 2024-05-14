@@ -8,7 +8,7 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.13
+@version: 2024.05.14
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import scene, box, cylinder, sphere, rotate, compound, textures
@@ -33,7 +33,6 @@ class LabyrinthRender3D:
         'on_field'  : vec(1.0, 0.8, 0.6),
         'arrow_x'   : vec(0.0, 0.0, 1.0),
         'arrow_y'   : vec(1.0, 0.0, 0.0)
-    #    'ball'      : vec(1.0, 0.5, 0.0)
     }
 
     # ========== Constructor ==================================================
@@ -106,7 +105,7 @@ class LabyrinthRender3D:
         self.__render_field(geometry)
 
         # Render ball at start location
-        self.__render_ball(self.__ball_position.x, self.__ball_position.y) # field with 2 holes
+        self.__render_ball(self.__ball_position.x, self.__ball_position.y)
 
     # ========== Render static objects ========================================
 
@@ -182,29 +181,29 @@ class LabyrinthRender3D:
         self.__field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['topfield'])
 
         # Init list of elements
-        self.__labyrinth_elements = []
-        self.__labyrinth_elements.append(self.__field)
+        labyrinth_elements = []
+        labyrinth_elements.append(self.__field)
 
         # Add walls
         walls_data = geometry.walls.data
         for wall_data in walls_data:
             wall = box(pos=wall_data["pos"], size=wall_data["size"], color=self.colors['walls'])
-            self.__labyrinth_elements.append(wall)
+            labyrinth_elements.append(wall)
 
         # Add holes
         holes_data = geometry.holes.data
         holes_radius = geometry.holes.radius
         for hole_data in holes_data:
             hole = cylinder(pos=hole_data["pos"], axis=hole_data["axis"], radius=holes_radius, color=self.colors['holes'])
-            self.__labyrinth_elements.append(hole)
+            labyrinth_elements.append(hole)
 
         # Compile all elements into a board with background picture
         if geometry.layout == '2 holes':
-            labyrinth = compound(self.__labyrinth_elements, texture='textures/2_holes.png')
+            labyrinth = compound(labyrinth_elements, texture='textures/2_holes.png')
         elif geometry.layout == '8 holes':
-            labyrinth = compound(self.__labyrinth_elements, texture='textures/8_holes.png')
+            labyrinth = compound(labyrinth_elements, texture='textures/8_holes.png')
         elif geometry.layout == '21 holes':
-            labyrinth = compound(self.__labyrinth_elements, texture='textures/21_holes.png')
+            labyrinth = compound(labyrinth_elements, texture='textures/21_holes.png')
         self.__labyrinth = labyrinth
 
         # Rotate plate
@@ -311,6 +310,7 @@ class LabyrinthRender3D:
     # -------------------------------------------------------------------------
 
     def move_ball(self, x, y, x_rad = None, y_rad = None):
+        # TODO Check and document parameters x_rad and y_rad
         """
         Move the ball to a specific location.
 

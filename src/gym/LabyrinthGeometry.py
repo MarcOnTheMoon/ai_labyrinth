@@ -6,7 +6,7 @@ Lengths are stated without unit, but are interpreted as [cm].
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.13
+@version: 2024.05.14
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
@@ -20,7 +20,18 @@ class LabyrinthGeometry:
     # ========== Field layouts ================================================
 
     # Define layout names (walls and holes)
+    # TODO Add destinations for 2 and 21 holes
     layouts = ['2 holes', '8 holes', '21 holes']
+    start_positions = {
+        '2 holes'  : vec(-1.52,  9.25, 0),
+        '8 holes'  : vec( 0.13, 10.53, 0),
+        '21 holes' : vec( 0.0,   0.0,  0)
+        }
+    destinations_xy = {
+        '2 holes'  : None,
+        '8 holes'  : [[-5.85, -3.83], [-11.4, -9.52]],
+        '21 holes' : None
+        }
 
     # ========== Constructor ==================================================
 
@@ -52,7 +63,40 @@ class LabyrinthGeometry:
         self.walls = Walls(layout=layout)
         self.holes = Holes(layout=layout, depth=self.field.plate_depth)
         self.ball = Ball()
-    
+
+# -----------------------------------------------------------------------------
+# Box with knobs to tilt field
+# -----------------------------------------------------------------------------
+
+class Box:
+    """
+    Representation of the box housing the tiltable field.
+    """
+    def __init__(self, height=9.5, boarder=0.8, wheel_radius=1.7, wheel_depth=1.5):
+        """
+        Constructor.
+
+        Parameters
+        ----------
+        height : float, optional
+            Height in [cm]. The default is 9.5.
+        boarder : float, optional
+            Thickness of the boxes plates in [cm]. The default is 0.8.
+        wheel_radius : float, optional
+            Radius of the knobs operating the game in [cm]. The default is 1.7.
+        wheel_depth : float, optional
+            Depth of the knobs operating the game in [cm]. The default is 1.5.
+
+        Returns
+        -------
+        None.
+
+        """
+        self.height = height
+        self.boarder = boarder
+        self.wheel_radius = wheel_radius
+        self.wheel_depth = wheel_depth
+
 # -----------------------------------------------------------------------------
 # Playing field
 # -----------------------------------------------------------------------------
@@ -313,39 +357,6 @@ class Holes:
         
         else:
             self.data = None
-
-# -----------------------------------------------------------------------------
-# Box with knobs to tilt field
-# -----------------------------------------------------------------------------
-
-class Box:
-    """
-    Representation of the box housing the tiltable field.
-    """
-    def __init__(self, height=9.5, boarder=0.8, wheel_radius=1.7, wheel_depth=1.5):
-        """
-        Constructor.
-
-        Parameters
-        ----------
-        height : float, optional
-            Height in [cm]. The default is 9.5.
-        boarder : float, optional
-            Thickness of the boxes plates in [cm]. The default is 0.8.
-        wheel_radius : float, optional
-            Radius of the knobs operating the game in [cm]. The default is 1.7.
-        wheel_depth : float, optional
-            Depth of the knobs operating the game in [cm]. The default is 1.5.
-
-        Returns
-        -------
-        None.
-
-        """
-        self.height = height
-        self.boarder = boarder
-        self.wheel_radius = wheel_radius
-        self.wheel_depth = wheel_depth
 
 # -----------------------------------------------------------------------------
 # Ball
