@@ -39,7 +39,7 @@ class LabyrinthEnvironment(gym.Env):
 
     # ========== Constructor ==================================================
 
-    def __init__(self, layout, render_mode='3D'):
+    def __init__(self, layout, render_mode='3D', time_steps_secs=0.01):
         """
         Constructor.
 
@@ -49,6 +49,8 @@ class LabyrinthEnvironment(gym.Env):
             Layout of holes and walls as defined in LabyrinthGeometry.py. The default is '8 holes'
         render_mode : String, optional
             Render mode to visualize the states (or None). The default is '3D'.
+        time_steps_secs : float, optional
+            Time period between simulation steps [s]. The default is 0.01.
 
         Returns
         -------
@@ -56,7 +58,7 @@ class LabyrinthEnvironment(gym.Env):
 
         """
         # Timing
-        self.__time_steps_secs = 0.01
+        self.__time_steps_secs = time_steps_secs
         
         # Create labyrinth geometry
         geometry = LabyrinthGeometry(layout=layout)
@@ -167,11 +169,9 @@ class LabyrinthEnvironment(gym.Env):
                 
             # Ball position
             # TODO Check rotation of ball using x_rad and y_rad
-            # TODO Adapt to frame rate or remove sleep()?
             x_rad = self.__x_degree * pi/180.0
             y_rad = self.__y_degree * pi/180.0
             self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y, x_rad=x_rad, y_rad=y_rad)
-            time.sleep(0.1)
 
     # ========== Step =========================================================
 
@@ -196,6 +196,10 @@ class LabyrinthEnvironment(gym.Env):
             Information (currently not used).
 
         """
+        # Wait until period between steps has passed
+        # TODO Rermember time of last step and wait accordingly
+        time.sleep(self.__time_steps_secs)
+
         # Apply action to field's rotation
         self.__x_degree += float(self.__action_to_angle_degree[action][0])
         self.__y_degree += float(self.__action_to_angle_degree[action][1])

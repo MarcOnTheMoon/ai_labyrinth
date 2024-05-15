@@ -1,3 +1,13 @@
+"""
+Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
+
+@authors: Sandra Lassahn, Marc Hensel
+@contact: http://www.haw-hamburg.de/marc-hensel
+@copyright: 2024
+@version: 2024.05.15
+@license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+"""
+
 #conda install -c conda-forge tensorflow
 #conda install pip
 #afterwards in anaconda: pip install keras-rl2
@@ -9,8 +19,11 @@
 # !!!    https://www.tensorflow.org/agents/tutorials/1_dqn_tutorial
 # https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html
 
+# Add Pocket cube env to path
+import sys
+sys.path.append('../gym')
+
 import random
-import gym
 import numpy as np
 from collections import deque
 from tensorflow.keras import Sequential, Input
@@ -22,7 +35,7 @@ from tensorflow.keras.optimizers import Adam
 
 from LabyrinthEnvironment import LabyrinthEnvironment
 
-class DQNAgent:
+class LabyrinthAgentDQN:
     def __init__(self, state_space, action_space):
 
         self.state_space = state_space
@@ -85,13 +98,18 @@ class DQNAgent:
     def save_weights(self, name):
         self.model.save_weights(name) #save Q Network parameters to a file
 
+# -----------------------------------------------------------------------------
+# Main (sample)
+# -----------------------------------------------------------------------------
+
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(render_mode='3D')  # Init gym environment
-    agent = DQNAgent(env.observation_space, env.action_space)
+    # Init environment and agent
+    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
+    agent = LabyrinthAgentDQN(env.observation_space, env.action_space)
 
-
-    episodes = 500 # Anzahl der Episoden zum Trainieren des Agenten
-    batch_size = 32 # Größe der Minibatches für das Training
+    # Hyperparameters
+    episodes = 500
+    batch_size = 32
 
     #training
     for episode in range(episodes):
