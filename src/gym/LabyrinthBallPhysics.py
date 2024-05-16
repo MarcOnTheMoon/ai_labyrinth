@@ -8,7 +8,7 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.15
+@version: 2024.05.16
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
@@ -41,11 +41,10 @@ class LabyrinthBallPhysics:
         self.dt = time_step_secs                # Time step [s]
 
         # Ball state
-        # TODO Are physical units of position [cm]^3 and velocity [cm/s]^3?
-        # TODO Why 3D vectors (z not used)?
+        # TODO Component z used?
         self.is_ball_in_hole = False            # Ball has fallen into hole if True
-        self.__position = vec(0.0, 0.0, 0.0)    # Ball's position
-        self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity
+        self.__position = vec(0.0, 0.0, 0.0)    # Ball's position [cm]^3
+        self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity [cm/s]^3
         
         # Physical constants
         self.__g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
@@ -69,7 +68,7 @@ class LabyrinthBallPhysics:
             3D velocity vector.
 
         """
-        return self.__velocity.copy()
+        return self.__velocity
 
     # -------------------------------------------------------------------------
     
@@ -242,111 +241,116 @@ class LabyrinthBallPhysics:
         radius = self.__geometry.ball.radius
 
         # ---------- Check for collision with an edge -------------------------
-        # TODO Return immediately when collision detected (because two collisions are impossible)? => Speed-up
 
         is_collision_edge = False
         for corner in self.__corners:
             # Left edge
             if (pos_x < corner[0].x) and (corner[0].x - pos_x < radius) and (pos_y >= corner[3].y) and (pos_y <= corner[0].y):
-                is_collision_edge = True
                 y_friction_coefficient = self.__urr_edge * cos(self.__y_rad)
                 y_a = self.__5_7g * y_friction_coefficient                                  # Acceleration in y
                 y_dv = (y_a * self.dt) if (self.__velocity.y <= 0) else (-y_a * self.dt)    # Change of speed in y
                 self.__velocity.y += y_dv
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[0].x - radius
+                is_collision_edge = True
+                break
                     
             # Right_edge
             if (pos_x > corner[1].x) and (pos_x - corner[1].x < radius) and (pos_y >= corner[2].y) and (pos_y <= corner[1].y):
-                is_collision_edge = True
                 y_friction_coefficient = self.__urr_edge * cos(self.__y_rad)
                 y_a = self.__5_7g * y_friction_coefficient                                  # Acceleration in y
                 y_dv = (y_a * self.dt) if (self.__velocity.y <= 0) else (-y_a * self.dt)    # Change of speed in y
                 self.__velocity.y += y_dv
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[1].x + radius
+                is_collision_edge = True
+                break
                     
             # Top edge
             if (pos_y > corner[0].y) and (pos_y - corner[0].y < radius) and (pos_x >= corner[0].x) and (pos_x <= corner[1].x):
-                is_collision_edge = True
                 x_friction_coefficient = self.__urr_edge * cos(self.__x_rad)
                 x_a = self.__5_7g * x_friction_coefficient                                  # Acceleration in x
                 x_dv = (x_a * self.dt) if (self.__velocity.x <= 0) else (-x_a * self.dt)    # Change of speed in x
                 self.__velocity.x += x_dv
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[0].y + radius
+                is_collision_edge = True
+                break
                     
             # Bottom edge
             if (pos_y < corner[3].y) and (corner[3].y - pos_y < radius) and (pos_x >= corner[3].x) and (pos_x <= corner[2].x):
-                is_collision_edge = True
                 x_friction_coefficient = self.__urr_edge * cos(self.__x_rad)
                 x_a = self.__5_7g * x_friction_coefficient                                  # Acceleration in x
                 x_dv = (x_a * self.dt) if (self.__velocity.x <= 0) else (-x_a * self.dt)    # Change of speed in x
                 self.__velocity.x += x_dv
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[2].y - radius
+                is_collision_edge = True
+                break
 
 
         if is_collision_edge == True: # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball).
             return
 
         # ---------- Check for collision with a corner ------------------------
-        # TODO Leave for loop with break when collision detected? => Speed-up
         
         is_collision_corner = False
         squared_radius = radius * radius
         for corner in self.__corners:
             # Top left corner (adjust position)
             if ((pos_x - corner[0].x) * (pos_x - corner[0].x) + (pos_y - corner[0].y) * (pos_y - corner[0].y)) < squared_radius:
-                is_collision_corner = True
                 sx = pos_x - corner[0].x
                 sy = pos_y - corner[0].y
                 collision_distance = sqrt(sx * sx + sy * sy)
                 distance_factor = radius / collision_distance
                 self.__position.x = pos_x = sx * distance_factor + corner[0].x
                 self.__position.y = pos_y = sy * distance_factor + corner[0].y
+                is_collision_corner = True
+                break
 
             # Top right corner (adjust position)
             elif ((pos_x - corner[1].x) * (pos_x - corner[1].x) + (pos_y - corner[1].y) * (pos_y - corner[1].y)) < squared_radius:
-                is_collision_corner = True
                 sx = pos_x - corner[1].x
                 sy = pos_y - corner[1].y
                 collision_distance = sqrt(sx * sx + sy * sy)
                 distance_factor = radius/ collision_distance
                 self.__position.x = pos_x = sx * distance_factor + corner[1].x
                 self.__position.y = pos_y = sy * distance_factor + corner[1].y
+                is_collision_corner = True
+                break
 
             # Bottom right corner (adjust position)
             elif ((pos_x - corner[2].x) * (pos_x - corner[2].x) + (pos_y - corner[2].y) * (pos_y - corner[2].y)) < squared_radius:
-                is_collision_corner = True
                 sx = pos_x - corner[2].x
                 sy = pos_y - corner[2].y
                 collision_distance = sqrt(sx * sx + sy * sy)
                 distance_factor = radius / collision_distance
                 self.__position.x = pos_x = sx * distance_factor + corner[2].x
                 self.__position.y = pos_y = sy * distance_factor + corner[2].y
+                is_collision_corner = True
+                break
 
             # Bottom left corner (adjust position)
             elif ((pos_x - corner[3].x) * (pos_x - corner[3].x) + (pos_y - corner[3].y) * (pos_y - corner[3].y)) < squared_radius:
-                is_collision_corner = True
                 sx = pos_x - corner[3].x
                 sy = pos_y - corner[3].y
                 collision_distance = sqrt(sx * sx + sy * sy)
                 distance_factor = radius / collision_distance
                 self.__position.x = pos_x = sx * distance_factor + corner[3].x
                 self.__position.y = pos_y = sy * distance_factor + corner[3].y
+                is_collision_corner = True
+                break
 
-            # Adjust velocity
-            # TODO Place outside of for loop (and leave loop with break)
-            if is_collision_corner == True:
-                print("Collision with corner detected")
-                collision_unity_vector_x = -sx / collision_distance
-                collision_unity_vector_y = -sy / collision_distance
-                scalar_product = self.__velocity.x * collision_unity_vector_x + self.__velocity.y * collision_unity_vector_y
-                collision_velocity_perpendicular_x = scalar_product * collision_unity_vector_x
-                collision_velocity_perpendicular_y = scalar_product * collision_unity_vector_y
-                self.__velocity.x -= (1.0 + damping_factor) * collision_velocity_perpendicular_x
-                self.__velocity.y -= (1.0 + damping_factor) * collision_velocity_perpendicular_y
+        # Adjust velocity
+        if is_collision_corner == True:
+            print("Collision with corner detected")
+            collision_unity_vector_x = -sx / collision_distance
+            collision_unity_vector_y = -sy / collision_distance
+            scalar_product = self.__velocity.x * collision_unity_vector_x + self.__velocity.y * collision_unity_vector_y
+            collision_velocity_perpendicular_x = scalar_product * collision_unity_vector_x
+            collision_velocity_perpendicular_y = scalar_product * collision_unity_vector_y
+            self.__velocity.x -= (1.0 + damping_factor) * collision_velocity_perpendicular_x
+            self.__velocity.y -= (1.0 + damping_factor) * collision_velocity_perpendicular_y
 
     # -------------------------------------------------------------------------
     

@@ -311,6 +311,7 @@ class LabyrinthRender3D:
 
     def move_ball(self, x, y, x_rad = None, y_rad = None):
         # TODO Check and document parameters x_rad and y_rad
+        # TODO Ensure x_rad and y_rad match attributes x_degree and y_degree?
         """
         Move the ball to a specific location.
 

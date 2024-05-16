@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.14
+@version: 2024.05.16
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -197,17 +197,20 @@ class LabyrinthEnvironment(gym.Env):
 
         """
         # Wait until period between steps has passed
-        # TODO Rermember time of last step and wait accordingly
+        # TODO Remember time of last step and wait accordingly
         time.sleep(self.__time_steps_secs)
 
         # Apply action to field's rotation
+        # TODO Replace += with =
         self.__x_degree += float(self.__action_to_angle_degree[action][0])
         self.__y_degree += float(self.__action_to_angle_degree[action][1])
 
         # New ball position
+        # TODO What dt to use for steps? Have, e.g., 10 time steps in physics? Add move_n_steps() as method in physics class.
+        # TODO Loop angles to destination angle in physics time steps?
         x_rad = float(self.__x_degree) * pi/180.0
         y_rad = float(self.__y_degree) * pi/180.0
-        self.__ball_position = self.__ball_physics.calc_move(x_rad, y_rad)
+        self.__ball_position = self.__ball_physics.move_one_time_step(x_rad, y_rad)
 
         # Observation_space
         self.observation_space = {
