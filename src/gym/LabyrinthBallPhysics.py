@@ -21,7 +21,7 @@ class LabyrinthBallPhysics:
 
     # ========== Constructor ==================================================
 
-    def __init__(self, geometry, time_step_secs):
+    def __init__(self, geometry, dt):
         """
         Constructor.
 
@@ -29,8 +29,8 @@ class LabyrinthBallPhysics:
         ----------
         geometry : LabyrinthGeometry
             Geometry for calculations
-        time_step_secs : float
-            Time period between steps [s]
+        dt : float
+            Time period for each step [s]
 
         Returns
         -------
@@ -38,13 +38,17 @@ class LabyrinthBallPhysics:
 
         """
         # Timing
-        self.dt = time_step_secs                # Time step [s]
+        self.dt = dt                            # Time step [s]
 
         # Ball state
         # TODO Component z used?
         self.is_ball_in_hole = False            # Ball has fallen into hole if True
         self.__position = vec(0.0, 0.0, 0.0)    # Ball's position [cm]^3
         self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity [cm/s]^3
+        
+        # Field tilting
+        self.__x_rad = 0.0
+        self.__y_rad = 0.0
         
         # Physical constants
         self.__g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
@@ -71,6 +75,11 @@ class LabyrinthBallPhysics:
         return self.__velocity
 
     # -------------------------------------------------------------------------
+
+    def set_position(self, position):
+        self.__position = position
+
+    # -------------------------------------------------------------------------
     
     def reset(self, position):
         """
@@ -86,38 +95,118 @@ class LabyrinthBallPhysics:
         None.
 
         """
+        # Ball
         self.__position = position
         self.__velocity = vec(0.0, 0.0, 0.0)
         self.is_ball_in_hole = False
+        
+        # Field tilting
+        self.__x_rad = 0.0
+        self.__y_rad = 0.0
 
     # -------------------------------------------------------------------------
     
-    def move_one_time_step(self, x_rad, y_rad, position=None):
+    def step(self, x_rad, y_rad, number_steps=1, position=None):
         """
-        Calculates the new velocity and position of the ball for the next time step.
-        And call the functions self.__detect_and_process_collisions() and self.__detect_ball_in_hole()
+        Simulates ball's position and velocity after one or more time steps dt.
 
         Parameters
         ----------
         x_rad : float
-            Field angle in x-direction [rad]
+            Field's tilting angle in x-direction after the time steps [rad].
         y_rad : float
-            Field angle in y-direction [rad]
+            Field's tilting angle in y-direction after the time steps [rad].
+        number_steps : int, optional
+            Number of time steps of duration dt to perform. The default is 1.
         position : vec(x,y,z), optional
-            Start position of the Ball. The default is None.
+            Start position of the ball. The default is None.
 
         Returns
         -------
         position : vec(x,y,z)
-            new ball position
+            New ball position
+
+        """
+        # Set ball's position
+        if position != None:
+            self.set_position(position)
+
+        # Set field rotation
+        self.__x_rad = x_rad
+        self.__y_rad = y_rad
+
+        # Do time steps    
+        for i in range(number_steps):
+            self.__step(x_rad=x_rad, y_rad=y_rad)
+        
+        return self.__position
+
+    # ========== Initialize labyrinth geometry ================================
+    
+    def __init_corners(self):
+        """
+        Calculates all corner points of the individual labyrinth walls.
+
+        Parameters
+        ----------
+        None.
+
+        Returns
+        -------
+        None.
+
+        """
+        # Interior walls (copied from LabyrinthGeometry)
+        walls_data = self.__geometry.walls.data.copy()
+        
+        # Add exterior walls (field boarders)
+        field_x = self.__geometry.field.size_x
+        field_y = self.__geometry.field.size_y
+        height = self.__geometry.box.height
+        thickness = self.__geometry.box.boarder
+        
+        walls_data.append({"pos": vec(0,  (field_y + thickness)/2, 0), "size": vec(field_x + 2 * thickness, thickness, height)})    # Upper
+        walls_data.append({"pos": vec(0, -(field_y + thickness)/2, 0), "size": vec(field_x + 2 * thickness, thickness, height)})    # Lower
+        walls_data.append({"pos": vec(-(field_x + thickness)/2, 0, 0), "size": vec(thickness, field_y, height)})                    # Left
+        walls_data.append({"pos": vec((field_x + thickness) / 2, 0, 0), "size": vec(thickness, field_y, height)})                   # Right
+
+        # Corner calculation
+        self.__corners = []
+        for wall_data in walls_data:
+            wall_center = wall_data["pos"]
+            wall_size = wall_data["size"]
+            corner_left_upper = vec( wall_center.x - wall_size.x /2, wall_center.y + wall_size.y /2, wall_center.z)
+            corner_right_upper = vec(wall_center.x + wall_size.x / 2, wall_center.y + wall_size.y / 2, wall_center.z)
+            corner_right_lower = vec(wall_center.x + wall_size.x / 2, wall_center.y - wall_size.y / 2, wall_center.z)
+            corner_left_lower = vec(wall_center.x - wall_size.x / 2, wall_center.y - wall_size.y / 2, wall_center.z)
+
+            self.__corners.append([corner_left_upper, corner_right_upper, corner_right_lower, corner_left_lower])
+
+    # ========== Simulate one time step of duration dt ========================
+    
+    def __step(self, x_rad, y_rad):
+        """
+        Simulates ball's position and velocity after one time steps dt.
+        
+        The method checks and processes collisions with walls and corners and
+        whether the ball falls into a hole.
+
+        Parameters
+        ----------
+        x_rad : float
+            Field's tilting angle in x-direction [rad].
+        y_rad : float
+            Field's tilting angle in y-direction [rad].
+
+        Returns
+        -------
+        position : vec(x,y,z)
+            New ball position
 
         """
         # Set arguments
         self.__x_rad = x_rad
         self.__y_rad = y_rad
-
-        if position != None:
-            self.__position = position
 
         # ---------- x-direction ----------------------------------------------
 
@@ -170,55 +259,14 @@ class LabyrinthBallPhysics:
 
         # Velocity
         self.__velocity = vec(velocity_x, velocity_y, 0.0)
-        self.__detect_and_process_collisions()
+        self.__detect_and_process_collision()
         self.__detect_ball_in_hole()
 
         return self.__position
 
-    # ========== Initialize labyrinth geometry ================================
-    
-    def __init_corners(self):
-        """
-        Calculates all corner points of the individual labyrinth walls.
-
-        Parameters
-        ----------
-        None.
-
-        Returns
-        -------
-        None.
-
-        """
-        # Interior walls (copied from LabyrinthGeometry)
-        walls_data = self.__geometry.walls.data.copy()
-        
-        # Add exterior walls (field boarders)
-        field_x = self.__geometry.field.size_x
-        field_y = self.__geometry.field.size_y
-        height = self.__geometry.box.height
-        thickness = self.__geometry.box.boarder
-        
-        walls_data.append({"pos": vec(0,  (field_y + thickness)/2, 0), "size": vec(field_x + 2 * thickness, thickness, height)})    # Upper
-        walls_data.append({"pos": vec(0, -(field_y + thickness)/2, 0), "size": vec(field_x + 2 * thickness, thickness, height)})    # Lower
-        walls_data.append({"pos": vec(-(field_x + thickness)/2, 0, 0), "size": vec(thickness, field_y, height)})                    # Left
-        walls_data.append({"pos": vec((field_x + thickness) / 2, 0, 0), "size": vec(thickness, field_y, height)})                   # Right
-
-        # Corner calculation
-        self.__corners = []
-        for wall_data in walls_data:
-            wall_center = wall_data["pos"]
-            wall_size = wall_data["size"]
-            corner_left_upper = vec( wall_center.x - wall_size.x /2, wall_center.y + wall_size.y /2, wall_center.z)
-            corner_right_upper = vec(wall_center.x + wall_size.x / 2, wall_center.y + wall_size.y / 2, wall_center.z)
-            corner_right_lower = vec(wall_center.x + wall_size.x / 2, wall_center.y - wall_size.y / 2, wall_center.z)
-            corner_left_lower = vec(wall_center.x - wall_size.x / 2, wall_center.y - wall_size.y / 2, wall_center.z)
-
-            self.__corners.append([corner_left_upper, corner_right_upper, corner_right_lower, corner_left_lower])
-
     # ========== Detect and process collisions and ball in hole ===============
     
-    def __detect_and_process_collisions(self):
+    def __detect_and_process_collision(self):
         """
         Detects a collision with a wall and changes the ball behavior if necessary.
 
@@ -389,11 +437,9 @@ if __name__ == '__main__':
     ball_start_position = geometry.start_positions[layout]
     render = LabyrinthRender3D(geometry, ball_position=ball_start_position)
 
-    # Init ball physics (including position and tilting)
-    x_rad = render.get_x_rad()
-    y_rad = render.get_y_rad()
-    ball_physics = LabyrinthBallPhysics(geometry=geometry, time_step_secs=0.01)
-    ball_physics.move_one_time_step(x_rad=x_rad, y_rad=y_rad, position=ball_start_position)
+    # Init ball physics
+    ball_physics = LabyrinthBallPhysics(geometry=geometry, dt=0.01)
+    ball_physics.reset(position=ball_start_position)
     time.sleep(2.0)
 
     # Tilt labyrinth and play steps
@@ -403,8 +449,10 @@ if __name__ == '__main__':
     
     for i in range(50):
         if ball_physics.is_ball_in_hole == False:
-            time.sleep(ball_physics.dt)
-            pos = ball_physics.move_one_time_step(x_rad=x_rad, y_rad=y_rad)
+            # TODO Ball moves through wall for number_steps=3
+            number_steps = 3
+            time.sleep(number_steps * ball_physics.dt)
+            pos = ball_physics.step(x_rad=x_rad, y_rad=y_rad, number_steps=number_steps)
             render.move_ball(x=pos.x, y=pos.y, x_rad=x_rad, y_rad=y_rad)
         else:
             render.ball_visibility(False)
@@ -419,7 +467,7 @@ if __name__ == '__main__':
     for i in range(2000):
         if ball_physics.is_ball_in_hole == False:
             time.sleep(ball_physics.dt)
-            pos = ball_physics.move_one_time_step(x_rad=x_rad, y_rad=y_rad)
+            pos = ball_physics.step(x_rad=x_rad, y_rad=y_rad)
             render.move_ball(x=pos.x, y=pos.y, x_rad=x_rad, y_rad=y_rad)
         else:
             render.ball_visibility(False)

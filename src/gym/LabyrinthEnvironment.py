@@ -33,15 +33,24 @@ class LabyrinthEnvironment(gym.Env):
     To be defined
     """
 
-    # TODO fps not used yet
-    # TODO Apapt time period between steps so that it matches physics
-    metadata = {'render_modes': ['3D'], 'render_fps': 10}
+    metadata = {'render_modes': ['3D']}
 
     # ========== Constructor ==================================================
 
-    def __init__(self, layout, render_mode='3D', time_steps_secs=0.01):
+    def __init__(self, layout, render_mode='3D', actions_dt=0.1, physics_dt=0.01):
         """
         Constructor.
+        
+        The parameters include two time periods dt, where actions_dt specifies
+        the frequency with which a reinforcement agent shall take actions,
+        while physics_dt specifies the frequency with which ball movements are
+        updated. The physics need to be updated in small time intervalls to
+        prevent the ball virutalle moving through walls.
+        
+        For instance:
+            actions_dt=0.1 means that an action is taken every 100 ms.
+            physics_dt=0.01 means that the ball's position is updated every 10 ms.
+        
 
         Parameters
         ----------
@@ -49,7 +58,9 @@ class LabyrinthEnvironment(gym.Env):
             Layout of holes and walls as defined in LabyrinthGeometry.py. The default is '8 holes'
         render_mode : String, optional
             Render mode to visualize the states (or None). The default is '3D'.
-        time_steps_secs : float, optional
+        actions_dt : float, optional
+            Time period between steps (i.e., actions taken) [s]. The default is 0.1.
+        physics_dt : float, optional
             Time period between simulation steps [s]. The default is 0.01.
 
         Returns
@@ -58,27 +69,31 @@ class LabyrinthEnvironment(gym.Env):
 
         """
         # Timing
-        self.__time_steps_secs = time_steps_secs
+        self.__actions_dt = actions_dt
+        self.__physics_dt = physics_dt
+        self.__physics_steps_per_action = int(actions_dt / physics_dt)
+        self.__last_action_timestamp_sec = 0.0
         
         # Create labyrinth geometry
         geometry = LabyrinthGeometry(layout=layout)
-
-        # Rendering
-        assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
-        if self.render_mode == '3D':
-            self.__render_3d = LabyrinthRender3D(geometry)
         
         # Field rotation
         self.__x_degree = 0.0
         self.__y_degree = 0.0
                 
         # Ball (physics, position, and destination)
-        self.__ball_physics = LabyrinthBallPhysics(geometry=geometry, time_step_secs=self.__time_steps_secs)
+        self.__ball_physics = LabyrinthBallPhysics(geometry=geometry, dt=self.__physics_dt)
         self.__ball_start_position = geometry.start_positions[layout]
         self.__ball_position = self.__ball_start_position
         self.__destination_x = geometry.destinations_xy[layout][0]
         self.__destination_y = geometry.destinations_xy[layout][1]
+
+        # Rendering
+        assert render_mode is None or render_mode in self.metadata["render_modes"]
+        self.render_mode = render_mode
+        if self.render_mode == '3D':
+            self.__render_3d = LabyrinthRender3D(geometry)
+            self.render()
 
         # Declare observation space (see class documentation above)
         self.observation_space = spaces.Dict({
@@ -172,6 +187,9 @@ class LabyrinthEnvironment(gym.Env):
             x_rad = self.__x_degree * pi/180.0
             y_rad = self.__y_degree * pi/180.0
             self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y, x_rad=x_rad, y_rad=y_rad)
+            
+            # Update timestamp
+            self.__last_render_timestamp_sec = time.time()
 
     # ========== Step =========================================================
 
@@ -196,22 +214,46 @@ class LabyrinthEnvironment(gym.Env):
             Information (currently not used).
 
         """
-        # Wait until period between steps has passed
-        # TODO Remember time of last step and wait accordingly
-        time.sleep(self.__time_steps_secs)
-
-        # Apply action to field's rotation
-        # TODO Replace += with =
-        self.__x_degree += float(self.__action_to_angle_degree[action][0])
-        self.__y_degree += float(self.__action_to_angle_degree[action][1])
+        # Field's rotation angles before and after applying the action
+        start_x_degree = self.__x_degree
+        start_y_degree = self.__y_degree
+        stop_x_degree = self.__action_to_angle_degree[action][0]
+        stop_y_degree = self.__action_to_angle_degree[action][1]
+        is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 
         # New ball position
-        # TODO What dt to use for steps? Have, e.g., 10 time steps in physics? Add move_n_steps() as method in physics class.
-        # TODO Loop angles to destination angle in physics time steps?
-        x_rad = float(self.__x_degree) * pi/180.0
-        y_rad = float(self.__y_degree) * pi/180.0
-        self.__ball_position = self.__ball_physics.move_one_time_step(x_rad, y_rad)
+        if is_rotate_field == False:
+            # Action does not rotate the field
+            x_rad = stop_x_degree * pi/180.0
+            y_rad = stop_y_degree * pi/180.0
+            self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad, number_steps=self.__physics_steps_per_action)
+        else:            
+            # Actions does rotates the field linearly
+            start_x_rad = start_x_degree * pi/180.0
+            start_y_rad = start_y_degree * pi/180.0
+            stop_x_rad = stop_x_degree * pi/180.0
+            stop_y_rad = stop_y_degree * pi/180.0
+            delta_x_rad = (stop_x_rad - start_x_rad) / self.__physics_steps_per_action
+            delta_y_rad = (stop_y_rad - start_y_rad) / self.__physics_steps_per_action
+            
+            for i in range (self.__physics_steps_per_action):
+                x_rad = start_x_rad + i * delta_x_rad
+                y_rad = start_y_rad + i * delta_y_rad
+                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)
 
+        # Store field's final rotation
+        self.__x_degree = stop_x_degree
+        self.__y_degree = stop_y_degree
+        
+        # Rendering active (Wait until period between steps has passed and render)
+        if self.render_mode == '3D':
+            timestamp = time.time()
+            elapsed_time = timestamp - self.__last_action_timestamp_sec
+            wait_time = float(max(self.__actions_dt - elapsed_time, 0))
+            time.sleep(wait_time)
+            self.__last_action_timestamp_sec = timestamp + wait_time
+            self.render()
+            
         # Observation_space
         self.observation_space = {
             'ball_position': np.array([self.__ball_position.x, self.__ball_position.y]),
@@ -255,6 +297,14 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
     env.reset()
 
-    for action in [2,6,3,1,0,5,5,5,5,5,5,5,5,4,4,4,4,4,4,4,4,4,4,4,4,4,4]:
+    for action in [2,6,3,1,0]:
         env.step(action)
-        env.render()
+
+    for action in range(10):
+        env.step(5)
+
+    for action in range(8):
+        env.step(4)
+
+    for action in range(20):
+        env.step(6)
