@@ -8,7 +8,7 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.16
+@version: 2024.05.17
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
@@ -301,7 +301,6 @@ class LabyrinthBallPhysics:
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[0].x - radius
                 is_collision_edge = True
-                break
                     
             # Right_edge
             if (pos_x > corner[1].x) and (pos_x - corner[1].x < radius) and (pos_y >= corner[2].y) and (pos_y <= corner[1].y):
@@ -312,7 +311,6 @@ class LabyrinthBallPhysics:
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[1].x + radius
                 is_collision_edge = True
-                break
                     
             # Top edge
             if (pos_y > corner[0].y) and (pos_y - corner[0].y < radius) and (pos_x >= corner[0].x) and (pos_x <= corner[1].x):
@@ -323,7 +321,6 @@ class LabyrinthBallPhysics:
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[0].y + radius
                 is_collision_edge = True
-                break
                     
             # Bottom edge
             if (pos_y < corner[3].y) and (corner[3].y - pos_y < radius) and (pos_x >= corner[3].x) and (pos_x <= corner[2].x):
@@ -334,8 +331,6 @@ class LabyrinthBallPhysics:
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[2].y - radius
                 is_collision_edge = True
-                break
-
 
         if is_collision_edge == True: # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball).
             return
@@ -449,8 +444,7 @@ if __name__ == '__main__':
     
     for i in range(50):
         if ball_physics.is_ball_in_hole == False:
-            # TODO Ball moves through wall for number_steps=3
-            number_steps = 3
+            number_steps = 1
             time.sleep(number_steps * ball_physics.dt)
             pos = ball_physics.step(x_rad=x_rad, y_rad=y_rad, number_steps=number_steps)
             render.move_ball(x=pos.x, y=pos.y, x_rad=x_rad, y_rad=y_rad)
