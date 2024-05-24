@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.16
+@version: 2024.05.24
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -279,15 +279,16 @@ class LabyrinthEnvironment(gym.Env):
         else:
             reward = -1
 
-        # Episode completed?
+        # Episode completed or truncated?
         done = is_ball_at_destination or is_ball_in_hole
+        truncated = False
 
         # Action history
         # TODO Not used. Remove?
         self.last_action = action
         self.number_actions += 1
 
-        return self.observation_space, reward, done, {}
+        return self.observation_space, reward, done, truncated, {}
 
 # -----------------------------------------------------------------------------
 # Main (sample)
