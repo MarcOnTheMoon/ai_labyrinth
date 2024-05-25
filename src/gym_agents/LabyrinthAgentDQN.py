@@ -7,7 +7,6 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @version: 2024.05.15
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
-import os.path
 #conda install -c conda-forge tensorflow
 #conda install pip
 #afterwards in anaconda: pip install keras-rl2
@@ -118,7 +117,7 @@ class LabyrinthAgentDQN:
 
             while not done:
                 action = self.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
-                next_state, reward, done, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
+                next_state, reward, done, truncated, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
                 self.remember(state, action, reward, next_state, done)  # Der Agent speichert die Erfahrung
                 state = next_state  # Aktualisiert den Zustand für die nächste Iteration
                 total_reward += reward  # Summiert die Belohnung über die Episode
@@ -144,7 +143,7 @@ class LabyrinthAgentDQN:
 
             while not done:
                 action = self.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
-                next_state, reward, done, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
+                next_state, reward, done, truncated, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
                 state = next_state  # Aktualisiert den Zustand für die nächste Iteration
                 total_reward += reward  # Summiert die Belohnung über die Episode
             episode += 1
