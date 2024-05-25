@@ -96,15 +96,20 @@ class LabyrinthEnvironment(gym.Env):
             self.render()
 
         # Declare observation space (see class documentation above)
-        self.observation_space = spaces.Dict({
+        """self.observation_space = spaces.Dict({
             'ball_position': spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
             'ball_velocity': spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32),
             'field_rotation': spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)
-        })
+        })"""
+        self.observation_space = spaces.Box(
+            low=np.array([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], dtype=np.float32),
+            high=np.array([np.inf, np.inf, np.inf, np.inf, np.inf, np.inf], dtype=np.float32)
+        )
+
 
         # Declare action space (see class documentation above)
         # TODO Define action space differently
-        self.action_space = spaces.Discrete(9)
+        """self.action_space = spaces.Discrete(9)
         self.__action_to_angle_degree = {
             0: np.array([-0.8, -0.8]),
             1: np.array([0, -0.8]),
@@ -115,7 +120,11 @@ class LabyrinthEnvironment(gym.Env):
             6: np.array([-0.8, 0.8]),
             7: np.array([0, 0.8]),
             8: np.array([0.8, 0.8])
-        }
+        }"""
+        #alternative:
+        num_actions_per_component = 9  # There are 9 possible actions per component (x,y)
+        self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
+        self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
 
     # ========== Reset ========================================================
 
@@ -139,14 +148,21 @@ class LabyrinthEnvironment(gym.Env):
         # Set random seed
         super().reset(seed=seed)
 
-        # Action history and observation space
-        self.last_action = 0
+        # observation space
         self.number_actions = 0
-        self.observation_space = {
+        """self.observation_space = {
             'ball_position': np.array([self.__ball_start_position.x, self.__ball_start_position.y]),
             'ball_velocity': np.array([0.0, 0.0]),
             'field_rotation': np.array([0.0, 0.0])
-        }
+        }"""
+        self.observation_space = np.array([
+            self.__ball_start_position.x,
+            self.__ball_start_position.y,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ], dtype=np.float32)
 
         # Field rotation
         self.__x_degree = 0.0
@@ -154,12 +170,16 @@ class LabyrinthEnvironment(gym.Env):
 
         # Ball
         self.__ball_position = self.__ball_start_position
+        self.__last_ball_position = self.__ball_start_position
         self.__ball_physics.reset(position=self.__ball_start_position)
 
         # Rendering (ball in hole became invisible)
         if self.render_mode == '3D':
             self.render()
             self.__render_3d.ball_visibility(True)
+
+        #reward counter
+        self.__interim_reward_counter = 0
 
         return self.observation_space, {}
 
@@ -191,6 +211,38 @@ class LabyrinthEnvironment(gym.Env):
             # Update timestamp
             self.__last_render_timestamp_sec = time.time()
 
+    # ========== interim reward ===============================================
+    def interim_reward(self):
+        #[Koordinate x oder y, Richtung der Querung, Schwelle, Bereich min, Bereich max]
+        # mit Richtung der Querung: 1 = von kleiner zu größeren werten, -1 = von größeren zu kleineren werten
+        interim_rewards = [['x', -1, 3.83, -11.4, 9.59]]
+        if len(interim_rewards) <= self.__interim_reward_counter:
+            return False
+
+        axis = interim_rewards[self.__interim_reward_counter][0]
+        direction = interim_rewards[self.__interim_reward_counter][1]
+        threshold = interim_rewards[self.__interim_reward_counter][2]
+        range_min = interim_rewards[self.__interim_reward_counter][3]
+        range_max = interim_rewards[self.__interim_reward_counter][4]
+        if axis == 'x':
+            if direction < 0:
+                if self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                    self.__interim_reward_counter += 1
+                    return True
+            elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                self.__interim_reward_counter += 1
+                return True
+        else: #axis == 'y'
+            if direction < 0:
+                if self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                    self.__interim_reward_counter += 1
+                    return True
+            elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                self.__interim_reward_counter += 1
+                return True
+        return False
+
+
     # ========== Step =========================================================
 
     def step(self, action):
@@ -217,8 +269,8 @@ class LabyrinthEnvironment(gym.Env):
         # Field's rotation angles before and after applying the action
         start_x_degree = self.__x_degree
         start_y_degree = self.__y_degree
-        stop_x_degree = self.__action_to_angle_degree[action][0]
-        stop_y_degree = self.__action_to_angle_degree[action][1]
+        stop_x_degree = self.__action_to_angle_degree[action[0]]
+        stop_y_degree = self.__action_to_angle_degree[action[1]]
         is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 
         # New ball position
@@ -229,6 +281,7 @@ class LabyrinthEnvironment(gym.Env):
             self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad, number_steps=self.__physics_steps_per_action)
         else:            
             # Actions does rotates the field linearly
+            #Wenn das Spielfeld rotiert, wird die Ballposition in mehreren Schritten von der Startposition zur Endposition linear interpoliert und jeweils aktualisiert.
             start_x_rad = start_x_degree * pi/180.0
             start_y_rad = start_y_degree * pi/180.0
             stop_x_rad = stop_x_degree * pi/180.0
@@ -255,11 +308,19 @@ class LabyrinthEnvironment(gym.Env):
             self.render()
             
         # Observation_space
-        self.observation_space = {
+        """self.observation_space = {
             'ball_position': np.array([self.__ball_position.x, self.__ball_position.y]),
             'ball_velocity': np.array([self.__ball_physics.get_velocity().x, self.__ball_physics.get_velocity().y]),
             'field_rotation': np.array([self.__x_degree, self.__y_degree])
-        }
+        }"""
+        self.observation_space = np.array([
+            self.__ball_start_position.x,
+            self.__ball_start_position.y,
+            self.__ball_physics.get_velocity().x,
+            self.__ball_physics.get_velocity().y,
+            self.__x_degree,
+            self.__y_degree
+        ], dtype=np.float32)
 
         # Ball reached destination?
         is_destination_x = (self.__ball_position.x > self.__destination_x[0]) and (self.__ball_position.x < self.__destination_x[1])
@@ -272,10 +333,13 @@ class LabyrinthEnvironment(gym.Env):
         # Reward
         if is_ball_at_destination:
             print("Ball reached destination")
-            reward = 500000
+            reward = 5000
         elif is_ball_in_hole:
             print("Ball lost")
-            reward = -1000000
+            reward = -10000
+        elif self.interim_reward():
+            print("interim reward")
+            reward = 20
         else:
             reward = -1
 
@@ -283,11 +347,10 @@ class LabyrinthEnvironment(gym.Env):
         done = is_ball_at_destination or is_ball_in_hole
 
         # Action history
-        # TODO Not used. Remove?
-        self.last_action = action
         self.number_actions += 1
 
         return self.observation_space, reward, done, {}
+
 
 # -----------------------------------------------------------------------------
 # Main (sample)
@@ -297,7 +360,14 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
     env.reset()
 
-    for action in [2,6,3,1,0]:
+    for action in [[2,3], [6,3], [8,4], [7,5]]:
+        env.step(action)
+    for action in range(4):
+        env.step([7,4])
+    for action in range(20):
+        env.step([3,8])
+
+    """for action in [2,6,3,1,0]:
         env.step(action)
 
     for action in range(10):
@@ -307,4 +377,4 @@ if __name__ == '__main__':
         env.step(4)
 
     for action in range(20):
-        env.step(6)
+        env.step(6)"""

@@ -7,7 +7,7 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @version: 2024.05.15
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
-
+import os.path
 #conda install -c conda-forge tensorflow
 #conda install pip
 #afterwards in anaconda: pip install keras-rl2
@@ -19,20 +19,19 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 # !!!    https://www.tensorflow.org/agents/tutorials/1_dqn_tutorial
 # https://stable-baselines3.readthedocs.io/en/master/modules/dqn.html
 
-# Add Pocket cube env to path
-import sys
-sys.path.append('../gym')
-
 import random
 import numpy as np
 from collections import deque
 from tensorflow.keras import Sequential, Input
 from tensorflow.keras.layers import Dense, Flatten
 from tensorflow.keras.optimizers import Adam
-#from rl.policy import EpsGreedyQPolicy
-#from rl.memory import SequentialMemory
-#from rl.agents.dqn import DQNAgent
 
+#Pfad damit auf LabyrinthEnvironment zugegriffen werden kann
+import sys
+import os
+project_dir = os.path.dirname(os.path.abspath(__file__))
+gym_dir = os.path.join(project_dir, '../gym')
+sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
 
 class LabyrinthAgentDQN:
@@ -40,63 +39,116 @@ class LabyrinthAgentDQN:
 
         self.state_space = state_space
         self.action_space = action_space
-        self.memory = deque(maxlen=2000)
+        self.memory = deque(maxlen=2000) #Die Erinnerungen werden als Elemente einer Datenstruktur namens "deque" („deck“) gespeichert, die ähnlich wie eine Liste funktioniert. Behält nur die neusten maxlength Elemente
         self.gamma = 0.95  # Discount factor for past rewards
-        self.epsilon = 1.0  # exploration rate - Epsilon greedy parameter
-        self.exploration_min = 0.01
-        self.exploration_decay = 0.99  # Rate at which to reduce chance of random action being taken
-        self.learning_rate = 0.001
+        self.epsilon = 1.0  # exploration rate - Epsilon greedy parameter,  1.0 = zu Beginn 100% der Zeit erkunden zu lassen
+        self.exploration_min = 0.01 # beschreibt wie niedrig die Explorationsrate ε abfallen kann
+        self.exploration_decay = 0.99  # Rate at which to reduce chance of random action being taken as the agent gets better and better in playing
+        self.learning_rate = 0.001 #stochastische Gradientenabstiegs-Hyperparameter
 
         self.model = self._build_model()
 
     def _build_model(self):
-        model = Sequential() # Sequential a simple stack of layers (one input, one output), alterntive Functional Input???
-        #input_shape = self.state_space['ball_position'].shape[0] + self.state_space['ball_velocity'].shape[0] + self.state_space['field_rotation'].shape[0]
-
-        #model.add(Flatten(input_shape=(1, input_shape)))
-        model.add(Input(shape=(6,), dtype='float32', name='state')) #jetzt überhaupt sequenzial benötigt?
+        #Neuronales Netz aufbauen
+        model = Sequential()
+        model.add(Dense(32, input_dim=6, activation="relu")) # Eingabeschicht
         model.add(Dense(64, activation='relu')) # Dense is the basic form of a neural network layer
         model.add(Dense(64, activation='relu'))
-        model.add(Dense(1, activation='linear', name='action'))
-        model.summary()
-        model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))
+        model.add(Dense(9*9, activation='softmax', name='action')) #Ausgabeschicht
+        model.summary()  # Zeigt eine Zusammenfassung des Modells an, einschließlich der Anzahl der Parameter pro Schicht
+        #hier das laden von den gewichten einbauen??
+        model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))  #mse = mean_squared_error, auch mae = mean_absolut_error oder mean_q = durchschnittlicher Q-Wert
         return model
 
-    """def _build_agent(self, model, action):
-    # werte in model einbauen vor compile?
-        policy = EpsGreedyQPolicy
-        memory = SequentialMemory(limit=2000, window_length=1)
-        agent = DQNAgent(model=model, memory=memory, policy=policy, nb_actions=action, nb_steps_warmup=10, target_model_update=1e-2)
-        return agent"""
-
     def remember(self, state, action, reward, next_state, done): # simply store states, actions and resulting rewards into the memory
-        self.memory.append((state, action, reward, next_state, done))
+        #Replay Memory wird genutzt, um Erfahrungen zu speichern und später zum Training zu verwenden.
+        self.memory.append((state, action, reward, next_state, done)) # memory dient zum Speichern von Erinnerungen, die anschließend abgespielt werden können, um das neuronale Netz das DQN zu trainieren
 
     def act(self, state):
+        #Epsilon-Greedy-Policy für die Aktionsauswahl
         if np.random.rand() <= self.epsilon:
-            return self.action_space.sample()
-            #return random.randrange(self.action_space)
-        q_values = self.model.predict(state)
-        action = np.argmax(q_values[0])
-        return action
+            # Take random action
+            x_action = np.random.choice([0,1,2,3,4,5,6,7,8])
+            y_action = np.random.choice([0,1,2,3,4,5,6,7,8])
+            return [x_action, y_action]
+        else:
+            state = np.array(state).reshape(1, -1)
+            q_values = self.model.predict(state) # predict(): Modell sagt die Belohnung des aktuellen Zustands basierend auf den bis dato trainierten Daten vorher
+            act_values = q_values.reshape((9, 9)) # convert to a 2D array representing the (x, y) action grid
+            x_action, y_action = np.unravel_index(np.argmax(act_values), act_values.shape) # Take best action mit konvertierung in die diemnsion der (x, y) Koordinaten
+            return [x_action, y_action]
 
-    def replay(self, batch_size):
-        minibatch = random.sample(self.memory, batch_size) #only take a few samples and we will just pick them randomly.
+    def train(self, batch_size):
+        # Diese Funktion trainiert das neuronale Netz mit zufälligen Stichproben aus dem Speicher.
+        minibatch = random.sample(self.memory, batch_size) #only take a few samples (batch_size) out of self.memory, pick them randomly.
         for state, action, reward, next_state, done in minibatch:
-            target = reward
+            target = reward # if done Wenn die Episode abgeschlossen ist (done), wird das Ziel (target) auf die Belohnung (reward) gesetzt.
             if not done:
-                target = reward + self.gamma * np.amax(self.model.predict(next_state)[0]) #model oder agent?
-            target_f = self.model.predict(state)
-            target_f[0][action] = target
-            self.model.fit(state, target_f, epochs=1, verbose=0) #model oder agent?
+                next_state = np.array(next_state).reshape(1, -1)
+                next_state = self.model.predict(next_state)
+                next_state = next_state.reshape((9, 9)) # in (x,y) konvertieren
+                target = reward + self.gamma * np.amax(next_state) #berechnet das Ziel (target) basierend auf dem Q-Learning-Update-Regel (Erkundung)
+
+            state = np.array(state).reshape(1, -1)
+            target_f = self.model.predict(state) # Sagt die Q-Werte für den aktuellen Zustand (state) voraus.
+            target_f = target_f.reshape((9, 9))
+            target_f[action[0], action[1]] = target #Aktualisiert den Q-Wert der ausgeführten Aktion (action) mit dem berechneten Zielwert (target)
+            target_f = target_f.flatten()
+            self.model.fit(state, target_f.reshape(1, -1), epochs=1, verbose=0) #fit = trains the model for a fixed number of epochs (hier 1)
         if self.epsilon > self.exploration_min:
-            self.epsilon *= self.exploration_decay
+            self.epsilon *= self.exploration_decay # Reduziert den epsilon-Wert basierend auf self.epsilon_decay. Dies reduziert im Laufe der Zeit die Rate, mit der der Agent zufällige Aktionen wählt, zugunsten der Nutzung des erlernten Modells.
 
     def load(self, name):
-        self.model.load_weights(name)
+        self.model.load_weights(name) #Loads the weights of the DQN agent from an HDF5 file.
 
     def save_weights(self, name):
-        self.model.save_weights(name) #save Q Network parameters to a file
+        self.model.save_weights(name) #Saves the weights of the DQN agent in an HDF5 file.
+
+    def training(self, env):
+        output_dir = "C:/Users/Sandra/Documents/"  # pfad, wo die gewichte gespeichert werden sollen
+
+        # Hyperparameters
+        episodes = 1000
+        batch_size = 32
+
+        for episode in range(episodes):
+            state, _ = env.reset()  # Initialisiert den Zustand der Umgebung
+            total_reward = 0
+            done = False
+
+            while not done:
+                action = self.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
+                next_state, reward, done, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
+                self.remember(state, action, reward, next_state, done)  # Der Agent speichert die Erfahrung
+                state = next_state  # Aktualisiert den Zustand für die nächste Iteration
+                total_reward += reward  # Summiert die Belohnung über die Episode
+            episode += 1
+            print(f"Episode: {episode}, Reward: {total_reward}")
+
+            if len(self.memory) >= batch_size:  # Überprüfen, ob genügend Erfahrungen im Speicher sind
+                self.train(
+                    batch_size)  # Der Agent führt das Training basierend auf den gespeicherten Erfahrungen durch
+            if episode % 50 == 0:  # Every 50 episodes, the agent’s save_weights() method store the neural net model’s parameters.
+                self.save_weights(output_dir + "episode_" + "{:05d}".format(episode) + ".weights.h5")
+
+    def evaluate(self, env):
+        input_dir = "C:/Users/Sandra/Documents/"
+        self.load(input_dir+"episode_00099.weights.h5")
+        self.epsilon = 0.0 #reine ausbeutung des erlernten
+        episodes = 10
+
+        for episode in range(episodes):
+            state, _ = env.reset()  # Initialisiert den Zustand der Umgebung
+            total_reward = 0
+            done = False
+
+            while not done:
+                action = self.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
+                next_state, reward, done, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
+                state = next_state  # Aktualisiert den Zustand für die nächste Iteration
+                total_reward += reward  # Summiert die Belohnung über die Episode
+            episode += 1
+            print(f"Episode: {episode}, Reward: {total_reward}")
 
 # -----------------------------------------------------------------------------
 # Main (sample)
@@ -106,30 +158,6 @@ if __name__ == '__main__':
     # Init environment and agent
     env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
     agent = LabyrinthAgentDQN(env.observation_space, env.action_space)
+    #agent.training(env)
+    agent.evaluate(env)
 
-    # Hyperparameters
-    episodes = 500
-    batch_size = 32
-
-    #training
-    for episode in range(episodes):
-        state, _ = env.reset()  # Initialisiert den Zustand der Umgebung
-        total_reward = 0
-        done = False
-
-        while not done:
-            action = agent.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
-            env.render(action)  # Die Umgebung führt die ausgewählte Aktion aus
-            for i in range(8):
-                env.render_ball(action) # Ballbewegung ausführen ein paar mal ausführen Rückmeldung zur Aktion
-            next_state, reward, done, _ = env.step(action) # Rückmeldung über die getätigte Aktion
-            agent.remember(state, action, reward, next_state, done)  # Der Agent speichert die Erfahrung
-            state = next_state  # Aktualisiert den Zustand für die nächste Iteration
-            total_reward += reward  # Summiert die Belohnung über die Episode
-        episode += 1
-        print(f"Episode: {episode}, Reward: {total_reward}")
-
-        if len(agent.memory) >= batch_size:  # Überprüfen, ob genügend Erfahrungen im Speicher sind
-            agent.replay(batch_size)  # Der Agent führt das Training basierend auf den gespeicherten Erfahrungen durch
-
-    agent.save_weights('dqn_weights.h5')

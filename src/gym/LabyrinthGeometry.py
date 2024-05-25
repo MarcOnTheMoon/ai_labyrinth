@@ -12,7 +12,7 @@ Lengths are stated without unit, but are interpreted as [cm].
 from vpython import vector as vec
 
 # -----------------------------------------------------------------------------
-# Class containing individual components of pinball geometry
+# Class containing individual components of labyrinth game geometry
 # -----------------------------------------------------------------------------
 
 class LabyrinthGeometry:
@@ -20,17 +20,18 @@ class LabyrinthGeometry:
     # ========== Field layouts ================================================
 
     # Define layout names (walls and holes)
-    # TODO Add destinations for 2 and 21 holes
     layouts = ['2 holes', '8 holes', '21 holes']
+    # Define start position and destination area
     start_positions = {
         '2 holes'  : vec(-1.52,  9.25, 0),
-        '8 holes'  : vec( 0.13, 10.53, 0),
+        #'8 holes'  : vec( 0.13, 10.53, 0),
+        '8 holes': vec(5.17, -10.43, 0), #näher am ziel
         '21 holes' : vec( 0.0,   0.0,  0)
         }
     destinations_xy = {
-        '2 holes'  : None,
-        '8 holes'  : [[-5.85, -3.83], [-11.4, -9.52]],
-        '21 holes' : None
+        '2 holes'  : [[0.15, 1.56], [-6.62, -5.64]],
+        '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
+        '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
         }
 
     # ========== Constructor ==================================================
