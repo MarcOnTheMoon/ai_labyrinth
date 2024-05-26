@@ -225,14 +225,24 @@ class LabyrinthEnvironment(gym.Env):
         # Für Fortschritt
 
         #Reihnfolge ziel nach anfang
-        target_points = [[-4.4, -10.32], [5.82, -10.32], [7.33, -6.88]]
-        #x_min, x_max, y_min, y-max
-        areas = [[-5.86, 7.46, -11.40, -9.52], [5.21, 7.46, -9.52, -4.63], [7.46, 10.18, -11.4, -4.63]]
+        #8holes
+        target_points = [[-4.4, -10.32],
+                         [5.82, -10.32],
+                         [7.33, -6.88],
+                         [9.96, -8.33],
+                         [12.54, -7.53]]
+        # [x_min, x_max, y_min, y-max]
+        # 8holes
+        areas = [[-5.86, 7.46, -11.40, -9.52],
+                 [5.21, 7.46, -9.52, -4.63],
+                 [7.46, 10.18, -11.4, -4.63],
+                 [10.18, 13.7, -11.4, -6.58],
+                 [10.18, 13.7, -6.58, -3.98]]
         i = 0
         for x_min, x_max, y_min, y_max in areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
-                last_distance = (self.__last_ball_position.x - target_points[i][0])^2 + (self.__last_ball_position.y - target_points[i][1])^2
-                current_distance = (self.__ball_position.x - target_points[i][0]) ^ 2 + (self.__ball_position.y - target_points[i][1]) ^ 2
+                last_distance = (self.__last_ball_position.x - target_points[i][0])*(self.__last_ball_position.x - target_points[i][0]) + (self.__last_ball_position.y - target_points[i][1])*(self.__last_ball_position.y - target_points[i][1])
+                current_distance = (self.__ball_position.x - target_points[i][0])*(self.__ball_position.x - target_points[i][0]) + (self.__ball_position.y - target_points[i][1])*(self.__ball_position.y - target_points[i][1])
 
                 if current_distance < last_distance:
                     return True #in die richtige richtung bewegt
@@ -328,20 +338,20 @@ class LabyrinthEnvironment(gym.Env):
         # Reward
         if is_ball_at_destination:
             print("Ball reached destination")
-            reward = 500
+            reward = 1000
         elif is_ball_in_hole:
             print("Ball lost")
-            reward = -1000
+            reward = -3000
         elif self.interim_reward():
             print("interim reward")
-            reward = 1
+            reward = 10
         else:
             reward = -1
 
         # Episode completed or truncated?
         done = is_ball_at_destination or is_ball_in_hole
         self.number_actions += 1 # Action history
-        if self.number_actions >= 10000:
+        if self.number_actions >= 2000:
             truncated = True
         else:
             truncated = False

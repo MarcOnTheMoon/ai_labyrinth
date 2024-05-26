@@ -47,9 +47,10 @@ class LabyrinthAgentDQN:
     def _build_model(self):
         #Neuronales Netz aufbauen
         model = Sequential()
-        model.add(Dense(32, input_dim=6, activation="relu")) # Eingabeschicht & verdeckte schicht 32
-        model.add(Dense(64, activation='relu')) # Dense is the basic form of a neural network layer
-        model.add(Dense(64, activation='relu'))
+        model.add(Input(shape=(6,), dtype='float32', name='state')) #Eingabeschicht
+        #model.add(Dense(32, input_dim=6, activation='relu')) # Eingabeschicht & verdeckte schicht 32
+        model.add(Dense(64, activation='sigmoid')) # Dense is the basic form of a neural network layer
+        model.add(Dense(64, activation='sigmoid'))
         model.add(Dense(9*9, activation='softmax', name='action')) #Ausgabeschicht
         model.summary()  # Zeigt eine Zusammenfassung des Modells an, einschließlich der Anzahl der Parameter pro Schicht
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))  #mse = mean_squared_error, auch mae = mean_absolut_error oder mean_q = durchschnittlicher Q-Wert
@@ -105,7 +106,7 @@ class LabyrinthAgentDQN:
         self.model.save_weights(name) #Saves the weights of the DQN agent in an H5 file.
 
     def training(self, env):
-        self.load(path + "episode_00099.weights.h5")
+        #self.load(path + "8Hole_v3.weights.h5")
 
         # Hyperparameters
         episodes = 1000
