@@ -13,6 +13,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
+import random
 from math import pi
 import time
 
@@ -75,24 +76,24 @@ class LabyrinthEnvironment(gym.Env):
         self.__last_action_timestamp_sec = 0.0
         
         # Create labyrinth geometry
-        geometry = LabyrinthGeometry(layout=layout)
+        self.__geometry = LabyrinthGeometry(layout=layout)
         
         # Field rotation
         self.__x_degree = 0.0
         self.__y_degree = 0.0
                 
         # Ball (physics, position, and destination)
-        self.__ball_physics = LabyrinthBallPhysics(geometry=geometry, dt=self.__physics_dt)
-        self.__ball_start_position = geometry.start_positions[layout]
+        self.__ball_physics = LabyrinthBallPhysics(geometry=self.__geometry, dt=self.__physics_dt)
+        self.__ball_start_position = self.__geometry.start_positions[layout]
         self.__ball_position = self.__ball_start_position
-        self.__destination_x = geometry.destinations_xy[layout][0]
-        self.__destination_y = geometry.destinations_xy[layout][1]
+        self.__destination_x = self.__geometry.destinations_xy[layout][0]
+        self.__destination_y = self.__geometry.destinations_xy[layout][1]
 
         # Rendering
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.render_mode = render_mode
         if self.render_mode == '3D':
-            self.__render_3d = LabyrinthRender3D(geometry)
+            self.__render_3d = LabyrinthRender3D(self.__geometry)
             self.render()
 
         # Declare observation space (see class documentation above)
@@ -132,9 +133,13 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions = 0 #action history counter
 
         # observation space
+        """area_start = [-0.04, 3.24, 2.07, 4.38]  # 2_hole # für Random Startposition
+        self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
+        self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])"""
+
         self.observation_space = np.array([
-            self.__ball_start_position.x,
-            self.__ball_start_position.y,
+            round(self.__ball_start_position.x, 3),
+            round(self.__ball_start_position.y, 3),
             0.0,
             0.0,
             0.0,
@@ -224,31 +229,78 @@ class LabyrinthEnvironment(gym.Env):
     def interim_reward(self):
         # Für Fortschritt
 
-        #Reihnfolge ziel nach anfang
-        #8holes
-        target_points = [[-4.4, -10.32],
+        #Reihnfolge ziel nach anfang, mit jeweils [x,y]
+        # 2holes
+        target_points = [[-0.13, -6],
+                         [-0.13, -6],
+                         [-0.72, -0.54],
+                         [-0.72, -0.54],
+                         [0.04, 1.66],
+                         [0.04, 1.66],
+                         [0.04, 1.66],
+                         [1.79, 5.39]]
+        #8holes beginn
+        """target_points = [[-4.4, -10.32],
                          [5.82, -10.32],
                          [7.33, -6.88],
-                         [9.96, -8.33],
-                         [12.54, -7.53]]
+                         [8.89, -8.29],
+                         [12.54, -7.53],
+
+                         [12.99, -5],
+                         [10.35, -1.15],
+                         [12.53, -1.51],
+                         [12.41, 3.74],
+                         [11.39, 5.36],
+
+                         [11.43, 7.01],
+                         [8.71, 10.19]]"""
         # [x_min, x_max, y_min, y-max]
-        # 8holes
-        areas = [[-5.86, 7.46, -11.40, -9.52],
+        # 2holes
+        areas = [[-13.7, 3.43, -6.67, 0.12],
+                 [-13.7, -3.44, 0.12, 11.4],
+                 [-3.44, -0.99, 0.12, 3.87],
+                 [-0.99, 3.43, 0.12, 2.46],
+                 [-3.19, 13.7, 4.28, 6.35],
+
+                 [-0.99, 13.7, 0.12, 4.28],
+                 [3.43, 13.7, -4.42, 0.12],
+                 [-3.23, 13.7, 6.35, 11.4]]
+        # 8holes beginn
+        """areas = [[-5.86, 7.46, -11.40, -9.52],
                  [5.21, 7.46, -9.52, -4.63],
-                 [7.46, 10.18, -11.4, -4.63],
-                 [10.18, 13.7, -11.4, -6.58],
-                 [10.18, 13.7, -6.58, -3.98]]
-        i = 0
+                 [7.46, 9.46, -11.4, -4.63],
+                 [9.46, 13.7, -11.4, -6.58],
+                 [9.46, 13.7, -6.58, -3.98],
+
+                 [9.46, 13.7, -3.98, -0.65],
+                 [9.46, 13.7, -0.65, 1.9],
+                 [9.46, 13.7, 1.9, 4.15],
+                 [9.46, 13.7, 4.15, 5.75],
+                 [9.46, 13.7, 5.75, 7.28],
+
+                 [8.23, 13.7, 7.28, 11.4]]"""
+        self.__progress = 0
         for x_min, x_max, y_min, y_max in areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
-                last_distance = (self.__last_ball_position.x - target_points[i][0])*(self.__last_ball_position.x - target_points[i][0]) + (self.__last_ball_position.y - target_points[i][1])*(self.__last_ball_position.y - target_points[i][1])
-                current_distance = (self.__ball_position.x - target_points[i][0])*(self.__ball_position.x - target_points[i][0]) + (self.__ball_position.y - target_points[i][1])*(self.__ball_position.y - target_points[i][1])
+                last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
+                current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
 
                 if current_distance < last_distance:
-                    return True #in die richtige richtung bewegt
+                    return True #in die richtige Richtung bewegt
                 else:
                     return False
-            i += 1
+            self.__progress += 1
+        return False
+
+    # ========== close_hole_discount reward ===================================
+    def close_hole_discount(self):
+        pos_x = self.__ball_position.x
+        pos_y = self.__ball_position.y
+
+        for hole in self.__geometry.holes.data:
+            hole_center = hole["pos"]
+            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.5) **2:
+                return True
         return False
 
 
@@ -283,6 +335,7 @@ class LabyrinthEnvironment(gym.Env):
         stop_y_degree = self.__action_to_angle_degree[action[1]]
         is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 
+        self.__last_ball_position = self.__ball_position  # remember last position before step action
         # New ball position
         if is_rotate_field == False:
             # Action does not rotate the field
@@ -319,10 +372,12 @@ class LabyrinthEnvironment(gym.Env):
             
         # Observation_space
         self.observation_space = np.array([
-            self.__ball_start_position.x,
-            self.__ball_start_position.y,
-            self.__ball_physics.get_velocity().x,
-            self.__ball_physics.get_velocity().y,
+            round(self.__ball_position.x, 3), #Runden auf 3 nachkommastellen
+            round(self.__ball_position.y, 3),
+            round(self.__ball_physics.get_velocity().x, 3),
+            round(self.__ball_physics.get_velocity().y, 3),
+            #round(self.__last_ball_position.x, 3),
+            #round(self.__last_ball_position.y, 3),
             self.__x_degree,
             self.__y_degree
         ], dtype=np.float32)
@@ -338,13 +393,16 @@ class LabyrinthEnvironment(gym.Env):
         # Reward
         if is_ball_at_destination:
             print("Ball reached destination")
-            reward = 1000
+            reward = 100
         elif is_ball_in_hole:
             print("Ball lost")
-            reward = -3000
+            reward = -100
+        elif self.close_hole_discount():
+            print("Ball close to hole")
+            reward = -10
         elif self.interim_reward():
-            print("interim reward")
-            reward = 10
+            print("right direction")
+            reward = 1 #/ (self.__progress + 1)
         else:
             reward = -1
 

@@ -10,6 +10,7 @@ Lengths are stated without unit, but are interpreted as [cm].
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
+import random
 
 # -----------------------------------------------------------------------------
 # Class containing individual components of labyrinth game geometry
@@ -22,14 +23,16 @@ class LabyrinthGeometry:
     # Define layout names (walls and holes)
     layouts = ['2 holes', '8 holes', '21 holes']
     # Define start position and destination area
+
     start_positions = {
-        '2 holes'  : vec(-1.52,  9.25, 0),
+        #'2 holes'  : vec(-1.52,  9.25, 0),
+        '2 holes': vec(-2.0, 1.0, 0),  # näher am ziel
         #'8 holes'  : vec( 0.13, 10.53, 0),
         '8 holes': vec(10.75, -8.4, 0), #näher am ziel
         '21 holes' : vec( 0.0,   0.0,  0)
         }
     destinations_xy = {
-        '2 holes'  : [[0.15, 1.56], [-6.62, -5.64]],
+        '2 holes'  : [[-1.9, 1.56], [-6.62, -5.5]],
         '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
         '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
         }
