@@ -36,10 +36,10 @@ class LabyrinthAgentDQN:
         self.action_space = action_space
         self.memory = deque(maxlen=2000) #Die Erinnerungen werden als Elemente einer Datenstruktur namens "deque" („deck“) gespeichert, die ähnlich wie eine Liste funktioniert. Behält nur die neusten maxlength Elemente
         self.memory_important_rewards = deque(maxlen=1) #zielbelohnungen speichern
-        self.gamma = 0.95  # ursprünglich 0.95 Discount factor for past rewards
-        self.epsilon = 1.0  # exploration rate - Epsilon greedy parameter,  1.0 = zu Beginn 100% der Zeit erkunden zu lassen
-        self.exploration_min = 0.01 #ursprünglich 0.01, beschreibt wie niedrig die Explorationsrate ε abfallen kann
-        self.exploration_decay = 0.99  # ursprünglich 0.99, Rate at which to reduce chance of random action being taken as the agent gets better and better in playing
+        self.gamma = 0.99 # ursprünglich 0.95 Discount factor for past rewards
+        self.epsilon = 1.0 # exploration rate - Epsilon greedy parameter,  1.0 = zu Beginn 100% der Zeit erkunden zu lassen
+        self.exploration_min = 0.1 #ursprünglich 0.01, beschreibt wie niedrig die Explorationsrate ε abfallen kann
+        self.exploration_decay = 0.97  # ursprünglich 0.99, Rate at which to reduce chance of random action being taken as the agent gets better and better in playing
         self.learning_rate = 0.001 #ursprünglich 0.001, stochastische Gradientenabstiegs-Hyperparameter
 
         self.model = self._build_model()
@@ -48,9 +48,9 @@ class LabyrinthAgentDQN:
         #Neuronales Netz aufbauen
         model = Sequential()
         model.add(Input(shape=(6,), dtype='float32', name='state')) #Eingabeschicht
-        model.add(Dense(32, activation='relu')) # In TensorFlow und Keras wird für Dense-Schichten standardmäßig der glorot_uniform Initialisator verwendet, auch bekannt als Xavier-Initialisierung
-        model.add(Dense(64, activation='relu')) # Dense is the basic form of a neural network layer
-        model.add(Dense(32, activation='relu'))
+        model.add(Dense(32, activation='elu')) # In TensorFlow und Keras wird für Dense-Schichten standardmäßig der glorot_uniform Initialisator verwendet, auch bekannt als Xavier-Initialisierung
+        model.add(Dense(64, activation='elu')) # Dense is the basic form of a neural network layer
+        model.add(Dense(32, activation='elu'))
         model.add(Dense(9*9, activation='linear', name='action')) #Ausgabeschicht
         model.summary()  # Zeigt eine Zusammenfassung des Modells an, einschließlich der Anzahl der Parameter pro Schicht
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))  #mse = mean_squared_error, auch mae = mean_absolut_error oder mean_q = durchschnittlicher Q-Wert
@@ -59,7 +59,7 @@ class LabyrinthAgentDQN:
     def remember(self, state, action, reward, next_state, done): # simply store states, actions and resulting rewards into the memory
         #Replay Memory wird genutzt, um Erfahrungen zu speichern und später zum Training zu verwenden.
         self.memory.append((state, action, reward, next_state, done)) # memory dient zum Speichern von Erinnerungen, die anschließend abgespielt werden können, um das neuronale Netz das DQN zu trainieren
-        if reward > 100:
+        if reward > 100 or reward < -100:
             self.memory_important_rewards.append((state, action, reward, next_state, done)) #merkt sich die wichtigen ereignisse (positive belohnungen und löcher)
 
     def act(self, state):
@@ -79,9 +79,9 @@ class LabyrinthAgentDQN:
     def train(self, batch_size):
         # Diese Funktion trainiert das neuronale Netz mit zufälligen Stichproben aus dem Speicher.
         minibatch = random.sample(self.memory, batch_size) #only take a few samples (batch_size) out of self.memory, pick them randomly.
-        """if len(self.memory_important_rewards) > 0:
+        if len(self.memory_important_rewards) > 0:
             for state, action, reward, next_state, done in self.memory_important_rewards:
-                minibatch.append((state, action, reward, next_state, done)) #wichtige ereignisse immer lernen/speichern"""
+                minibatch.append((state, action, reward, next_state, done)) #wichtige ereignisse immer lernen/speichern
 
         for state, action, reward, next_state, done in minibatch:
             #ins richtige Format bringen
@@ -105,8 +105,6 @@ class LabyrinthAgentDQN:
 
             # Aktualisierung des Q-Werts der ausgeführten Aktion
             target_f[action[0], action[1]] = target # Aktualisiert den Q-Wert der ausgeführten Aktion (action), durch Erfahrung
-            # Zurück in die flache Form konvertieren
-            target_f = target_f.flatten()
             # Training des Modells mit dem aktualisierten Q-Wert
             self.model.fit(state, target_f.reshape(1, -1), epochs=1, verbose=0) #fit = trains the model for a fixed number of epochs (hier 1)
         #Epsilon verkleinern
@@ -120,7 +118,7 @@ class LabyrinthAgentDQN:
         self.model.save_weights(name) #Saves the weights of the DQN agent in an H5 file.
 
     def training(self, env):
-        self.load(path + "2Hole.weights.h5")
+        #self.load(path + "2Hole_v2.weights.h5")
 
         # Hyperparameters
         episodes = 1000
@@ -152,7 +150,7 @@ class LabyrinthAgentDQN:
                 self.train(batch_size)
             if episode % 10 == 0:  # Every 50 episodes, the agent’s save_weights() method store the neural net model’s parameters.
                 #self.save_weights(output_dir + "episode_" + "{:05d}".format(episode) + ".weights.h5")
-                self.save_weights(path + "2Hole" + ".weights.h5")
+                self.save_weights(path + "2Hole_v2" + ".weights.h5")
 
     def evaluate(self, env):
         self.load(path+"2Hole.weights.h5")
@@ -163,8 +161,9 @@ class LabyrinthAgentDQN:
             state, _ = env.reset()  # Initialisiert den Zustand der Umgebung
             total_reward = 0
             done = False
+            truncated = False
 
-            while not done or not truncated:
+            while not done and not truncated:
                 action = self.act(state)  # Der Agent wählt eine Aktion basierend auf dem Zustand
                 next_state, reward, done, truncated, _ = env.step(action)  # Rückmeldung über die getätigte Aktion
                 state = next_state  # Aktualisiert den Zustand für die nächste Iteration
@@ -180,8 +179,8 @@ class LabyrinthAgentDQN:
 
 if __name__ == '__main__':
     # Init environment and agent
-    #env = LabyrinthEnvironment(layout='2 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='2 holes', render_mode=None) #training
+    env = LabyrinthEnvironment(layout='2 holes', render_mode='3D') #evaluate
+    #env = LabyrinthEnvironment(layout='2 holes', render_mode=None) #training
     agent = LabyrinthAgentDQN(env.observation_space, env.action_space)
     agent.training(env)
     #agent.evaluate(env)

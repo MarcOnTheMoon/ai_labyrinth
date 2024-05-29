@@ -175,7 +175,7 @@ class Walls:
         z_pos = height / 2
         if layout == '2 holes':
             self.data = [
-                {"pos": vec(-3.41, 7.52, z_pos), "size": vec(thickness, 7.59, height)},
+                {"pos": vec(-3.41, 3.5, z_pos), "size": vec(thickness, 15.81, height)},
                 {"pos": vec(-2.37, 4, z_pos), "size": vec(2.64, thickness, height)},
                 {"pos": vec(-7.78, -4.54, z_pos), "size": vec(11.83, thickness, height)},
                 {"pos": vec(-2.14, -7.82, z_pos), "size": vec(thickness, 7.12, height)},
@@ -183,7 +183,7 @@ class Walls:
 
                 {"pos": vec(1.84, -7.82, z_pos), "size": vec(thickness, 7.12, height)},
                 {"pos": vec(7.53, -4.54, z_pos), "size": vec(11.95, thickness, height)},
-                {"pos": vec(3.61, -1.77, z_pos), "size": vec(thickness, 6.05, height)},
+                {"pos": vec(3.61, 3.5, z_pos), "size": vec(thickness, 15.81, height)},
             ]
         
         elif layout == '8 holes':
