@@ -25,8 +25,8 @@ class LabyrinthGeometry:
     # Define start position and destination area
 
     start_positions = {
-        #'2 holes'  : vec(-1.52,  9.25, 0),
-        '2 holes': vec(-2.0, 1.0, 0),  # näher am ziel
+        '2 holes'  : vec(-1.52,  9.25, 0),
+        #'2 holes': vec(-2.0, 1.0, 0),  # näher am ziel
         #'8 holes'  : vec( 0.13, 10.53, 0),
         '8 holes': vec(10.75, -8.4, 0), #näher am ziel
         '21 holes' : vec( 0.0,   0.0,  0)
