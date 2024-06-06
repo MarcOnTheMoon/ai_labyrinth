@@ -69,10 +69,10 @@ class LabyrinthAgentDQN:
         """
         model = Sequential()
         model.add(Input(shape=(6,), dtype='float32', name='state')) # input layer
-        model.add(Dense(32, activation='elu')) # hidden layer: In TensorFlow and Keras, the glorot_uniform initializer is used by default for Dense layers, also known as Xavier initialization.
-        model.add(Dense(64, activation='elu')) # Dense is the basic form of a neural network layer
-        model.add(Dense(32, activation='elu'))
-        model.add(Dense(9*9, activation='linear', name='action')) # output layer
+        model.add(Dense(1024, activation='relu')) # hidden layer: : Dense is the basic form of a neural network layer
+        model.add(Dense(512, activation='relu')) # In TensorFlow and Keras, the glorot_uniform initializer is used by default for Dense layers, also known as Xavier initialization.
+        model.add(Dense(256, activation='relu'))
+        model.add(Dense(2*9, activation='linear', name='action')) # output layer
         model.summary() # Displays a summary of the model, including the number of parameters per layer
         model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))  #mse = mean_squared_error, also possible mae = mean_absolut_error or mean_q = average Q-value
         return model
@@ -117,17 +117,15 @@ class LabyrinthAgentDQN:
                 action to rotate the field in the y direction.
         """
         if np.random.rand() <= self.epsilon:
-            # exploration: take random action out of 9 different actions
-            x_action = np.random.choice([0,1,2,3,4,5,6,7,8])
-            y_action = np.random.choice([0,1,2,3,4,5,6,7,8])
-            return [x_action, y_action]
+            # exploration: take random action out of 18 different actions
+            action = random.randint(0, 17)
+            return action
         else:
             # exploitation: take the best action based on the trained data
             state = np.array(state).reshape(1, -1) # Shape the state into the correct format
-            q_values = self.model.predict(state) # predict(): Model predicts the reward of the current state based on the data trained so far
-            act_values = q_values.reshape((9, 9)) # convert to a 2D array representing the (x, y) action grid
-            x_action, y_action = np.unravel_index(np.argmax(act_values), act_values.shape) #Take the best action with converting into the dimension of (x, y) coordinates.
-            return [x_action, y_action]
+            act_values = self.model.predict(state) # predict(): Model predicts the reward of the current state based on the data trained so far
+            action = np.unravel_index(np.argmax(act_values), act_values.shape) #Take the best action with converting into the dimension of (x, y) coordinates.
+            return action
 
     def train(self, batch_size):
         """
@@ -155,14 +153,12 @@ class LabyrinthAgentDQN:
 
             # prediction of the Q-values for the current state
             target_f = self.model.predict(state)  # target_forecast
-            target_f = target_f.reshape((9, 9))
 
             if done:
                 target = reward # When the episode is completed (done), the target is set to the reward because there is no subsequent state beyond the achieved one
             if not done:
                 # prediction of the Q-values for the next state
                 next_q_values = self.model.predict(next_state)
-                next_q_values = next_q_values.reshape((9, 9)) # convert to (x,y)
                 # Calculation of the target value using the Q-learning formula
                 target = reward + self.gamma * np.amax(next_q_values) # Calculates the target based on the Q-learning update rule (only exploration), is the rest of the update rule needed????
 
@@ -183,7 +179,7 @@ class LabyrinthAgentDQN:
             Parameters
             ----------
             name:
-                path and name of the file from which file it has to be loaded
+                path and name of the file from which it has to be loaded
 
 
             Returns
@@ -199,7 +195,7 @@ class LabyrinthAgentDQN:
             Parameters
             ----------
             name:
-                path and name of the file in which file it should be saved
+                path and name of the file in which it should be saved
 
 
             Returns
@@ -221,7 +217,7 @@ class LabyrinthAgentDQN:
             -------
             None
         """
-        self.load(path + "2Hole_v2.weights.h5")
+        #self.load(path + "2Hole_v2.weights.h5")
 
         # hyperparameter
         episodes = 1000
@@ -295,7 +291,7 @@ class LabyrinthAgentDQN:
 
 if __name__ == '__main__':
     # Init environment and agent
-    env = LabyrinthEnvironment(layout='2 holes', render_mode='3D') # evaluate
+    env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') # evaluate
     #env = LabyrinthEnvironment(layout='2 holes', render_mode=None) # training
     agent = LabyrinthAgentDQN(env.observation_space, env.action_space)
     agent.training(env)

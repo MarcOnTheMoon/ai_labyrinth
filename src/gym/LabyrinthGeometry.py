@@ -21,10 +21,13 @@ class LabyrinthGeometry:
     # ========== Field layouts ================================================
 
     # Define layout names (walls and holes)
-    layouts = ['2 holes', '8 holes', '21 holes']
+    layouts = ['0 holes', '2 holes', '8 holes', '21 holes']
     # Define start position and destination area
-
+    area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # für Random Startposition [x_min, x_max, y_min, y_max]
+    x = random.uniform(area_start[0], area_start[1])
+    y = random.uniform(area_start[2], area_start[3])
     start_positions = {
+        '0 holes' : vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
         #'2 holes': vec(-2.0, 1.0, 0),  # näher am ziel
         #'8 holes'  : vec( 0.13, 10.53, 0),
@@ -32,6 +35,7 @@ class LabyrinthGeometry:
         '21 holes' : vec( 0.0,   0.0,  0)
         }
     destinations_xy = {
+        '0 holes'  : [[-0.25, 0.25], [-0.25, 0.25]],
         '2 holes'  : [[-1.9, 1.56], [-6.62, -5.5]],
         '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
         '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
@@ -64,8 +68,9 @@ class LabyrinthGeometry:
         # Init geometry
         self.box = Box()
         self.field = Field()
-        self.walls = Walls(layout=layout)
-        self.holes = Holes(layout=layout, depth=self.field.plate_depth)
+        if layout != '0 holes':
+            self.walls = Walls(layout=layout)
+            self.holes = Holes(layout=layout, depth=self.field.plate_depth)
         self.ball = Ball()
 
 # -----------------------------------------------------------------------------

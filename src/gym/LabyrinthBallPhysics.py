@@ -156,8 +156,11 @@ class LabyrinthBallPhysics:
         None.
 
         """
-        # Interior walls (copied from LabyrinthGeometry)
-        walls_data = self.__geometry.walls.data.copy()
+        if self.__geometry.layout != '0 holes':
+            # Interior walls (copied from LabyrinthGeometry)
+            walls_data = self.__geometry.walls.data.copy()
+        else:
+            walls_data = []
         
         # Add exterior walls (field boarders)
         field_x = self.__geometry.field.size_x
@@ -169,6 +172,7 @@ class LabyrinthBallPhysics:
         walls_data.append({"pos": vec(0, -(field_y + thickness)/2, 0), "size": vec(field_x + 2 * thickness, thickness, height)})    # Lower
         walls_data.append({"pos": vec(-(field_x + thickness)/2, 0, 0), "size": vec(thickness, field_y, height)})                    # Left
         walls_data.append({"pos": vec((field_x + thickness) / 2, 0, 0), "size": vec(thickness, field_y, height)})                   # Right
+
 
         # Corner calculation
         self.__corners = []
@@ -260,7 +264,8 @@ class LabyrinthBallPhysics:
         # Velocity
         self.__velocity = vec(velocity_x, velocity_y, 0.0)
         self.__detect_and_process_collision()
-        self.__detect_ball_in_hole()
+        if self.__geometry.layout != '0 holes':
+            self.__detect_ball_in_hole()
 
         return self.__position
 
@@ -332,7 +337,7 @@ class LabyrinthBallPhysics:
                 self.__position.y = pos_y = corner[2].y - radius
                 is_collision_edge = True
 
-        if is_collision_edge == True: # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball).
+        if is_collision_edge == True or self.__geometry.layout == '0 holes': # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball) and its the game plate with 0 holes.
             return
 
         # ---------- Check for collision with a corner ------------------------

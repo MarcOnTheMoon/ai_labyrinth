@@ -184,21 +184,24 @@ class LabyrinthRender3D:
         labyrinth_elements = []
         labyrinth_elements.append(self.__field)
 
-        # Add walls
-        walls_data = geometry.walls.data
-        for wall_data in walls_data:
-            wall = box(pos=wall_data["pos"], size=wall_data["size"], color=self.colors['walls'])
-            labyrinth_elements.append(wall)
+        if geometry.layout != '0 holes':
+            # Add walls
+            walls_data = geometry.walls.data
+            for wall_data in walls_data:
+                wall = box(pos=wall_data["pos"], size=wall_data["size"], color=self.colors['walls'])
+                labyrinth_elements.append(wall)
 
-        # Add holes
-        holes_data = geometry.holes.data
-        holes_radius = geometry.holes.radius
-        for hole_data in holes_data:
-            hole = cylinder(pos=hole_data["pos"], axis=hole_data["axis"], radius=holes_radius, color=self.colors['holes'])
-            labyrinth_elements.append(hole)
+            # Add holes
+            holes_data = geometry.holes.data
+            holes_radius = geometry.holes.radius
+            for hole_data in holes_data:
+                hole = cylinder(pos=hole_data["pos"], axis=hole_data["axis"], radius=holes_radius, color=self.colors['holes'])
+                labyrinth_elements.append(hole)
 
         # Compile all elements into a board with background picture
-        if geometry.layout == '2 holes':
+        if geometry.layout == '0 holes':
+            labyrinth = compound(labyrinth_elements, texture='textures/0_holes.png')
+        elif geometry.layout == '2 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/2_holes.png')
         elif geometry.layout == '8 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/8_holes.png')

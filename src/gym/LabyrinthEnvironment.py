@@ -104,8 +104,9 @@ class LabyrinthEnvironment(gym.Env):
 
 
         # Declare action space (see class documentation above)
-        num_actions_per_component = 9  # There are 9 possible actions per component (x,y)
-        self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
+        self.num_actions_per_component = 9  # There are 9 possible actions per component (x,y)
+        #self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
+        self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
         self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
 
     # ========== Reset ========================================================
@@ -133,9 +134,10 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions = 0 #action history counter
 
         # observation space
-        """area_start = [-0.04, 3.24, 2.07, 4.38]  # 2_hole # für Random Startposition
-        self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
-        self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])"""
+        if self.__geometry.layout == '0 holes':
+            area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
+            self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
+            self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
 
         self.observation_space = np.array([
             round(self.__ball_start_position.x, 3),
@@ -229,56 +231,68 @@ class LabyrinthEnvironment(gym.Env):
     def interim_reward(self):
         # Für Fortschritt
 
-        #Reihnfolge ziel nach anfang, mit jeweils [x,y]
-        # 2holes
-        target_points = [[-0.13, -6],
-                         [-0.13, -6],
-                         [-0.72, -0.54],
-                         [-0.72, -0.54],
-                         [0.04, 1.66],
-                         [0.04, 1.66],
-                         [0.04, 1.66],
-                         [1.79, 5.39]]
+        #Reihnfolge ziel nach anfang, mit jeweils [x,y] Zwischenzielkoordinaten
+        if self.__geometry.layout == '0 holes':
+            target_points = [[0, 0]]
+
+        if self.__geometry.layout == '2 holes':
+            target_points = [[-0.13, -6],
+                             [-0.13, -6],
+                             [-0.72, -0.54],
+                             [-0.72, -0.54],
+                             [0.04, 1.66],
+
+                             [0.04, 1.66],
+                             [0.04, 1.66],
+                             [1.79, 5.39],
+                             [1.79, 5.39]]
         #8holes beginn
-        """target_points = [[-4.4, -10.32],
-                         [5.82, -10.32],
-                         [7.33, -6.88],
-                         [8.89, -8.29],
-                         [12.54, -7.53],
+        if self.__geometry.layout == '8 holes':
+            target_points = [[-4.4, -10.32],
+                             [5.82, -10.32],
+                             [7.33, -6.88],
+                             [8.89, -8.29],
+                             [12.54, -7.53],
 
-                         [12.99, -5],
-                         [10.35, -1.15],
-                         [12.53, -1.51],
-                         [12.41, 3.74],
-                         [11.39, 5.36],
+                             [12.99, -5],
+                             [10.35, -1.15],
+                             [12.53, -1.51],
+                             [12.41, 3.74],
+                             [11.39, 5.36],
 
-                         [11.43, 7.01],
-                         [8.71, 10.19]]"""
+                             [11.43, 7.01],
+                             [8.71, 10.19]]
         # [x_min, x_max, y_min, y-max]
-        # 2holes
-        areas = [[-13.7, 3.43, -6.67, 0.12],
-                 [-13.7, -3.44, 0.12, 11.4],
-                 [-3.44, -0.99, 0.12, 3.87],
-                 [-0.99, 3.43, 0.12, 2.46],
-                 [-3.19, 13.7, 4.28, 6.35],
+        if self.__geometry.layout == '0 holes':
+            areas = [[-13.06, 13.06, -10.76, 10.76]]
 
-                 [-0.99, 13.7, 0.12, 4.28],
-                 [3.43, 13.7, -4.42, 0.12],
-                 [-3.23, 13.7, 6.35, 11.4]]
+        if self.__geometry.layout == '2 holes':
+            areas = [[-3.44, 3.43, -6.67, 0.12],
+                     [-13.7, -3.44, -6.67, 11.4],
+                     [-3.44, -0.99, 0.12, 3.87],
+                     [-0.99, 3.43, 0.12, 2.46],
+                     [-3.19, -0.99, 4.28, 6.35],
+
+                     [-0.99, 3.43, 0.12, 6.35],
+                     [3.43, 13.7, -4.42, 6.35],
+                     [-3.23, 3.43, 6.35, 11.4],
+                     [3.34, 13.7, 6.35, 11.4]]
         # 8holes beginn
-        """areas = [[-5.86, 7.46, -11.40, -9.52],
-                 [5.21, 7.46, -9.52, -4.63],
-                 [7.46, 9.46, -11.4, -4.63],
-                 [9.46, 13.7, -11.4, -6.58],
-                 [9.46, 13.7, -6.58, -3.98],
+        if self.__geometry.layout == '8 holes':
+            areas = [[-5.86, 7.46, -11.40, -9.52],
+                     [5.21, 7.46, -9.52, -4.63],
+                     [7.46, 9.46, -11.4, -4.63],
+                     [9.46, 13.7, -11.4, -6.58],
+                     [9.46, 13.7, -6.58, -3.98],
 
-                 [9.46, 13.7, -3.98, -0.65],
-                 [9.46, 13.7, -0.65, 1.9],
-                 [9.46, 13.7, 1.9, 4.15],
-                 [9.46, 13.7, 4.15, 5.75],
-                 [9.46, 13.7, 5.75, 7.28],
+                     [9.46, 13.7, -3.98, -0.65],
+                     [9.46, 13.7, -0.65, 1.9],
+                     [9.46, 13.7, 1.9, 4.15],
+                     [9.46, 13.7, 4.15, 5.75],
+                     [9.46, 13.7, 5.75, 7.28],
 
-                 [8.23, 13.7, 7.28, 11.4]]"""
+                     [8.23, 13.7, 7.28, 11.4]]
+
         self.__progress = 0
         for x_min, x_max, y_min, y_max in areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
@@ -329,10 +343,13 @@ class LabyrinthEnvironment(gym.Env):
 
         """
         # Field's rotation angles before and after applying the action
-        start_x_degree = self.__x_degree
-        start_y_degree = self.__y_degree
-        stop_x_degree = self.__action_to_angle_degree[action[0]]
-        stop_y_degree = self.__action_to_angle_degree[action[1]]
+        stop_x_degree = start_x_degree = self.__x_degree
+        stop_y_degree = start_y_degree = self.__y_degree
+        # rotate only one axes
+        if action < self.num_actions_per_component:
+            stop_x_degree = self.__action_to_angle_degree[action]
+        else:
+            stop_y_degree = self.__action_to_angle_degree[action - self.num_actions_per_component]
         is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 
         self.__last_ball_position = self.__ball_position  # remember last position before step action
@@ -388,21 +405,26 @@ class LabyrinthEnvironment(gym.Env):
         is_ball_at_destination = is_destination_x and is_destination_y
 
         # Ball has fallen into a hole?
-        is_ball_in_hole = self.__ball_physics.is_ball_in_hole
+        if self.__geometry.layout != '0 holes':
+            is_ball_in_hole = self.__ball_physics.is_ball_in_hole
+            is_ball_to_close_hole = self.close_hole_discount()
+        else:
+            is_ball_in_hole = False
+            is_ball_to_close_hole = False
 
         # Reward
         if is_ball_at_destination:
             print("Ball reached destination")
-            reward = 100
-        elif is_ball_in_hole:
+            reward = 600
+        elif is_ball_in_hole and self.__geometry.layout != '0 holes':
             print("Ball lost")
-            reward = -100
-        elif self.close_hole_discount():
+            reward = -200
+        elif is_ball_to_close_hole and self.__geometry.layout != '0 holes':
             print("Ball close to hole")
-            reward = -10
+            reward = -11
         elif self.interim_reward():
             print("right direction")
-            reward = 1 #/ (self.__progress + 1)
+            reward = -0.2  # / (self.__progress + 1)
         else:
             reward = -1
 
@@ -411,6 +433,8 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions += 1 # Action history
         if self.number_actions >= 2000:
             truncated = True
+            if self.__geometry.layout == '0 holes':
+                done = True
         else:
             truncated = False
 
@@ -425,9 +449,9 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
     env.reset()
 
-    for action in [[2,3], [6,3], [8,4], [7,5]]:
+    for action in [1, 1, 6, 6]:
         env.step(action)
     for action in range(4):
-        env.step([7,4])
+        env.step(6)
     for action in range(20):
-        env.step([3,8])
+        env.step(12)
