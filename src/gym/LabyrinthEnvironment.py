@@ -301,9 +301,9 @@ class LabyrinthEnvironment(gym.Env):
         for x_min, x_max, y_min, y_max in areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
                 last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
-                self.__current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
+                self.current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
 
-                if self.__current_distance < last_distance:
+                if self.current_distance < last_distance:
                     return True #in die richtige Richtung bewegt
                 else:
                     return False
@@ -417,34 +417,47 @@ class LabyrinthEnvironment(gym.Env):
             is_ball_in_hole = False
             is_ball_to_close_hole = False
 
-        # Ball close to destination 0 holes game plate?
-        is_ball_close_to_destination = False
-        if self.__geometry.layout != '0 holes' and self.__current_distance < 1.25: #ball befindet sich im innersten nicht gefüllten Kreis
-            is_ball_close_to_destination = True
-
         # Reward
-        if is_ball_at_destination:
-            print("Ball reached destination")
-            reward = 600
-        elif is_ball_in_hole and self.__geometry.layout != '0 holes':
-            print("Ball lost")
-            reward = -200
-        elif is_ball_to_close_hole and self.__geometry.layout != '0 holes':
-            print("Ball close to hole")
-            reward = -11
-        elif self.interim_reward():
-
-            if is_ball_close_to_destination:
-                reward = 10
-                print("close to destination")
-            else:
+        if self.__geometry.layout != '0 holes':
+            if is_ball_at_destination:
+                print("Ball reached destination")
+                reward = 600
+            elif is_ball_in_hole:
+                print("Ball lost")
+                reward = -200
+            elif is_ball_to_close_hole:
+                print("Ball close to hole")
+                reward = -11
+            elif self.interim_reward():
                 reward = -0.2
                 print("right direction")
-        else:
-            if is_ball_close_to_destination:
-                reward = -0.5
             else:
                 reward = -1
+        else: #self.__geometry.layout == '0 holes'
+            if is_ball_at_destination:
+                print("Ball reached destination")
+                reward = 600
+            elif self.interim_reward():
+                if self.current_distance < 1.25 ** 2:
+                    reward = 100
+                    print("close to destination_3")
+                elif self.current_distance < 2.5 ** 2:
+                    reward = 20
+                    print("close to destination_2")
+                elif self.current_distance < 5 ** 2:
+                    reward = 1
+                    print("close to destination_1")
+                else:
+                    reward = -0.2
+                    print("right direction")
+            else:
+                if self.current_distance < 1.25 ** 2:
+                    reward = 1
+                    print("close to destination false direction")
+                    if self.current_distance < 2.5 ** 2:
+                        reward = -0.2
+                else:
+                    reward = -1
 
         # Episode completed or truncated?
         done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes'
