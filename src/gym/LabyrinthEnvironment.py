@@ -109,6 +109,8 @@ class LabyrinthEnvironment(gym.Env):
         self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
         self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
 
+        self.firstepisode = True
+
     # ========== Reset ========================================================
 
     def reset(self, seed=None):
@@ -134,10 +136,12 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions = 0 #action history counter
 
         # observation space
-        if self.__geometry.layout == '0 holes':
+        if self.__geometry.layout == '0 holes' and not self.firstepisode:
             area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
             self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
             self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
+
+        self.firstepisode = False
 
         self.observation_space = np.array([
             round(self.__ball_start_position.x, 3),
@@ -313,7 +317,7 @@ class LabyrinthEnvironment(gym.Env):
 
         for hole in self.__geometry.holes.data:
             hole_center = hole["pos"]
-            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.5) **2:
+            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.25) **2:
                 return True
         return False
 
@@ -429,12 +433,14 @@ class LabyrinthEnvironment(gym.Env):
             reward = -1
 
         # Episode completed or truncated?
-        done = is_ball_at_destination or is_ball_in_hole
+        done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes'
         self.number_actions += 1 # Action history
-        if self.number_actions >= 2000:
+
+        if self.number_actions >= 500 and self.__geometry.layout == '0 holes':
+            done = True
+            truncated = False
+        elif self.number_actions >= 2000:
             truncated = True
-            if self.__geometry.layout == '0 holes':
-                done = True
         else:
             truncated = False
 

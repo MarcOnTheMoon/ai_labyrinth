@@ -7,14 +7,14 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @version: 2024.05.15
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
-#conda install -c conda-forge tensorflow
 
 import random
 import numpy as np
-from collections import deque
-from tensorflow.keras import Sequential, Input
-from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.optimizers import Adam
+import torch
+import torch.optim as optim
+import matplotlib.pyplot as plt
+from replay_buffer import ReplayBuffer
+from q_model import PtQNet
 
 #Path to access LabyrinthEnvironment
 import sys
@@ -26,13 +26,97 @@ from LabyrinthEnvironment import LabyrinthEnvironment
 
 path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
-class LabyrinthAgentDQN:
-    def __init__(self, state_space, action_space):
+class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute und Methoden von BaseDqnAgent
+
+    def __init__(
+            self,
+            state_size,
+            action_size,
+            degp_epsilon = 1,
+            degp_decay_rate = .9,
+            degp_min_epsilon = .1,
+            train_batch_size = 64,
+            replay_buffer_size = 100_000,
+            gamma = 0.99,
+            learning_rate = 5e-4,
+            learn_period = 1
+    ):
         """
             Constructor.
 
             Parameters
             ----------
+            state_size:
+                size of environment observation space
+            action_size:
+                size of action space
+            degp_epsilon:
+                exploration rate ε - initial Epsilon greedy parameter,  1 = explore 100% of the time at the beginning
+            degp_decay_rate:
+                Rate that reduce chance of random action, decay rate of epsilon greedy policy
+            degp_min_epsilon:
+                describes how low the exploration rate ε can drop, minimal epsilon value
+            train_batch_size:
+                batch-Größe für das Training
+            replay_buffer_size:
+                Größe des Replay-Buffers
+            gamma:
+                Discount factor for past rewards. gamma -> 1: long-term rewards should be given more consideration. gamma -> 0: short-term, immediate optimization of the reward.
+            learning_rate:
+                Learning rate for the optimizer
+            learn_period:
+                wie oft das Q-Netz trainiert werden soll
+
+            Returns
+            -------
+            None.
+
+        """
+        self.state_size = state_size #setzt die Zustandsgröße
+        self.action_size = action_size #setzt die Aktionsgröße
+
+        self.degp_epsilon = self.degp_initial_epsilon = degp_epsilon #Setzt den initialen und aktuellen Epsilon-Wert.
+        self.degp_decay_rate = degp_decay_rate # Setzt die Abbaurate für Epsilon.
+        self.degp_min_epsilon = degp_min_epsilon #Setzt den minimalen Epsilon-Wert.
+
+        # Q-Network initialized in init_q_net method
+        self.learn_period = learn_period #Setzt die Häufigkeit des Trainings
+        self.learning_rate = learning_rate
+        self.init_q_net() # ruft init_q_net auf, um das Q-Netzwerk zu initialisieren.
+
+        # Replay memory
+        self.memory = ReplayBuffer(replay_buffer_size, train_batch_size) #Initialisiert den Replay-Buffer mit der angegebenen Größe und Batch-Größe, ruft dafür die init von der klasse ReplayBuffer auf.
+
+        self.training_steps_count = 0 # Initialisiert den Zähler für Trainingsschritte.
+        self.train_batch_size = train_batch_size # Setzt die Batch-Größe für das Training.
+        self.replay_buffer_size = replay_buffer_size #Setzt die Größe des Replay-Buffers.
+        self.gamma = gamma # setzt den Diskonierungsfaktor
+
+
+    def init_q_net(self):
+        """
+            Inizialisierung des Q-Netzes, Optimierers und der Verlustfunktion
+
+            Parameters
+            ----------
+            None.
+
+            Returns
+            -------
+            None.
+
+        """
+        self.q_net = PtQNet(self.state_size, self.action_size) #initialisiert das Q-Netz, PtQNet ist die Klasse, des neuronalen Netzwerks
+        self.optimizer = optim.Adam(self.q_net.parameters(), lr = self.learning_rate) #Optimierer: Adam
+        self.loss = torch.nn.MSELoss() # Verlustfunktion: Mean Squared Error (MSE)
+
+    def before_episode(self):
+        """
+            Anpassung von Epsilon vor einer neuen Episode.
+
+            Parameters
+            ----------
+            None
 
 
             Returns
@@ -40,47 +124,12 @@ class LabyrinthAgentDQN:
             None.
 
         """
+        self.degp_epsilon *= self.degp_decay_rate #Verringert den Epsilon-Wert gemäß der Abbaurate.
+        self.degp_epsilon = max(self.degp_epsilon, self.degp_min_epsilon) #Stellt sicher, dass Epsilon nicht unter den minimalen Wert fällt.
 
-        self.state_space = state_space #till now not used
-        self.action_space = action_space #till now not used
-        self.memory = deque(maxlen=2000) #The memories are stored as elements of a data structure called "deque" ("deck"), which functions similarly to a list. It only retains the most recent maxlength elements.
-        self.memory_important_rewards = deque(maxlen=1) #store target rewards
-        self.gamma = 0.97 # originally 0.95, Discount factor for past rewards. gamma -> 1: long-term rewards should be given more consideration. gamma -> 0: short-term, immediate optimization of the reward.
-        self.epsilon = 1.0 # exploration rate ε - Epsilon greedy parameter,  1.0 = explore 100% of the time at the beginning
-        self.exploration_min = 0.1 #originally 0.01, describes how low the exploration rate ε can drop
-        self.exploration_decay = 0.99  # originally 0.99, Rate at which to reduce chance of random action being taken as the agent gets better and better in playing
-        self.learning_rate = 0.001 # originally 0.001, Learning rate for the optimizer - hyperparameter
-
-        self.model = self._build_model()
-
-    def _build_model(self):
+    def step(self, state, action, reward, next_state, done):
         """
-            neural network architecture
-
-            Parameters
-            ----------
-            None
-
-            Returns
-            -------
-            model: Sequential
-                the neural network
-
-        """
-        model = Sequential()
-        model.add(Input(shape=(6,), dtype='float32', name='state')) # input layer
-        model.add(Dense(1024, activation='relu')) # hidden layer: : Dense is the basic form of a neural network layer
-        model.add(Dense(512, activation='relu')) # In TensorFlow and Keras, the glorot_uniform initializer is used by default for Dense layers, also known as Xavier initialization.
-        model.add(Dense(256, activation='relu'))
-        model.add(Dense(2*9, activation='linear', name='action')) # output layer
-        model.summary() # Displays a summary of the model, including the number of parameters per layer
-        model.compile(loss='mse', optimizer=Adam(learning_rate=self.learning_rate))  #mse = mean_squared_error, also possible mae = mean_absolut_error or mean_q = average Q-value
-        return model
-
-    def remember(self, state, action, reward, next_state, done):
-        """
-            simply store states, actions and resulting rewards into the memory.
-            Replay Memory is used to store experiences and later use them for training the model.
+            speichert erfahrunngen und löst das training/lernen aus
 
             Parameters
             ----------
@@ -90,95 +139,127 @@ class LabyrinthAgentDQN:
             next_state:
             done:
 
+
             Returns
             -------
-            None
+            None.
 
         """
+        self.memory.add(state, action, reward, next_state, done) # Save experience in replay memory
 
-        self.memory.append((state, action, reward, next_state, done))
-        if reward > 100 or reward < -100: # remembers important experiences (target and holes)
-            self.memory_important_rewards.append((state, action, reward, next_state, done))
+        self.training_steps_count += 1 # Erhöht den Zähler für Trainingsschritte
 
-    def act(self, state):
+        if self.training_steps_count % self.learn_period == 0: # Überprüft, ob es Zeit zum Lernen ist.
+            # If enough samples are available in memory, get random subset and learn
+            if len(self.memory) > self.train_batch_size: #Überprüft, ob genug Proben im Replay-Buffer sind.
+                self.learn() #Ruft die Lernmethode auf.
+
+    def act(self, state, mode = 'train'):
         """
-            uses Epsilon-Greedy policy for action selection
+            Auswahl einer Aktion beim Training
 
             Parameters
             ----------
             state:
+            mode:
+                mögliche modi: train oder test
 
 
             Returns
             -------
-            x_action:
-                action to rotate the field in the x direction.
-            y_action:
-                action to rotate the field in the y direction.
-        """
-        if np.random.rand() <= self.epsilon:
-            # exploration: take random action out of 18 different actions
-            action = random.randint(0, 17)
-            return action
-        else:
-            # exploitation: take the best action based on the trained data
-            state = np.array(state).reshape(1, -1) # Shape the state into the correct format
-            act_values = self.model.predict(state) # predict(): Model predicts the reward of the current state based on the data trained so far
-            action = np.unravel_index(np.argmax(act_values), act_values.shape) #Take the best action with converting into the dimension of (x, y) coordinates.
-            return action
+            action:
+                chose action to rotate the field.
 
-    def train(self, batch_size):
         """
-            trains the neural network with samples from the memory.
+        r = random.random() #Erzeugt eine zufällige Zahl zwischen 0 und 1.
+        random_action = mode == 'train' and r < self.degp_epsilon #Überprüft, ob eine zufällige Aktion ausgewählt werden soll (im Trainingsmodus und wenn r kleiner als Epsilon ist).
+
+        if random_action: #Wenn eine zufällige Aktion ausgewählt werden soll:
+            # Random Policy
+            action = random.choice(np.arange(self.action_size)) #Wählt eine zufällige Aktion.
+        else: #ansonsten
+            # Greedy Policy
+            state = torch.from_numpy(state).float().unsqueeze(0)  # Konvertiert den Zustand state von einem NumPy-Array in einen PyTorch-Tensor und fügt eine zusätzliche Dimension hinzu. um aus dem 1D-Zustandsvektor einen 2D-Batch mit einem einzigen Element zu machen. Dies ist wichtig, da neuronale Netze typischerweise Batch-Verarbeitung erwarten.
+
+            self.q_net.eval()  # Schaltet das Netzwerk in den Evaluierungsmodus (deaktiviert Dropout und Batch Normalization).
+
+            with torch.no_grad():  # disabling gradient computation #Deaktiviert die Berechnung der Gradienten, um Speicher zu sparen und die Ausführung zu beschleunigen. Während der Aktionsauswahl benötigen wir keine Gradienten, da wir das Modell nur verwenden, um Vorhersagen zu treffen.
+                action_values = self.q_net(
+                    state)  # Berechnet die Q-Werte für alle möglichen Aktionen basierend auf dem gegebenen Zustand
+            self.q_net.train()  # Schaltet das Netzwerk zurück in den Trainingsmodus, um sicherzustellen, dass es für zukünftige Trainingsschritte bereit ist.
+
+            action = np.argmax(
+                action_values.data.numpy())  # Wählt die Aktion mit dem höchsten Q-Wert aus. Dies implementiert eine greedy policy, bei der stets die best bekannte Aktion gewählt wird.
+
+        return action #Gibt die ausgewählte Aktion zurück.
+
+
+
+
+    def learn(self):
+        """
+            trainieren des Agenten
 
             Parameters
             ----------
-            batch_size: int
-                Number of samples to be used for training
+            None
+
+            Returns
+            -------
+            None
+
+        """
+        samples = self.memory.batch() # Entnimmt eine Stichprobe von Erfahrungen aus dem Replay-Speicher.
+        s, a, r, s_next, dones = samples # Entpackt die Stichprobe in Zustände s, Aktionen a, Belohnungen r, nächste Zustände s_next und End-Zustände dones.
+
+        # folgende Zeilen konvertieren die NumPy-Arrays in PyTorch-Tensoren:
+        s = torch.from_numpy(s).float()
+        a = torch.from_numpy(a).long()
+        r = torch.from_numpy(r).float()
+        s_next = torch.from_numpy(s_next).float()
+        dones = torch.from_numpy(dones).float()
+
+        # V(s') = max(Q(s',a))
+        v_s_next = self.q_net(s_next).detach().max(1)[0].unsqueeze(1) # Berechnet den maximalen Q-Wert für die nächsten Zustände s_next ohne Gradientenberechnung (mit .detach()) und fügt eine Dimension hinzu.
+
+        # Q(s,a)
+        q_sa_pure = self.q_net(s) #Berechnet die Q-Werte für den aktuellen Zustand s.
+        q_sa = q_sa_pure.gather(dim = 1, index = a) # Extrahiert die Q-Werte der gewählten Aktionen a aus den berechneten Q-Werten.
+
+        # TD = r + g * V(s') - Q(s,a)
+        td = r + (self.gamma * v_s_next * (1 - dones)) - q_sa # Berechnet den Temporal Difference (TD) Fehler gemäß der Aktualisierungsregel des Q-Learnings. self.gamma ist der Diskontierungsfaktor. 1-done wird verwendet, da es nach dem End-zustand keinen nachfolgenden Zustandgibt -> V(s') ist dann 0, sonst V(s')= 1
+
+        # Compute loss: TD -> 0
+        error = self.loss(td, torch.zeros(td.shape)) # Berechnet den Verlust zwischen dem TD-Fehler und Null.
+        #print(f'error: {error}')
+        self.optimizer.zero_grad() # Setzt die Gradienten der Optimierer auf Null zurück. Gradienten werden standardmäßig summiert bei jedem Aufruf von backward(), Wenn die Gradienten nicht auf Null zurückgesetzt werden würden, würden sie sich bei jedem neuen Backpropagation-Schritt zu den vorherigen Gradienten addieren -> falsche Updates.
+        error.backward() # Backward= backpropagation: Berechnet die Gradienten des Fehlers bezüglich der Modellparameter.
+        self.optimizer.step() # aktualisiert die Netzwerkparameter basierend auf den berechneten Gradienten.
+
+
+    def save(self, path):
+        """
+            saves the weights of the model in a file.
+
+            Parameters
+            ----------
+            path:
+                path and name of the file in which it has to be stored
 
 
             Returns
             -------
             None
         """
-        minibatch = random.sample(self.memory, batch_size) #only take a few samples (batch_size) out of self.memory, pick them randomly.
-        if len(self.memory_important_rewards) > 0:
-            for state, action, reward, next_state, done in self.memory_important_rewards:
-                minibatch.append((state, action, reward, next_state, done)) # always learn important experiences (target and hole)
+        torch.save(self.q_net.state_dict(), path)
 
-        for state, action, reward, next_state, done in minibatch:
-            # format into the correct shape
-            state = np.array(state).reshape(1, -1)
-            next_state = np.array(next_state).reshape(1, -1)
-
-            # prediction of the Q-values for the current state
-            target_f = self.model.predict(state)  # target_forecast
-
-            if done:
-                target = reward # When the episode is completed (done), the target is set to the reward because there is no subsequent state beyond the achieved one
-            if not done:
-                # prediction of the Q-values for the next state
-                next_q_values = self.model.predict(next_state)
-                # Calculation of the target value using the Q-learning formula
-                target = reward + self.gamma * np.amax(next_q_values) # Calculates the target based on the Q-learning update rule (only exploration), is the rest of the update rule needed????
-
-            print(f"Vorhergesagter Zielwert: {target_f[action[0], action[1]]}, Berechneter Zielwert: {target}")
-
-            # Updating the Q-value of the executed action
-            target_f[action[0], action[1]] = target
-            # Training the model with the updated Q-value
-            self.model.fit(state, target_f.reshape(1, -1), epochs=1, verbose=0) #fit = trains the model for a fixed number of epochs (here 1)
-        # decrease Epsilon
-        if self.epsilon > self.exploration_min:
-            self.epsilon *= self.exploration_decay # Reduce the epsilon value based on self.epsilon_decay. This decreases over time the rate at which the agent chooses random actions, in favor of exploiting learned knowledge
-
-    def load(self, name):
+    def load(self, path):
         """
-            Loads the weights of the model from an H5 file.
+            Loads the weights of the model from a file.
 
             Parameters
             ----------
-            name:
+            path:
                 path and name of the file from which it has to be loaded
 
 
@@ -186,104 +267,7 @@ class LabyrinthAgentDQN:
             -------
             None
         """
-        self.model.load_weights(name)
-
-    def save_weights(self, name):
-        """
-            save the weights of the model in a H5 file.
-
-            Parameters
-            ----------
-            name:
-                path and name of the file in which it should be saved
-
-
-            Returns
-            -------
-            None
-        """
-        self.model.save_weights(name)
-
-    def training(self, env):
-        """
-            performs the training process.
-
-            Parameters
-            ----------
-            env:
-                Environment to train in
-
-            Returns
-            -------
-            None
-        """
-        #self.load(path + "2Hole_v2.weights.h5")
-
-        # hyperparameter
-        episodes = 1000
-        #batch_size = 64
-
-        for episode in range(episodes):
-            # initializations for the next episode
-            state, _ = env.reset()  # initialize the state of the environment
-            total_reward = 0
-            done = False
-            truncated = False
-            batch_size = 0
-            self.memory.clear()
-            self.memory_important_rewards.clear()
-
-            while not done and not truncated:
-                action = self.act(state)  # the agent selects an action based on the state.
-                next_state, reward, done, truncated, _ = env.step(action)  # Execution and feedback on the chosen action
-                self.remember(state, action, reward, next_state, done)  # Caching the experience
-                state = next_state  # update the state for the next iteration
-                total_reward += reward  # sum up the reward over the episode
-                batch_size += 1
-            episode += 1 # increases the episode
-            print(f"Episode: {episode}, Reward: {total_reward}")
-
-            """if len(self.memory) >= batch_size:  # Überprüfen, ob genügend Erfahrungen im Speicher sind
-                self.train(batch_size)"""
-            batch_size = int(batch_size / 5)
-            if batch_size > 0 and not truncated: # Only learn if either the goal is reached or the ball is fallen into a hole, meaningful?
-                self.train(batch_size) # Trains the neural network based on the stored experiences
-            if episode % 10 == 0:  # Every 10 episodes, the agent’s save_weights() method store the model parameters.
-                #self.save_weights(output_dir + "episode_" + "{:05d}".format(episode) + ".weights.h5")
-                self.save_weights(path + "2Hole_v2" + ".weights.h5")
-
-    def evaluate(self, env):
-        """
-            performs the trained knowledge.
-
-            Parameters
-            ----------
-            env:
-                Environment to perform the knowledge in
-
-            Returns
-            -------
-            None
-        """
-        self.load(path+"2Hole.weights.h5")
-        self.epsilon = 0.0 # Pure exploitation of the learned knowledge
-        episodes = 10
-
-        for episode in range(episodes):
-            state, _ = env.reset()  # initialize the state of the environment
-            total_reward = 0
-            done = False
-            truncated = False
-
-            while not done and not truncated:
-                action = self.act(state)  # choose an action based on the current state
-                next_state, reward, done, truncated, _ = env.step(action)  # Execute the chosen action
-                state = next_state  # updates the state for the next iteration
-                total_reward += reward  # sum up the reached reward over an episode
-                print(reward)
-
-            episode += 1
-            print(f"Episode: {episode}, Reward: {total_reward}")
+        self.q_net.load_state_dict(torch.load(path))
 
 # -----------------------------------------------------------------------------
 # Main (sample)
@@ -291,9 +275,38 @@ class LabyrinthAgentDQN:
 
 if __name__ == '__main__':
     # Init environment and agent
-    env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') # evaluate
-    #env = LabyrinthEnvironment(layout='2 holes', render_mode=None) # training
-    agent = LabyrinthAgentDQN(env.observation_space, env.action_space)
-    agent.training(env)
-    #agent.evaluate(env)
+    #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
+    env = LabyrinthEnvironment(layout='0 holes', render_mode=None) #training
+    save_path = path + '0holes_dqnagent.pth'
+    agent = DqnAgent(state_size = 6, action_size = 18)
+    agent.load(save_path)
+    episodes = 1000
+    scores = []
+    for e in range(1, episodes + 1):
+        state, _ = env.reset()
+        score = 0
+        agent.before_episode()
+
+        while True:
+            action = agent.act(state)
+
+            # next_state, reward, done ,_ = env.step(action) # original
+            next_state, reward, done, truncated, _ = env.step(action)
+            agent.step(state, action, reward, next_state, done)
+            state = next_state
+            score += reward
+            if done or truncated:
+                break
+
+        print(f'Episode {e} Score: {score}')
+        scores.append(score)  # save most recent score
+        if e % 10 == 0:
+            print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
+
+    agent.save(save_path)
+    # Training Results
+    plt.plot(np.arange(len(scores)), scores)
+    plt.ylabel('Score')
+    plt.xlabel('Episode')
+    plt.show()
 
