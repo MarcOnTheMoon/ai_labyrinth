@@ -4,7 +4,7 @@ import torch.nn as nn
 class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Basisklasse für alle neuronalen Netzwerke in PyTorch
     """Q-Network"""
 
-    def __init__(self, state_size, action_size, fc1_units = 256, fc2_units = 64):
+    def __init__(self, state_size, action_size, fc1_units = 4096, fc2_units = 2048, fc3_units = 512):
         """
             Constructor. initialisiert die Netzwerkschichten
 
@@ -18,6 +18,8 @@ class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Bas
                 First hidden layer size
             fc2_units:
                 Second hidden layer size
+            fc3_units:
+                Third hidden layer size
 
             Returns
             -------
@@ -28,7 +30,8 @@ class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Bas
         self.relu = nn.ReLU() #Initialisiert die ReLU-Aktivierungsfunktion (Rectified Linear Unit)
         self.fc1 = nn.Linear(state_size, fc1_units) #Definiert die erste vollverbundene Schicht (Linear Layer) mit state_size Eingabeneuronen und fc1_units Ausgabeneuronen.
         self.fc2 = nn.Linear(fc1_units, fc2_units) # Definiert die zweite vollverbundene Schicht mit fc1_units Eingabeneuronen (von der ersten Schicht) und fc2_units Ausgabeneuronen.
-        self.fc3 = nn.Linear(fc2_units, action_size) #Definiert die dritte vollverbundene Schicht mit fc2_units Eingabeneuronen und action_size Ausgabeneuronen. Diese Schicht gibt die Q-Werte für jede mögliche Aktion aus.
+        self.fc3 = nn.Linear(fc2_units, fc3_units)
+        self.fc4 = nn.Linear(fc3_units, action_size) #Definiert die dritte vollverbundene Schicht mit fc2_units Eingabeneuronen und action_size Ausgabeneuronen. Diese Schicht gibt die Q-Werte für jede mögliche Aktion aus.
 
     def forward(self, state):
         """
@@ -48,4 +51,5 @@ class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Bas
         """
         x = self.relu(self.fc1(state)) #Der Eingabezustand (state) wird durch die erste vollverbundene Schicht fc1 geleitet und dann durch die ReLU-Aktivierungsfunktion. Das Ergebnis wird in x gespeichert.
         x = self.relu(self.fc2(x)) # Die Ausgabe der ersten Schicht wird durch die zweite vollverbundene Schicht fc2 geleitet und dann erneut durch die ReLU-Aktivierungsfunktion. Das Ergebnis wird wieder in x gespeichert.
-        return self.fc3(x) #Die Ausgabe der zweiten Schicht wird durch die dritte vollverbundene Schicht fc3 geleitet. Diese Schicht hat keine Aktivierungsfunktion, da sie die endgültigen Q-Werte für jede Aktion ausgibt.
+        x = self.relu(self.fc3(x))
+        return self.fc4(x) #Die Ausgabe der zweiten Schicht wird durch die dritte vollverbundene Schicht fc3 geleitet. Diese Schicht hat keine Aktivierungsfunktion, da sie die endgültigen Q-Werte für jede Aktion ausgibt.

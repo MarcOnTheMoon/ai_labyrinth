@@ -7,6 +7,8 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @version: 2024.05.15
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
+# conda install pytorch::pytorch danach bswp in pycharm pip install torch
+# conda install matplotlib
 
 import random
 import numpy as np
@@ -279,7 +281,7 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='0 holes', render_mode=None) #training
     save_path = path + '0holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = 18)
-    agent.load(save_path)
+    #agent.load(save_path)
     episodes = 1000
     scores = []
     for e in range(1, episodes + 1):
