@@ -9,13 +9,13 @@ gym_dir = os.path.join(project_dir, '../gym')
 sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
 
-path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
+path = "C:/Users/Lassahn/Documents/Sandra/" #lokal Path to load and store weight data
 
 
 # PyTorch Implementation
 if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='0 holes', render_mode='3D')  # evaluate
-    agent = DqnAgent(state_size = 6, action_size = 18)
+    agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     save_path = path + '0holes_dqnagent.pth'
 
     agent.load(save_path)
@@ -37,7 +37,7 @@ if __name__ == '__main__':
             next_state, reward, done, _ ,_ = env.step(action)
             state = next_state
             score += reward
-            if done:
+            if done or score > 5000:
                 break
 
         scores.append(score)

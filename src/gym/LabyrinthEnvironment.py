@@ -104,10 +104,11 @@ class LabyrinthEnvironment(gym.Env):
 
 
         # Declare action space (see class documentation above)
-        self.num_actions_per_component = 9  # There are 9 possible actions per component (x,y)
         #self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
+        #self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
+        self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
+        self.num_actions_per_component = len(self.__action_to_angle_degree)  # There are 9 possible actions per component (x,y)
         self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
-        self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
 
         self.firstepisode = True
 
@@ -137,7 +138,8 @@ class LabyrinthEnvironment(gym.Env):
 
         # observation space
         if self.__geometry.layout == '0 holes' and not self.firstepisode:
-            area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
+            #area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
+            area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole # Random Startposition
             self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
             self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
 
@@ -430,7 +432,7 @@ class LabyrinthEnvironment(gym.Env):
                 reward = -11
             elif self.interim_reward():
                 reward = -0.2
-                print("right direction")
+                #print("right direction")
             else:
                 reward = -1
         else: #self.__geometry.layout == '0 holes'
@@ -445,11 +447,11 @@ class LabyrinthEnvironment(gym.Env):
                     reward = 20
                     print("close to destination_2")
                 elif self.current_distance < 5 ** 2:
-                    reward = 1
+                    reward = 2
                     print("close to destination_1")
                 else:
                     reward = -0.2
-                    print("right direction")
+                    #print("right direction")
             else:
                 if self.current_distance < 1.25 ** 2:
                     reward = 1
@@ -463,7 +465,7 @@ class LabyrinthEnvironment(gym.Env):
         done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes'
         self.number_actions += 1 # Action history
 
-        if self.number_actions >= 500 and self.__geometry.layout == '0 holes':
+        if self.number_actions >= 300 and self.__geometry.layout == '0 holes':
             done = True
             truncated = False
         elif self.number_actions >= 2000:

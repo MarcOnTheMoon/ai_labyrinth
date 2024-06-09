@@ -26,7 +26,7 @@ gym_dir = os.path.join(project_dir, '../gym')
 sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
 
-path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
+path = "C:/Users/Lassahn/Documents/Sandra/" #lokal Path to load and store weight data
 
 class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute und Methoden von BaseDqnAgent
 
@@ -233,7 +233,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
         # Compute loss: TD -> 0
         error = self.loss(td, torch.zeros(td.shape)) # Berechnet den Verlust zwischen dem TD-Fehler und Null.
-        #print(f'error: {error}')
+        print(f'error: {error}')
         self.optimizer.zero_grad() # Setzt die Gradienten der Optimierer auf Null zurück. Gradienten werden standardmäßig summiert bei jedem Aufruf von backward(), Wenn die Gradienten nicht auf Null zurückgesetzt werden würden, würden sie sich bei jedem neuen Backpropagation-Schritt zu den vorherigen Gradienten addieren -> falsche Updates.
         error.backward() # Backward= backpropagation: Berechnet die Gradienten des Fehlers bezüglich der Modellparameter.
         self.optimizer.step() # aktualisiert die Netzwerkparameter basierend auf den berechneten Gradienten.
@@ -276,11 +276,12 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
     env = LabyrinthEnvironment(layout='0 holes', render_mode=None) #training
     save_path = path + '0holes_dqnagent.pth'
-    agent = DqnAgent(state_size = 6, action_size = 18)
+    agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
     episodes = 1000
     scores = []
@@ -297,13 +298,19 @@ if __name__ == '__main__':
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
-            if done or truncated:
+            """if action < 5:
+                print(f'Action x {angle_degree[action]}° reward {reward} score {round(score,2)}')
+            else:
+                print(f'Action y {angle_degree[action-5]}° reward {reward} score {round(score, 2)}')
+            """
+            if done or truncated or score > 2000:
                 break
 
         print(f'Episode {e} Score: {score}')
         scores.append(score)  # save most recent score
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
+            agent.save(save_path)
 
     agent.save(save_path)
     # Training Results
