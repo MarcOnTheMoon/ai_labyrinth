@@ -45,6 +45,9 @@ class ReplayBuffer:
         e = self.experience(state, action, reward, next_state, done) #Erstellt eine neue Instanz des Experience-Tupels mit den neuen Daten.
         self.memory.append(e) #Fügt die neue Erfahrung e dem Speicher self.memory hinzu. Wenn der Puffer voll ist, wird das älteste Element entfernt.
 
+        if reward > 100:  # Zielerfahrungen nochmal speichern -> chance erhöhen, dass daraus gelernt wird, aber nicht zu oft, sonst verlernt er den Weg Richtung Spielplattenmitte nicht mehr
+            self.memory.append(e)
+
     def batch(self, batch_size = None):
         """
             Randomly sample a batch of experiences from the memory

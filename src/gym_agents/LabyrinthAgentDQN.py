@@ -26,7 +26,7 @@ gym_dir = os.path.join(project_dir, '../gym')
 sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
 
-path = "C:/Users/Lassahn/Documents/Sandra/" #lokal Path to load and store weight data
+path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
 class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute und Methoden von BaseDqnAgent
 
@@ -276,13 +276,13 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    angle_degree = [-1, -0.5, 0, 0.5, 1]
+    #angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
     env = LabyrinthEnvironment(layout='0 holes', render_mode=None) #training
     save_path = path + '0holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    #agent.load(save_path)
+    agent.load(save_path)
     episodes = 1000
     scores = []
     for e in range(1, episodes + 1):

@@ -138,8 +138,8 @@ class LabyrinthEnvironment(gym.Env):
 
         # observation space
         if self.__geometry.layout == '0 holes' and not self.firstepisode:
-            #area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
-            area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole # Random Startposition
+            area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
+            #area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole # Random Startposition
             self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
             self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
 
@@ -454,7 +454,7 @@ class LabyrinthEnvironment(gym.Env):
                     #print("right direction")
             else:
                 if self.current_distance < 1.25 ** 2:
-                    reward = 1
+                    reward = -0.1
                     print("close to destination false direction")
                     if self.current_distance < 2.5 ** 2:
                         reward = -0.2
