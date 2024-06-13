@@ -35,8 +35,8 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
             state_size,
             action_size,
             degp_epsilon = 1,
-            degp_decay_rate = .9,
-            degp_min_epsilon = .1,
+            degp_decay_rate = .98, #für 0 holes .9
+            degp_min_epsilon = .15, #für 0 holes .1
             train_batch_size = 64,
             replay_buffer_size = 100_000,
             gamma = 0.99,
@@ -94,6 +94,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
         self.replay_buffer_size = replay_buffer_size #Setzt die Größe des Replay-Buffers.
         self.gamma = gamma # setzt den Diskonierungsfaktor
 
+        self.error_print_iteration = 0 #zähler fürs ausprinten des lernfehlers
 
     def init_q_net(self):
         """
@@ -158,7 +159,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
     def act(self, state, mode = 'train'):
         """
-            Auswahl einer Aktion beim Training
+            Auswahl einer Aktion beim Training, nach der Epsilon Greedy Policy
 
             Parameters
             ----------
@@ -195,9 +196,6 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
         return action #Gibt die ausgewählte Aktion zurück.
 
-
-
-
     def learn(self):
         """
             trainieren des Agenten
@@ -233,7 +231,9 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
         # Compute loss: TD -> 0
         error = self.loss(td, torch.zeros(td.shape)) # Berechnet den Verlust zwischen dem TD-Fehler und Null.
-        print(f'error: {error}')
+        self.error_print_iteration = (self.error_print_iteration + 1) % 100 #alle 100 steps den Fehler ausprinten
+        if self.error_print_iteration == 0:
+            print(f'error: {error}')
         self.optimizer.zero_grad() # Setzt die Gradienten der Optimierer auf Null zurück. Gradienten werden standardmäßig summiert bei jedem Aufruf von backward(), Wenn die Gradienten nicht auf Null zurückgesetzt werden würden, würden sie sich bei jedem neuen Backpropagation-Schritt zu den vorherigen Gradienten addieren -> falsche Updates.
         error.backward() # Backward= backpropagation: Berechnet die Gradienten des Fehlers bezüglich der Modellparameter.
         self.optimizer.step() # aktualisiert die Netzwerkparameter basierend auf den berechneten Gradienten.
@@ -279,11 +279,14 @@ if __name__ == '__main__':
     #angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='0 holes', render_mode=None) #training
-    save_path = path + '0holes_dqnagent.pth'
+    env = LabyrinthEnvironment(layout='2 holes', render_mode=None) #training
+    if env.layout == '0 holes':
+        save_path = path + '0holes_dqnagent.pth'
+    if env.layout == '2 holes':
+        save_path = path + '2holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    agent.load(save_path)
-    episodes = 1000
+    #agent.load(save_path)
+    episodes = 900
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()

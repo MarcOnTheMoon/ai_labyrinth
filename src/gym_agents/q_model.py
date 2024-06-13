@@ -36,6 +36,8 @@ class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Bas
         #self.fc3 = nn.Linear(fc2_units, fc3_units)
         self.fc3 = nn.Linear(fc2_units, action_size) #Definiert die dritte vollverbundene Schicht mit fc2_units Eingabeneuronen und action_size Ausgabeneuronen. Diese Schicht gibt die Q-Werte für jede mögliche Aktion aus.
 
+        #standardmäßig wird die Kaiming-Initialisierung (He-Initialisierung) für lineare Schichten und Convolutional-Schichten verwendet, wenn man keine eigene Initialisierung vorgibt
+
     def forward(self, state):
         """
             Definiert den Vorwärtsdurchlauf durch das Netzwerk. Es findet die Berechnung der Ausgabe des Netzwerks (Q-Werte) basierend eine gegebene Eingabe (state) statt.

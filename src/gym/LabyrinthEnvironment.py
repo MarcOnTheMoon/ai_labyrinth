@@ -77,6 +77,7 @@ class LabyrinthEnvironment(gym.Env):
         
         # Create labyrinth geometry
         self.__geometry = LabyrinthGeometry(layout=layout)
+        self.layout = layout
         
         # Field rotation
         self.__x_degree = 0.0
@@ -137,11 +138,9 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions = 0 #action history counter
 
         # observation space
-        if self.__geometry.layout == '0 holes' and not self.firstepisode:
-            area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # Random Startposition
-            #area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole # Random Startposition
-            self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
-            self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
+        if (self.__geometry.layout == '0 holes') and not self.firstepisode:
+            self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
+            self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
 
         self.firstepisode = False
 
@@ -241,7 +240,7 @@ class LabyrinthEnvironment(gym.Env):
         if self.__geometry.layout == '0 holes':
             target_points = [[0, 0]]
 
-        if self.__geometry.layout == '2 holes':
+        """if self.__geometry.layout == '2 holes':
             target_points = [[-0.13, -6],
                              [-0.13, -6],
                              [-0.72, -0.54],
@@ -251,7 +250,13 @@ class LabyrinthEnvironment(gym.Env):
                              [0.04, 1.66],
                              [0.04, 1.66],
                              [1.79, 5.39],
-                             [1.79, 5.39]]
+                             [1.79, 5.39]]"""
+        if self.__geometry.layout == '2 holes':
+            target_points = [[-0.13, -6],
+                             [-0.13, -1.52],
+                             [0.33, 1.2],
+                             [0.33, 1.2],
+                             [1.97, 5.81]]
         #8holes beginn
         if self.__geometry.layout == '8 holes':
             target_points = [[-4.4, -10.32],
@@ -270,10 +275,10 @@ class LabyrinthEnvironment(gym.Env):
                              [8.71, 10.19]]
         # [x_min, x_max, y_min, y-max]
         if self.__geometry.layout == '0 holes':
-            areas = [[-13.06, 13.06, -10.76, 10.76]]
+            self.areas = [[-13.06, 13.06, -10.76, 10.76]]
 
-        if self.__geometry.layout == '2 holes':
-            areas = [[-3.44, 3.43, -6.67, 0.12],
+        """if self.__geometry.layout == '2 holes':
+            self.areas = [[-3.44, 3.43, -6.67, 0.12],
                      [-13.7, -3.44, -6.67, 11.4],
                      [-3.44, -0.99, 0.12, 3.87],
                      [-0.99, 3.43, 0.12, 2.46],
@@ -282,10 +287,16 @@ class LabyrinthEnvironment(gym.Env):
                      [-0.99, 3.43, 0.12, 6.35],
                      [3.43, 13.7, -4.42, 6.35],
                      [-3.23, 3.43, 6.35, 11.4],
-                     [3.34, 13.7, 6.35, 11.4]]
+                     [3.34, 13.7, 6.35, 11.4]]"""
+        if self.__geometry.layout == '2 holes':
+            self.areas = [[-3.13, 3.33, -6.53, -1.03],
+                          [-3.13, 1.0, -1.03, 4.08],
+                          [1.0, 3.33, 0.47, 4.08],
+                          [-0.7, 3.33, 4.08, 6.48],
+                          [-3.13, 3.33, 6.48, 11.4]]
         # 8holes beginn
         if self.__geometry.layout == '8 holes':
-            areas = [[-5.86, 7.46, -11.40, -9.52],
+            self.areas = [[-5.86, 7.46, -11.40, -9.52],
                      [5.21, 7.46, -9.52, -4.63],
                      [7.46, 9.46, -11.4, -4.63],
                      [9.46, 13.7, -11.4, -6.58],
@@ -300,7 +311,7 @@ class LabyrinthEnvironment(gym.Env):
                      [8.23, 13.7, 7.28, 11.4]]
 
         self.__progress = 0
-        for x_min, x_max, y_min, y_max in areas:
+        for x_min, x_max, y_min, y_max in self.areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
                 last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
                 self.current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
@@ -320,7 +331,7 @@ class LabyrinthEnvironment(gym.Env):
 
         for hole in self.__geometry.holes.data:
             hole_center = hole["pos"]
-            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.25) **2:
+            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.4) **2:
                 return True
         return False
 
@@ -431,7 +442,8 @@ class LabyrinthEnvironment(gym.Env):
                 print("Ball close to hole")
                 reward = -11
             elif self.interim_reward():
-                reward = -0.2
+                #reward = 0.5
+                reward = 2/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
                 #print("right direction")
             else:
                 reward = -1
@@ -454,10 +466,10 @@ class LabyrinthEnvironment(gym.Env):
                     #print("right direction")
             else:
                 if self.current_distance < 1.25 ** 2:
-                    reward = -0.1
+                    reward = -0.2
                     print("close to destination false direction")
                     if self.current_distance < 2.5 ** 2:
-                        reward = -0.2
+                        reward = -0.4
                 else:
                     reward = -1
 
@@ -466,9 +478,8 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions += 1 # Action history
 
         if self.number_actions >= 300 and self.__geometry.layout == '0 holes':
-            done = True
-            truncated = False
-        elif self.number_actions >= 2000:
+            truncated = True
+        elif self.number_actions >= 500 and self.__geometry.layout == '2 holes':
             truncated = True
         else:
             truncated = False
