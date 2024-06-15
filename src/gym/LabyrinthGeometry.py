@@ -26,8 +26,8 @@ class LabyrinthGeometry:
     # Define start position and destination area
     #für Random Startposition [x_min, x_max, y_min, y_max]
     # area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole, innerer bereich
-    #area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # komplette Spielplatte
-    area_start = [-1.3, 2.3, 6.76, 10.76] #2 holes
+    area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # komplette Spielplatte
+    #area_start = [-1.3, 2.3, 6.76, 10.76] #2 holes
     x = random.uniform(area_start[0], area_start[1])
     y = random.uniform(area_start[2], area_start[3])
     start_positions = {
@@ -35,7 +35,7 @@ class LabyrinthGeometry:
         #'2 holes': vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
         #'8 holes'  : vec( 0.13, 10.53, 0),
-        '8 holes': vec(10.75, -8.4, 0), #näher am ziel
+        '8 holes': vec(11.33, 5.5, 0), #näher am ziel
         '21 holes' : vec( 0.0,   0.0,  0)
         }
     destinations_xy = {

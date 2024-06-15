@@ -391,7 +391,7 @@ class LabyrinthBallPhysics:
 
         # Adjust velocity
         if is_collision_corner == True:
-            print("Collision with corner detected")
+            #print("Collision with corner detected")
             collision_unity_vector_x = -sx / collision_distance
             collision_unity_vector_y = -sy / collision_distance
             scalar_product = self.__velocity.x * collision_unity_vector_x + self.__velocity.y * collision_unity_vector_y

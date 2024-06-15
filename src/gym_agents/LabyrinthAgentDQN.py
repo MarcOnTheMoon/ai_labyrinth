@@ -279,14 +279,16 @@ if __name__ == '__main__':
     #angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='2 holes', render_mode=None) #training
+    env = LabyrinthEnvironment(layout='8 holes', render_mode=None) #training
     if env.layout == '0 holes':
         save_path = path + '0holes_dqnagent.pth'
     if env.layout == '2 holes':
         save_path = path + '2holes_dqnagent.pth'
+    if env.layout == '8 holes':
+        save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
-    episodes = 900
+    episodes = 500
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()

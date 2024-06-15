@@ -141,6 +141,11 @@ class LabyrinthEnvironment(gym.Env):
         if (self.__geometry.layout == '0 holes') and not self.firstepisode:
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
+        if (self.__geometry.layout == '8 holes') and not self.firstepisode:
+            startpoints = [[11.33, 5.5], [13.0, -5], [8.9, -8.3], [4.54, 9.6], [-1.2, 1.14]]
+            start_index = random.randint(0, len(startpoints )-1)
+            self.__ball_start_position.x = startpoints[start_index][0]
+            self.__ball_start_position.y = startpoints[start_index][1]
 
         self.firstepisode = False
 
@@ -240,17 +245,6 @@ class LabyrinthEnvironment(gym.Env):
         if self.__geometry.layout == '0 holes':
             target_points = [[0, 0]]
 
-        """if self.__geometry.layout == '2 holes':
-            target_points = [[-0.13, -6],
-                             [-0.13, -6],
-                             [-0.72, -0.54],
-                             [-0.72, -0.54],
-                             [0.04, 1.66],
-
-                             [0.04, 1.66],
-                             [0.04, 1.66],
-                             [1.79, 5.39],
-                             [1.79, 5.39]]"""
         if self.__geometry.layout == '2 holes':
             target_points = [[-0.13, -6],
                              [-0.13, -1.52],
@@ -260,34 +254,49 @@ class LabyrinthEnvironment(gym.Env):
         #8holes beginn
         if self.__geometry.layout == '8 holes':
             target_points = [[-4.4, -10.32],
+                             [-4.4, -10.32],
                              [5.82, -10.32],
                              [7.33, -6.88],
                              [8.89, -8.29],
-                             [12.54, -7.53],
 
+                             [12.54, -7.53],
                              [12.99, -5],
                              [10.35, -1.15],
                              [12.53, -1.51],
                              [12.41, 3.74],
-                             [11.39, 5.36],
 
+                             [11.39, 5.36],
                              [11.43, 7.01],
-                             [8.71, 10.19]]
+                             [8.71, 10.19],
+                             [4.54, 9.6],
+                             [6.07, 7.55],
+
+                             [5.52, 3.39],
+                             [-1.2, 1.14],
+                             [-1.22, -0.73],
+                             [-0.05, -2.6],
+                             [3.35, -2.99],
+
+                             [0.94, -5.23],
+                             [-2.74, -7.98],
+                             [-5.82, -5.23],
+                             [-8.1, -7.41],
+                             [-13.22, -7.03],
+
+                             [-13.16, -4.7],
+                             [-11.63, -3.18],
+                             [-9.8, -1.49],
+                             [-3.58, -0.58],
+                             [-6.09, 4.15],
+
+                             [-9.51, 4.48],
+                             [-11.05, 3.58],
+                             [-12.85, 3.92],
+                             [-12.45, 10.83]]
         # [x_min, x_max, y_min, y-max]
         if self.__geometry.layout == '0 holes':
             self.areas = [[-13.06, 13.06, -10.76, 10.76]]
 
-        """if self.__geometry.layout == '2 holes':
-            self.areas = [[-3.44, 3.43, -6.67, 0.12],
-                     [-13.7, -3.44, -6.67, 11.4],
-                     [-3.44, -0.99, 0.12, 3.87],
-                     [-0.99, 3.43, 0.12, 2.46],
-                     [-3.19, -0.99, 4.28, 6.35],
-
-                     [-0.99, 3.43, 0.12, 6.35],
-                     [3.43, 13.7, -4.42, 6.35],
-                     [-3.23, 3.43, 6.35, 11.4],
-                     [3.34, 13.7, 6.35, 11.4]]"""
         if self.__geometry.layout == '2 holes':
             self.areas = [[-3.13, 3.33, -6.53, -1.03],
                           [-3.13, 1.0, -1.03, 4.08],
@@ -296,19 +305,46 @@ class LabyrinthEnvironment(gym.Env):
                           [-3.13, 3.33, 6.48, 11.4]]
         # 8holes beginn
         if self.__geometry.layout == '8 holes':
-            self.areas = [[-5.86, 7.46, -11.40, -9.52],
-                     [5.21, 7.46, -9.52, -4.63],
-                     [7.46, 9.46, -11.4, -4.63],
-                     [9.46, 13.7, -11.4, -6.58],
-                     [9.46, 13.7, -6.58, -3.98],
+            self.areas = [[0.14, 7.46, -11.40, -9.52],
+                          [-58.6, 0.14, -11.40, -9.52],
+                          [5.21, 7.46, -9.52, -4.63],
+                          [7.46, 9.46, -11.4, -4.63],
+                          [9.46, 13.7, -11.4, -6.58],
 
-                     [9.46, 13.7, -3.98, -0.65],
-                     [9.46, 13.7, -0.65, 1.9],
-                     [9.46, 13.7, 1.9, 4.15],
-                     [9.46, 13.7, 4.15, 5.75],
-                     [9.46, 13.7, 5.75, 7.28],
+                          [9.46, 13.7, -6.58, -3.98],
+                          [9.46, 13.7, -3.98, -0.65],
+                          [9.46, 13.7, -0.65, 1.9],
+                          [9.46, 13.7, 1.9, 4.15],
+                          [9.46, 13.7, 4.15, 5.75],
 
-                     [8.23, 13.7, 7.28, 11.4]]
+                          [9.46, 13.7, 5.75, 7.28],
+                          [8.23, 13.7, 7.28, 11.4],
+                          [2.26, 8.23, 9.09, 11.4],
+                          [2.26, 7.83, 7.08, 9.09],
+                          [4.81, 8.82, 2.16, 7.08],
+
+                          [-1.98, 4.81, 0.6, 4.11],
+                          [-1.98, 0.29, -1.23, 0.6],
+                          [-1.98, 0.29, -3.56, -1.23],
+                          [0.29, 4.59, -3.85, -1.23],
+                          [0.16, 4.59, -6.95, -3.85],
+
+                          [-3.38, 0.16, -8.86, -4.17],
+                          [-6.26, -3.38, -8.86, -4.17],
+                          [-8.88, -6.26, -11.4, -4.17],
+                          [-13.7, -8.88, -11.4, -6.53],
+                          [-13.7, -11.59, -6.53, -4.11],
+
+                          [-13.7, -10.25, -4.11, -2.64],
+                          [-12.1, -8.98, -2.64, -0.16],
+                          [-8.98, -2.53, 0.11, 5.56],
+                          [-6.58, -2.53, -3.53, 0.11],
+                          [-10.13, -6.58, 2.39, 5.56],
+
+                          [-11.69, -10.13, 0.61, 5.56],
+                          [-13.7, -11.69, 0.61, 4.68],
+                          [-13.7, -11.66, 4.68, 11.4],
+                          [-11.66, 0.5, 9.99, 11.4]]
 
         self.__progress = 0
         for x_min, x_max, y_min, y_max in self.areas:
@@ -431,7 +467,22 @@ class LabyrinthEnvironment(gym.Env):
             is_ball_to_close_hole = False
 
         # Reward
-        if self.__geometry.layout != '0 holes':
+        if self.__geometry.layout == '8 holes':
+            if is_ball_at_destination:
+                print("Ball reached destination")
+                reward = 800
+            elif is_ball_in_hole:
+                print("Ball lost")
+                reward = -100
+            elif is_ball_to_close_hole:
+                print("Ball close to hole")
+                reward = -11
+            elif self.interim_reward():
+                reward = 5/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
+                #print("right direction")
+            else:
+                reward = -1
+        elif self.__geometry.layout == '2 holes':
             if is_ball_at_destination:
                 print("Ball reached destination")
                 reward = 600
@@ -480,6 +531,8 @@ class LabyrinthEnvironment(gym.Env):
         if self.number_actions >= 300 and self.__geometry.layout == '0 holes':
             truncated = True
         elif self.number_actions >= 500 and self.__geometry.layout == '2 holes':
+            truncated = True
+        elif self.number_actions >= 700 and self.__geometry.layout == '8 holes':
             truncated = True
         else:
             truncated = False
