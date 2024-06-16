@@ -35,7 +35,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
             state_size,
             action_size,
             degp_epsilon = 1,
-            degp_decay_rate = .99, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
+            degp_decay_rate = .98, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
             degp_min_epsilon = .15, #für 0 holes .1, für 2Holes 0.15
             train_batch_size = 64,
             replay_buffer_size = 100_000,
@@ -111,8 +111,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
         """
         self.q_net = PtQNet(self.state_size, self.action_size) #initialisiert das Q-Netz, PtQNet ist die Klasse, des neuronalen Netzwerks
         self.optimizer = optim.Adam(self.q_net.parameters(), lr = self.learning_rate) #Optimierer: Adam
-        #self.loss = torch.nn.MSELoss() # Verlustfunktion: Mean Squared Error (MSE)
-        self.loss = torch.nn.HuberLoss()
+        self.loss = torch.nn.MSELoss() # Verlustfunktion: Mean Squared Error (MSE)
 
     def before_episode(self):
         """
@@ -289,7 +288,7 @@ if __name__ == '__main__':
         save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
-    episodes = 1000
+    episodes = 500
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()

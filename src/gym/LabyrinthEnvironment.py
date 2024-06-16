@@ -142,7 +142,7 @@ class LabyrinthEnvironment(gym.Env):
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
         if (self.__geometry.layout == '8 holes') and not self.firstepisode:
-            startpoints = [[13.0, -5], [8.9, -8.3], [4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23]]
+            startpoints = [[13.0, -5], [8.9, -8.3], [4.54, 9.6], [-1.2, 1.14], [3.35, -2.99]]
             start_index = random.randint(0, len(startpoints )-1)
             self.__ball_start_position.x = startpoints[start_index][0]
             self.__ball_start_position.y = startpoints[start_index][1]
@@ -349,10 +349,10 @@ class LabyrinthEnvironment(gym.Env):
         self.__progress = 0
         for x_min, x_max, y_min, y_max in self.areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
-                last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
-                self.current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
+                self.__last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
+                self.__current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
 
-                if round(self.current_distance, 3) < round(last_distance, 3): #runden sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
+                if self.__current_distance < self.__last_distance: #runden sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
                     return True #in die richtige Richtung bewegt
                 else:
                     return False
@@ -473,10 +473,10 @@ class LabyrinthEnvironment(gym.Env):
                 reward = 800
             elif is_ball_in_hole:
                 print("Ball lost")
-                reward = -50
+                reward = -100
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
-                reward = -10
+                reward = -11
             elif self.interim_reward():
                 reward = 5/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
                 #print("right direction")
@@ -503,23 +503,23 @@ class LabyrinthEnvironment(gym.Env):
                 print("Ball reached destination")
                 reward = 600
             elif self.interim_reward():
-                if self.current_distance < 1.25 ** 2:
+                if self.__current_distance < 1.25 ** 2:
                     reward = 100
                     print("close to destination_3")
-                elif self.current_distance < 2.5 ** 2:
+                elif self.__current_distance < 2.5 ** 2:
                     reward = 20
                     print("close to destination_2")
-                elif self.current_distance < 5 ** 2:
+                elif self.__current_distance < 5 ** 2:
                     reward = 2
                     print("close to destination_1")
                 else:
                     reward = -0.2
                     #print("right direction")
             else:
-                if self.current_distance < 1.25 ** 2:
+                if self.__current_distance < 1.25 ** 2:
                     reward = -0.2
                     print("close to destination false direction")
-                    if self.current_distance < 2.5 ** 2:
+                    if self.__current_distance < 2.5 ** 2:
                         reward = -0.4
                 else:
                     reward = -1
@@ -532,7 +532,7 @@ class LabyrinthEnvironment(gym.Env):
             truncated = True
         elif self.number_actions >= 500 and self.__geometry.layout == '2 holes':
             truncated = True
-        elif self.number_actions >= 800 and self.__geometry.layout == '8 holes':
+        elif self.number_actions >= 700 and self.__geometry.layout == '8 holes':
             truncated = True
         else:
             truncated = False

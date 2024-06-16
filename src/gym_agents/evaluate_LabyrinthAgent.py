@@ -37,6 +37,7 @@ if __name__ == '__main__':
             next_state, reward, done, _ ,_ = env.step(action)
             state = next_state
             score += reward
+            print(reward)
             if done or score > 5000:
                 break
 
