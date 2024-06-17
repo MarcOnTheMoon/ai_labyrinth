@@ -277,6 +277,8 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    seed = 1
+    random.seed(seed)  # Zufallsfolge auf definierten Anfang setzen
     #angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
@@ -289,7 +291,7 @@ if __name__ == '__main__':
         save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
-    episodes = 1100
+    episodes = 2000
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()
@@ -317,8 +319,8 @@ if __name__ == '__main__':
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
             agent.save(save_path)
-        if e % 100 == 0 and e > 300 and env.layout == '8 holes': #alle 200 episoden die Gewichte in einer anderen Datei speichern
-            save_path_100 = path + 'a' + str(e) + '8holes_dqnagent.pth'
+        if e % 100 == 0 and env.layout == '8 holes': #alle 200 episoden die Gewichte in einer anderen Datei speichern
+            save_path_100 = path + str(e) + '8holes_dqnagent.pth'
             agent.save(save_path_100)
 
     agent.save(save_path)

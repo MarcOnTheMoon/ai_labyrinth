@@ -5,7 +5,7 @@ import torch.nn.functional as F
 class PtQNet(nn.Module): # PtQNet, die von nn.Module erbt. nn.Module ist die Basisklasse für alle neuronalen Netzwerke in PyTorch
     """Q-Network"""
 
-    def __init__(self, state_size, action_size, fc1_units = 1024, fc2_units = 512, fc3_units = 64):
+    def __init__(self, state_size, action_size, fc1_units = 1024, fc2_units = 512, fc3_units = 128):
         """
             Constructor. initialisiert die Netzwerkschichten
 

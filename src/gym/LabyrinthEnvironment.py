@@ -142,7 +142,7 @@ class LabyrinthEnvironment(gym.Env):
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
         if (self.__geometry.layout == '8 holes') and not self.firstepisode:
-            startpoints = [[-1.2, 1.14], [0.94, -5.23], [-13.22, -7.03]]
+            startpoints = [[4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23], [-12.6, -7.03]]
             start_index = random.randint(0, len(startpoints )-1)
             self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.5, 0.5)
             self.__ball_start_position.y = startpoints[start_index][1] + random.uniform(-0.5, 0.5)
@@ -352,8 +352,8 @@ class LabyrinthEnvironment(gym.Env):
                 self.__last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
                 self.__current_distance = (self.__ball_position.x - target_points[self.__progress][0])** 2 + (self.__ball_position.y - target_points[self.__progress][1]) ** 2
 
-                if self.__current_distance - self.__last_distance > 0.1: #genügend Änderung sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
-                    return True #in die richtige Richtung min. 1 mm bewegt
+                if self.__last_distance - self.__current_distance > 0.075: #genügend Änderung sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
+                    return True #in die richtige Richtung
                 else:
                     return False
             self.__progress += 1
@@ -480,6 +480,8 @@ class LabyrinthEnvironment(gym.Env):
             elif self.interim_reward():
                 reward = 5/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
                 #print("right direction")
+            #elif self.__ball_physics.twoedgecollision == 2 and self.__current_distance >= self.__last_distance:
+                #reward = -2.1
             else:
                 reward = -2
         elif self.__geometry.layout == '2 holes':
@@ -533,6 +535,7 @@ class LabyrinthEnvironment(gym.Env):
         elif self.number_actions >= 500 and self.__geometry.layout == '2 holes':
             truncated = True
         elif self.number_actions >= 800 and self.__geometry.layout == '8 holes':
+            print(f'truncated at Ball Pos. x={self.__ball_position.x} y={self.__ball_position.y}')
             truncated = True
         else:
             truncated = False
