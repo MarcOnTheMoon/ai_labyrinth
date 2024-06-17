@@ -35,7 +35,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
             state_size,
             action_size,
             degp_epsilon = 1,
-            degp_decay_rate = .98, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
+            degp_decay_rate = .99, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
             degp_min_epsilon = .15, #für 0 holes .1, für 2Holes 0.15
             train_batch_size = 64,
             replay_buffer_size = 100_000,
@@ -154,7 +154,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
         if self.training_steps_count % self.learn_period == 0: # Überprüft, ob es Zeit zum Lernen ist.
             # If enough samples are available in memory, get random subset and learn
-            if len(self.memory) > self.train_batch_size: #Überprüft, ob genug Proben im Replay-Buffer sind.
+            if len(self.memory) > 200: #Überprüft, ob genug Proben im Replay-Buffer sind.
                 self.learn() #Ruft die Lernmethode auf.
 
     def act(self, state, mode = 'train'):
@@ -176,7 +176,8 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
         """
         r = random.random() #Erzeugt eine zufällige Zahl zwischen 0 und 1.
         random_action = mode == 'train' and r < self.degp_epsilon #Überprüft, ob eine zufällige Aktion ausgewählt werden soll (im Trainingsmodus und wenn r kleiner als Epsilon ist).
-
+        if mode == 'test' and r < 0.01: #1% Zufälligkeit bei der evaluation -> besseren Ergebnissen
+            random_action = True
         if random_action: #Wenn eine zufällige Aktion ausgewählt werden soll:
             # Random Policy
             action = random.choice(np.arange(self.action_size)) #Wählt eine zufällige Aktion.
@@ -288,7 +289,7 @@ if __name__ == '__main__':
         save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
-    episodes = 500
+    episodes = 1100
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()
@@ -316,6 +317,9 @@ if __name__ == '__main__':
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
             agent.save(save_path)
+        if e % 100 == 0 and e > 300 and env.layout == '8 holes': #alle 200 episoden die Gewichte in einer anderen Datei speichern
+            save_path_100 = path + 'a' + str(e) + '8holes_dqnagent.pth'
+            agent.save(save_path_100)
 
     agent.save(save_path)
     # Training Results
