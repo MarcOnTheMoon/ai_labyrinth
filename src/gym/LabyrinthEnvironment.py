@@ -144,8 +144,8 @@ class LabyrinthEnvironment(gym.Env):
         if (self.__geometry.layout == '8 holes') and not self.firstepisode:
             startpoints = [[4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23], [-12.6, -7.03]]
             start_index = random.randint(0, len(startpoints )-1)
-            self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.5, 0.5)
-            self.__ball_start_position.y = startpoints[start_index][1] + random.uniform(-0.5, 0.5)
+            self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
+            self.__ball_start_position.y = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
 
         self.firstepisode = False
 
@@ -281,17 +281,20 @@ class LabyrinthEnvironment(gym.Env):
                              [-2.74, -7.98],
                              [-5.82, -5.23],
                              [-8.1, -7.41],
-                             [-13.22, -7.03],
+                             [-12.58, -7.03],
 
                              [-13.16, -4.7],
                              [-11.63, -3.18],
                              [-9.8, -1.49],
-                             [-3.58, -0.58],
-                             [-6.09, 4.15],
+                             [-5.55, -1.84],
+                             [-3.31, 1.29],
 
+                             [-6.09, 4.15],
                              [-9.51, 4.48],
                              [-11.05, 3.58],
                              [-12.85, 3.92],
+                             [-12.45, 10.83],
+
                              [-12.45, 10.83]]
         # [x_min, x_max, y_min, y-max]
         if self.__geometry.layout == '0 holes':
@@ -337,16 +340,20 @@ class LabyrinthEnvironment(gym.Env):
 
                           [-13.7, -10.25, -4.11, -2.64],
                           [-12.1, -8.98, -2.64, -0.16],
-                          [-8.98, -2.53, 0.11, 5.56],
-                          [-6.58, -2.53, -3.53, 0.11],
-                          [-10.13, -6.58, 2.39, 5.56],
+                          [-8.98, -4.73, -3.53, 0.11],
+                          [-4.73, -2.53, -3.53, 2.01],
+                          [-6.58, -2.53, 2.01, 5.56],
 
+                          [-10.13, -6.58, 2.39, 5.56],
                           [-11.69, -10.13, 0.61, 5.56],
                           [-13.7, -11.69, 0.61, 4.68],
                           [-13.7, -11.66, 4.68, 11.4],
-                          [-11.66, 0.5, 9.99, 11.4]]
+                          [-11.66, -5.34, 9.99, 11.4],
+
+                          [-5.34, 0.5, 9.99, 11.4]]
 
         self.__progress = 0
+        self.__right_direction = False
         for x_min, x_max, y_min, y_max in self.areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
                 self.__last_distance = (self.__last_ball_position.x - target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - target_points[self.__progress][1]) ** 2
@@ -355,6 +362,7 @@ class LabyrinthEnvironment(gym.Env):
                 if self.__last_distance - self.__current_distance > 0.075: #genügend Änderung sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
                     return True #in die richtige Richtung
                 else:
+                    self.__right_direction = True
                     return False
             self.__progress += 1
 
@@ -482,6 +490,8 @@ class LabyrinthEnvironment(gym.Env):
                 #print("right direction")
             #elif self.__ball_physics.twoedgecollision == 2 and self.__current_distance >= self.__last_distance:
                 #reward = -2.1
+            #elif self.__right_direction:
+            #    reward = -1
             else:
                 reward = -2
         elif self.__geometry.layout == '2 holes':
