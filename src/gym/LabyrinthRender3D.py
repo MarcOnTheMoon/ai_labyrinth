@@ -203,6 +203,8 @@ class LabyrinthRender3D:
             labyrinth = compound(labyrinth_elements, texture='textures/0_holes.png')
         elif geometry.layout == '2 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/2_holes.png')
+        elif geometry.layout == '2 holes real':
+            labyrinth = compound(labyrinth_elements, texture='textures/2_holes_real.png')
         elif geometry.layout == '8 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/8_holes.png')
         elif geometry.layout == '21 holes':
@@ -312,9 +314,7 @@ class LabyrinthRender3D:
 
     # -------------------------------------------------------------------------
 
-    def move_ball(self, x, y, x_rad = None, y_rad = None):
-        # TODO Check and document parameters x_rad and y_rad
-        # TODO Ensure x_rad and y_rad match attributes x_degree and y_degree?
+    def move_ball(self, x, y):
         """
         Move the ball to a specific location.
 
@@ -332,10 +332,8 @@ class LabyrinthRender3D:
         """
         self.__ball.pos = vec(x, y, self.__ball_radius)
 
-        if x_rad != None:
-            self.__ball.rotate(angle=x_rad, axis=self.__axis_x, origin=vec(0,0,0))
-        if y_rad != None:
-            self.__ball.rotate(angle=y_rad, axis=self.__axis_y, origin=vec(0,0,0))
+        self.__ball.rotate(angle=self.get_x_rad(), axis=self.__axis_x, origin=vec(0,0,0))
+        self.__ball.rotate(angle=self.get_y_rad(), axis=self.__axis_y, origin=vec(0,0,0))
 
 # -----------------------------------------------------------------------------
 # Main (sample)

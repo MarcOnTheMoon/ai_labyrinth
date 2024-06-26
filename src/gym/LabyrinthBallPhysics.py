@@ -41,9 +41,9 @@ class LabyrinthBallPhysics:
         self.dt = dt                            # Time step [s]
 
         # Ball state
-        # TODO Component z used?
         self.is_ball_in_hole = False            # Ball has fallen into hole if True
-        self.__position = vec(0.0, 0.0, 0.0)    # Ball's position [cm]^3
+        self.__position = vec(0.0, 0.0, 0.0)    # Ball's position [cm]^3, z-component not used
+                                                      # Use of vec as a standardized structure of vpython (vec requires 3 components): in the render class the z component of the ball position is added for visualisation
         self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity [cm/s]^3
         
         # Field tilting
@@ -296,6 +296,7 @@ class LabyrinthBallPhysics:
         # ---------- Check for collision with an edge -------------------------
 
         is_collision_edge = False
+        self.twoedgecollision = 0
         for corner in self.__corners:
             # Left edge
             if (pos_x < corner[0].x) and (corner[0].x - pos_x < radius) and (pos_y >= corner[3].y) and (pos_y <= corner[0].y):
@@ -306,6 +307,7 @@ class LabyrinthBallPhysics:
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[0].x - radius
                 is_collision_edge = True
+                self.twoedgecollision += 1
                     
             # Right_edge
             if (pos_x > corner[1].x) and (pos_x - corner[1].x < radius) and (pos_y >= corner[2].y) and (pos_y <= corner[1].y):
@@ -316,6 +318,7 @@ class LabyrinthBallPhysics:
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[1].x + radius
                 is_collision_edge = True
+                self.twoedgecollision += 1
                     
             # Top edge
             if (pos_y > corner[0].y) and (pos_y - corner[0].y < radius) and (pos_x >= corner[0].x) and (pos_x <= corner[1].x):
@@ -326,6 +329,7 @@ class LabyrinthBallPhysics:
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[0].y + radius
                 is_collision_edge = True
+                self.twoedgecollision += 1
                     
             # Bottom edge
             if (pos_y < corner[3].y) and (corner[3].y - pos_y < radius) and (pos_x >= corner[3].x) and (pos_x <= corner[2].x):
@@ -336,6 +340,7 @@ class LabyrinthBallPhysics:
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[2].y - radius
                 is_collision_edge = True
+                self.twoedgecollision += 1
 
         if is_collision_edge == True or self.__geometry.layout == '0 holes': # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball) and its the game plate with 0 holes.
             return
@@ -452,7 +457,7 @@ if __name__ == '__main__':
             number_steps = 1
             time.sleep(number_steps * ball_physics.dt)
             pos = ball_physics.step(x_rad=x_rad, y_rad=y_rad, number_steps=number_steps)
-            render.move_ball(x=pos.x, y=pos.y, x_rad=x_rad, y_rad=y_rad)
+            render.move_ball(x=pos.x, y=pos.y)
         else:
             render.ball_visibility(False)
             print("Game over")
@@ -467,7 +472,7 @@ if __name__ == '__main__':
         if ball_physics.is_ball_in_hole == False:
             time.sleep(ball_physics.dt)
             pos = ball_physics.step(x_rad=x_rad, y_rad=y_rad)
-            render.move_ball(x=pos.x, y=pos.y, x_rad=x_rad, y_rad=y_rad)
+            render.move_ball(x=pos.x, y=pos.y)
         else:
             render.ball_visibility(False)
             print("Game over")

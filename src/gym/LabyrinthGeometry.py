@@ -21,7 +21,7 @@ class LabyrinthGeometry:
     # ========== Field layouts ================================================
 
     # Define layout names (walls and holes)
-    layouts = ['0 holes', '2 holes', '8 holes', '21 holes']
+    layouts = ['0 holes', '2 holes', '2 holes real', '8 holes', '21 holes']
 
     # Define start position and destination area
     #für Random Startposition [x_min, x_max, y_min, y_max]
@@ -34,6 +34,7 @@ class LabyrinthGeometry:
         '0 holes' : vec(x, y, 0),
         #'2 holes': vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
+        '2 holes real': vec(-0.79, 9.86, 0),
         #'8 holes'  : vec( 0.13, 10.53, 0),
         '8 holes': vec(13, -5.0, 0), #näher am ziel
         '21 holes' : vec( 0.0,   0.0,  0)
@@ -41,6 +42,7 @@ class LabyrinthGeometry:
     destinations_xy = {
         '0 holes'  : [[-0.25, 0.25], [-0.25, 0.25]],
         '2 holes'  : [[-1.9, 1.56], [-6.62, -5.5]],
+        '2 holes real': [[-0.24, 2.73], [-11.4, -10.08]],
         '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
         '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
         }
@@ -192,9 +194,21 @@ class Walls:
 
                 {"pos": vec(1.84, -7.82, z_pos), "size": vec(thickness, 7.12, height)},
                 {"pos": vec(7.53, -4.54, z_pos), "size": vec(11.95, thickness, height)},
-                {"pos": vec(3.61, 3.5, z_pos), "size": vec(thickness, 15.81, height)},
+                {"pos": vec(3.61, 3.5, z_pos), "size": vec(thickness, 15.81, height)}
             ]
-        
+
+        elif layout == '2 holes real':
+            self.data = [
+                {"pos": vec(-2.44, 1.08, z_pos), "size": vec(thickness, 20.65, height)},
+                {"pos": vec(-1.35, 2.35, z_pos), "size": vec(2.75, thickness, height)},
+                {"pos": vec(-1.54, -8.97, z_pos), "size": vec(2.34, thickness, height)},
+                {"pos": vec(-0.65, -10.12, z_pos), "size": vec(thickness, 2.56, height)},
+                {"pos": vec(4.78, 1.08, z_pos), "size": vec(thickness, 20.65, height)},
+
+                {"pos": vec(3.91, -8.97, z_pos), "size": vec(2.31, thickness, height)},
+                {"pos": vec(3.04, -10.12, z_pos), "size": vec(thickness, 2.56, height)},
+            ]
+
         elif layout == '8 holes':
             self.data = [
                 {"pos": vec(2.01, 9.09, z_pos), "size": vec(thickness, 4.54, height)},
@@ -325,6 +339,12 @@ class Holes:
             self.data = [
                 {"pos": vec(-1.6, 5.31, 0.001), "axis": vec(0.0, 0.0, -depth)},
                 {"pos": vec(2.06, -0.39, 0.001), "axis": vec(0.0, 0.0, -depth)},
+            ]
+
+        elif layout == '2 holes real':
+            self.data = [
+                {"pos": vec(-1.12, 3.36, 0.001), "axis": vec(0.0, 0.0, -depth)},
+                {"pos": vec(3.41, -4.72, 0.001), "axis": vec(0.0, 0.0, -depth)},
             ]
 
         elif layout == '8 holes':

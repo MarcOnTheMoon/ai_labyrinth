@@ -135,13 +135,13 @@ class LabyrinthEnvironment(gym.Env):
         # Set random seed
         super().reset(seed=seed)
 
-        self.number_actions = 0 #action history counter
+        self.number_actions = 0 # action history counter
 
         # observation space
         if (self.__geometry.layout == '0 holes') and not self.firstepisode:
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
-        if (self.__geometry.layout == '8 holes') and not self.firstepisode:
+        elif (self.__geometry.layout == '8 holes') and not self.firstepisode:
             startpoints = [[4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23], [-12.6, -7.03]]
             start_index = random.randint(0, len(startpoints )-1)
             self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
@@ -197,10 +197,7 @@ class LabyrinthEnvironment(gym.Env):
                 self.__render_3d.ball_visibility(False)
                 
             # Ball position
-            # TODO Check rotation of ball using x_rad and y_rad
-            x_rad = self.__x_degree * pi/180.0
-            y_rad = self.__y_degree * pi/180.0
-            self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y, x_rad=x_rad, y_rad=y_rad)
+            self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y)
             
             # Update timestamp
             self.__last_render_timestamp_sec = time.time()
@@ -245,14 +242,24 @@ class LabyrinthEnvironment(gym.Env):
         if self.__geometry.layout == '0 holes':
             target_points = [[0, 0]]
 
-        if self.__geometry.layout == '2 holes':
+        elif self.__geometry.layout == '2 holes':
             target_points = [[-0.13, -6],
                              [-0.13, -1.52],
                              [0.33, 1.2],
                              [0.33, 1.2],
                              [1.97, 5.81]]
-        #8holes beginn
-        if self.__geometry.layout == '8 holes':
+
+        elif self.__geometry.layout == '2 holes real':
+            target_points = [[1.24, -10.42],
+                             [0.3, -6.77],
+                             [-0.22, -3.57],
+                             [1.06, -0.92],
+                             [1.06, -0.92],
+
+                             [2.71, 4.28],
+                             [1.13, 6.55]]
+
+        elif self.__geometry.layout == '8 holes':
             target_points = [[-4.4, -10.32],
                              [-4.4, -10.32],
                              [5.82, -10.32],
@@ -296,18 +303,28 @@ class LabyrinthEnvironment(gym.Env):
                              [-12.45, 10.83],
 
                              [-12.45, 10.83]]
-        # [x_min, x_max, y_min, y-max]
+        # [x_min, x_max, y_min, y_max]
         if self.__geometry.layout == '0 holes':
             self.areas = [[-13.06, 13.06, -10.76, 10.76]]
 
-        if self.__geometry.layout == '2 holes':
+        elif self.__geometry.layout == '2 holes':
             self.areas = [[-3.13, 3.33, -6.53, -1.03],
                           [-3.13, 1.0, -1.03, 4.08],
                           [1.0, 3.33, 0.47, 4.08],
                           [-0.7, 3.33, 4.08, 6.48],
                           [-3.13, 3.33, 6.48, 11.4]]
-        # 8holes beginn
-        if self.__geometry.layout == '8 holes':
+
+        elif self.__geometry.layout == '2 holes real':
+            self.areas = [[-2.09, 4.6, -9.9, -6.05],
+                          [-2.09, 1.96, -6.05, -2.92],
+                          [-2.09, 1.96, -2.92, 2.28],
+                          [1.96, 4.6, -2.92, 2.28],
+                          [0.14, 4.6, 2.28, 5.03],
+
+                          [0.14, 4.6, 5.03, 10.27],
+                          [-2.09, 0.14, 5.03, 10.27]]
+
+        elif self.__geometry.layout == '8 holes':
             self.areas = [[0.14, 7.46, -11.40, -9.52],
                           [-58.6, 0.14, -11.40, -9.52],
                           [5.21, 7.46, -9.52, -4.63],
@@ -394,7 +411,7 @@ class LabyrinthEnvironment(gym.Env):
 
         Returns
         -------
-        observation : dict
+        observation :
             Observation after applying the action.
         reward : int
             Reward of applying the action.

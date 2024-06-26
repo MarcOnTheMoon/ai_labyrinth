@@ -228,7 +228,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
         q_sa = q_sa_pure.gather(dim = 1, index = a) # Extrahiert die Q-Werte der gewählten Aktionen a aus den berechneten Q-Werten.
 
         # TD = r + g * V(s') - Q(s,a)
-        td = r + (self.gamma * v_s_next * (1 - dones)) - q_sa # Berechnet den Temporal Difference (TD) Fehler gemäß der Aktualisierungsregel des Q-Learnings. self.gamma ist der Diskontierungsfaktor. 1-done wird verwendet, da es nach dem End-zustand keinen nachfolgenden Zustandgibt -> V(s') ist dann 0, sonst V(s')= 1
+        td = r + (self.gamma * v_s_next * (1 - dones)) - q_sa # Berechnet den Temporal Difference (TD) Fehler gemäß der Aktualisierungsregel des Q-Learnings. self.gamma ist der Diskontierungsfaktor. 1-done wird verwendet, da es nach dem Endzustand keinen nachfolgenden Zustandgibt -> V(s') ist dann 0, sonst V(s')= 1
 
         # Compute loss: TD -> 0
         error = self.loss(td, torch.zeros(td.shape)) # Berechnet den Verlust zwischen dem TD-Fehler und Null.
@@ -285,9 +285,9 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='8 holes', render_mode=None) #training
     if env.layout == '0 holes':
         save_path = path + '0holes_dqnagent.pth'
-    if env.layout == '2 holes':
+    elif env.layout == '2 holes':
         save_path = path + '2holes_dqnagent.pth'
-    if env.layout == '8 holes':
+    elif env.layout == '8 holes':
         save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
