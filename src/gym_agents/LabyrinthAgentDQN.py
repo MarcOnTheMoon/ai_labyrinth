@@ -28,7 +28,7 @@ from LabyrinthEnvironment import LabyrinthEnvironment
 
 path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
-class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute und Methoden von BaseDqnAgent
+class DqnAgent:
 
     def __init__(
             self,
@@ -132,7 +132,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
     def step(self, state, action, reward, next_state, done):
         """
-            speichert erfahrunngen und löst das training/lernen aus
+            speichert Erfahrunngen und löst das Training/Lernen aus
 
             Parameters
             ----------
@@ -159,7 +159,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
 
     def act(self, state, mode = 'train'):
         """
-            Auswahl einer Aktion beim Training, nach der Epsilon Greedy Policy
+            Auswahl einer Aktion, nach der Epsilon Greedy Policy
 
             Parameters
             ----------
@@ -188,8 +188,7 @@ class DqnAgent: #DqnAgent erbt von BaseDqnAgent, enthält somit alle Attribute u
             self.q_net.eval()  # Schaltet das Netzwerk in den Evaluierungsmodus (deaktiviert Dropout und Batch Normalization).
 
             with torch.no_grad():  # disabling gradient computation #Deaktiviert die Berechnung der Gradienten, um Speicher zu sparen und die Ausführung zu beschleunigen. Während der Aktionsauswahl benötigen wir keine Gradienten, da wir das Modell nur verwenden, um Vorhersagen zu treffen.
-                action_values = self.q_net(
-                    state)  # Berechnet die Q-Werte für alle möglichen Aktionen basierend auf dem gegebenen Zustand
+                action_values = self.q_net(state)  # Berechnet die Q-Werte für alle möglichen Aktionen basierend auf dem gegebenen Zustand
             self.q_net.train()  # Schaltet das Netzwerk zurück in den Trainingsmodus, um sicherzustellen, dass es für zukünftige Trainingsschritte bereit ist.
 
             action = np.argmax(

@@ -38,7 +38,7 @@ class LabyrinthBallPhysics:
 
         """
         # Timing
-        self.dt = dt                            # Time step [s]
+        self.__dt = dt                            # Time step [s]
 
         # Ball state
         self.is_ball_in_hole = False            # Ball has fallen into hole if True
@@ -51,8 +51,8 @@ class LabyrinthBallPhysics:
         self.__y_rad = 0.0
         
         # Physical constants
-        self.__g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
-        self.__5_7g = 5.0 / 7.0 * self.__g      # constant for ball acceleration [cm/s²]
+        g = 9.81 * 100.0                 # Acceleration of gravity [cm/s²]
+        self.__5_7g = 5.0 / 7.0 * g      # constant for ball acceleration [cm/s²]
         self.__urr = 0.00118                    # Rolling friction coefficient
         self.__urr_edge = 0.00212               # Friction coefficients for collision with an edge
 
@@ -224,7 +224,7 @@ class LabyrinthBallPhysics:
             x_a = -self.__5_7g * (x_sin + x_friction_coefficient)
 
         # New velocity in x
-        velocity_x = self.__velocity.x + x_a * self.dt
+        velocity_x = self.__velocity.x + x_a * self.__dt
 
         # Check whether the friction is greater than the downhill force (e.g., rolling out the ball in the plane)
         if abs(x_sin) < x_friction_coefficient:
@@ -245,7 +245,7 @@ class LabyrinthBallPhysics:
             y_a = -self.__5_7g * (y_sin + y_friction_coefficient)
 
         # New velocity in y
-        velocity_y = self.__velocity.y + y_a * self.dt
+        velocity_y = self.__velocity.y + y_a * self.__dt
 
         # Check whether the friction is greater than the downhill force (e.g., rolling out the ball in the plane)
         if abs(y_sin) < y_friction_coefficient:
@@ -257,8 +257,8 @@ class LabyrinthBallPhysics:
         # ---------- Update position and velocity -----------------------------
 
         # Position
-        position_x = self.__position.x + self.__velocity.x * self.dt + x_a / 2 * self.dt * self.dt
-        position_y = self.__position.y + self.__velocity.y * self.dt + y_a / 2 * self.dt * self.dt
+        position_x = self.__position.x + self.__velocity.x * self.__dt + x_a / 2 * self.__dt * self.__dt
+        position_y = self.__position.y + self.__velocity.y * self.__dt + y_a / 2 * self.__dt * self.__dt
         self.__position = vec(position_x, position_y, 0.0)
 
         # Velocity
@@ -296,51 +296,46 @@ class LabyrinthBallPhysics:
         # ---------- Check for collision with an edge -------------------------
 
         is_collision_edge = False
-        self.twoedgecollision = 0
         for corner in self.__corners:
             # Left edge
             if (pos_x < corner[0].x) and (corner[0].x - pos_x < radius) and (pos_y >= corner[3].y) and (pos_y <= corner[0].y):
                 y_friction_coefficient = self.__urr_edge * cos(self.__y_rad)
                 y_a = self.__5_7g * y_friction_coefficient                                  # Acceleration in y
-                y_dv = (y_a * self.dt) if (self.__velocity.y <= 0) else (-y_a * self.dt)    # Change of speed in y
+                y_dv = (y_a * self.__dt) if (self.__velocity.y <= 0) else (-y_a * self.__dt)    # Change of speed in y
                 self.__velocity.y += y_dv
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[0].x - radius
                 is_collision_edge = True
-                self.twoedgecollision += 1
                     
             # Right_edge
             if (pos_x > corner[1].x) and (pos_x - corner[1].x < radius) and (pos_y >= corner[2].y) and (pos_y <= corner[1].y):
                 y_friction_coefficient = self.__urr_edge * cos(self.__y_rad)
                 y_a = self.__5_7g * y_friction_coefficient                                  # Acceleration in y
-                y_dv = (y_a * self.dt) if (self.__velocity.y <= 0) else (-y_a * self.dt)    # Change of speed in y
+                y_dv = (y_a * self.__dt) if (self.__velocity.y <= 0) else (-y_a * self.__dt)    # Change of speed in y
                 self.__velocity.y += y_dv
                 self.__velocity.x = -self.__velocity.x * damping_factor
                 self.__position.x = pos_x = corner[1].x + radius
                 is_collision_edge = True
-                self.twoedgecollision += 1
                     
             # Top edge
             if (pos_y > corner[0].y) and (pos_y - corner[0].y < radius) and (pos_x >= corner[0].x) and (pos_x <= corner[1].x):
                 x_friction_coefficient = self.__urr_edge * cos(self.__x_rad)
                 x_a = self.__5_7g * x_friction_coefficient                                  # Acceleration in x
-                x_dv = (x_a * self.dt) if (self.__velocity.x <= 0) else (-x_a * self.dt)    # Change of speed in x
+                x_dv = (x_a * self.__dt) if (self.__velocity.x <= 0) else (-x_a * self.__dt)    # Change of speed in x
                 self.__velocity.x += x_dv
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[0].y + radius
                 is_collision_edge = True
-                self.twoedgecollision += 1
                     
             # Bottom edge
             if (pos_y < corner[3].y) and (corner[3].y - pos_y < radius) and (pos_x >= corner[3].x) and (pos_x <= corner[2].x):
                 x_friction_coefficient = self.__urr_edge * cos(self.__x_rad)
                 x_a = self.__5_7g * x_friction_coefficient                                  # Acceleration in x
-                x_dv = (x_a * self.dt) if (self.__velocity.x <= 0) else (-x_a * self.dt)    # Change of speed in x
+                x_dv = (x_a * self.__dt) if (self.__velocity.x <= 0) else (-x_a * self.__dt)    # Change of speed in x
                 self.__velocity.x += x_dv
                 self.__velocity.y = -self.__velocity.y * damping_factor
                 self.__position.y = pos_y = corner[2].y - radius
                 is_collision_edge = True
-                self.twoedgecollision += 1
 
         if is_collision_edge == True or self.__geometry.layout == '0 holes': # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball) and its the game plate with 0 holes.
             return

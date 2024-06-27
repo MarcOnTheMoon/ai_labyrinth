@@ -4,8 +4,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>350</x>
-      <y>130</y>
+      <x>180</x>
+      <y>50</y>
       <w>140</w>
       <h>40</h>
     </coordinates>
@@ -16,8 +16,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>210</x>
-      <y>230</y>
+      <x>40</x>
+      <y>150</y>
       <w>420</w>
       <h>260</h>
     </coordinates>
@@ -42,8 +42,8 @@ _+ metadata: Dict_
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>410</x>
-      <y>160</y>
+      <x>240</x>
+      <y>80</y>
       <w>30</w>
       <h>90</h>
     </coordinates>
@@ -53,131 +53,148 @@ _+ metadata: Dict_
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>970</x>
-      <y>670</y>
-      <w>200</w>
-      <h>100</h>
+      <x>800</x>
+      <y>590</y>
+      <w>230</w>
+      <h>220</h>
     </coordinates>
     <panel_attributes>LabyrinthGeometry
 --
+_+ layouts: list_
+_+ area_start: list_
+_+ start_positions: Dict_
+_+ destinations_xy: Dict_
++ layout: String
 + box: Box
 + field: Field
++ walls: Walls
++ holes: Holes
 + ball: Ball
 --
-</panel_attributes>
+- __init__(layout='8 holes': String)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>510</x>
-      <y>600</y>
-      <w>590</w>
+      <x>380</x>
+      <y>520</y>
+      <w>550</w>
       <h>90</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;560.0;10.0;560.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;520.0;10.0;520.0;70.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>700</x>
-      <y>830</y>
-      <w>230</w>
-      <h>110</h>
+      <x>430</x>
+      <y>630</y>
+      <w>320</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>LabyrinthGeometry::Box
 --
-+ height = 9.5: float
-+ boarder = 0.8: float
-+ wheel_radius = 1.7: float
-+ wheel_depth = 1.5: float
++ height: float
++ boarder: float
++ wheel_radius: float
++ wheel_depth: float
 --
-</panel_attributes>
+- __init__(height=9.5: float, boarder=0.8: float, 
+			                wheel_radius=1.7: float, wheel_depth=1.5: float)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>730</x>
-      <y>230</y>
-      <w>710</w>
-      <h>300</h>
+      <x>560</x>
+      <y>100</y>
+      <w>580</w>
+      <h>390</h>
     </coordinates>
     <panel_attributes>LabyrinthRender3D
 --
 _+ colors: Dict_
 - __scene: vpython::scene
 - __ball_radius: float
+- __ball_position: vpython::vector
+- __ball: vpython::sphere
 - __x_degree: float
 - __y_degree: float
 - __axis_x: vpython::vector
 - __axis_y: vpython::vector
+- __labyrinth: vpython::compound
 --
-- __init__(geometry: LabyrinthGeometry, scene_width=800: float, scene_height=600: float, scene_range=20: float)
+- __init__(geometry: LabyrinthGeometry, scene_width=800: float, scene_height=600: float,
+                scene_range=20: float, ball_position=None: vpython::vector)
 - __render_scene(geometry: LabyrinthGeometry)
 - __render_box(geometry: LabyrinthGeometry)
 - __render_field(geometry: LabyrinthGeometry)
 - __render_ball(x: float, y: float)
++ ball_visibility(visible: boolean)
 + move_ball(x: float, y: float)
 + rotate_by(x_degree=None: float, y_degree=None: float)
 + rotate_to(x_degree=None: float, y_degree=None: float)
++ get_x_rad()
++ get_y_rad()
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>970</x>
-      <y>830</y>
-      <w>200</w>
-      <h>100</h>
+      <x>800</x>
+      <y>870</y>
+      <w>300</w>
+      <h>150</h>
     </coordinates>
     <panel_attributes>LabyrinthGeometry::Field
 --
-+ size_x = 27.4: float
-+ size_y = 22.8: float
-+ plate_depth = 0.3: float
++ size_x: float
++ size_y: float
++ plate_depth: float
++ rotation_x_deg=0.0: float
++ rotation_y_deg=0.0: float
 --
-</panel_attributes>
+- __init__(size_x=27.4: float, size_y=22.8: float, 
+		              	  plate_depth=0.3: float)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1230</x>
-      <y>830</y>
+      <x>1060</x>
+      <y>630</y>
       <w>200</w>
-      <h>80</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>LabyrinthGeometry::Ball
 --
-+ radius = 0.635: float
-+ weightGram = 9.0: float
++ radius: float
 --
-</panel_attributes>
+- __init__(radius=0.635: float)</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>800</x>
-      <y>700</y>
-      <w>190</w>
-      <h>150</h>
+      <x>580</x>
+      <y>600</y>
+      <w>240</w>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>170.0;10.0;10.0;10.0;10.0;130.0</additional_attributes>
+    <additional_attributes>220.0;10.0;10.0;10.0;10.0;30.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1060</x>
-      <y>760</y>
+      <x>890</x>
+      <y>800</y>
       <w>40</w>
       <h>90</h>
     </coordinates>
@@ -189,33 +206,33 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1160</x>
-      <y>700</y>
-      <w>190</w>
-      <h>150</h>
+      <x>1020</x>
+      <y>600</y>
+      <w>170</w>
+      <h>50</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;160.0;10.0;160.0;130.0</additional_attributes>
+    <additional_attributes>10.0;10.0;140.0;10.0;140.0;30.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1110</x>
-      <y>520</y>
+      <x>940</x>
+      <y>480</y>
       <w>100</w>
-      <h>170</h>
+      <h>130</h>
     </coordinates>
     <panel_attributes>lt=-
 initializes ^</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;150.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;110.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>620</x>
-      <y>310</y>
+      <x>450</x>
+      <y>230</y>
       <w>130</w>
       <h>40</h>
     </coordinates>
@@ -227,24 +244,43 @@ m2=0..1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>210</x>
-      <y>570</y>
-      <w>310</w>
-      <h>120</h>
+      <x>40</x>
+      <y>490</y>
+      <w>350</w>
+      <h>380</h>
     </coordinates>
-    <panel_attributes>Labyrinth
+    <panel_attributes>LabyrinthBallPhysics
 --
-
+- __dt: float
+- __position: vpython::vector
+- __velocity: vpython::vector
+- __x_rad: float
+- __y_rad: float
+- __5_7g: float
+- __urr: float
+- __urr_edge: float
+- __geometry: LabyrinthGeometry
+- __corners: list
++ is_ball_in_hole: boolean
 --
-- __init__()
+- __init__(geometry: LabyrinthGeometry, dt: float)
+- __init_corners()
+- __step(x_rad: float, y_rad: float)
+- __detection_and_process_collision()
+- __detect_ball_in_hole()
++ get_velocit()
++ set_position(position: vpython::vector)
++ reset(position: vpython::vector)
++ step(x_rad: float, y_rad: float, number_steps=1: int, 
+           position=None: vpython::vector)
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>410</x>
-      <y>480</y>
+      <x>240</x>
+      <y>400</y>
       <w>40</w>
       <h>110</h>
     </coordinates>
@@ -252,5 +288,66 @@ m2=0..1</panel_attributes>
 m1=1
 m2=1</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>400</x>
+      <y>820</y>
+      <w>350</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>LabyrinthGeometry::Walls
+--
++ thickness: float
++ height: float
++ data: Dict
+--
+- __init__(layout: String, thickness=0.58: float,
+			                height=0.6: float)</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>580</x>
+      <y>760</y>
+      <w>240</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>220.0;10.0;190.0;10.0;190.0;40.0;10.0;40.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1060</x>
+      <y>740</y>
+      <w>280</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>LabyrinthGeometry::Holes
+--
++ radius: float
++ data: Dict
+--
+- __init__(layout: String, radius=0.75: float,
+			                depth=0.3: float) </panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>710</y>
+      <w>210</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;180.0;10.0;180.0;30.0</additional_attributes>
   </element>
 </diagram>

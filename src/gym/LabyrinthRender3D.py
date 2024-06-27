@@ -178,11 +178,11 @@ class LabyrinthRender3D:
 
         # Render plate (Coordinate system's origin on top surface of plate)
         center = vec(0, 0, -plate_depth/2)
-        self.__field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['topfield'])
+        field = box(pos=center, length=field_x, height=field_y, width=plate_depth, color=self.colors['topfield'])
 
         # Init list of elements
         labyrinth_elements = []
-        labyrinth_elements.append(self.__field)
+        labyrinth_elements.append(field)
 
         if geometry.layout != '0 holes':
             # Add walls

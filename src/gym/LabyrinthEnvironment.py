@@ -505,8 +505,6 @@ class LabyrinthEnvironment(gym.Env):
             elif self.interim_reward():
                 reward = 5/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
                 #print("right direction")
-            #elif self.__ball_physics.twoedgecollision == 2 and self.__current_distance >= self.__last_distance:
-                #reward = -2.1
             #elif self.__right_direction:
             #    reward = -1
             else:
@@ -575,7 +573,7 @@ class LabyrinthEnvironment(gym.Env):
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
+    env = LabyrinthEnvironment(layout='2 holes real', render_mode='3D')
     env.reset()
 
     for action in [1, 1, 6, 6]:
@@ -583,4 +581,4 @@ if __name__ == '__main__':
     for action in range(4):
         env.step(6)
     for action in range(20):
-        env.step(12)
+        env.step(9)

@@ -28,10 +28,8 @@ class LabyrinthGeometry:
     # area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole, innerer bereich
     area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # komplette Spielplatte
     #area_start = [-1.3, 2.3, 6.76, 10.76] #2 holes
-    x = random.uniform(area_start[0], area_start[1])
-    y = random.uniform(area_start[2], area_start[3])
     start_positions = {
-        '0 holes' : vec(x, y, 0),
+        '0 holes' : vec(random.uniform(area_start[0], area_start[1]), random.uniform(area_start[2], area_start[3]), 0),
         #'2 holes': vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
         '2 holes real': vec(-0.79, 9.86, 0),
@@ -400,9 +398,9 @@ class Ball:
     Representation of ball.
     
     The default values correspond to a ball from the game series Labyrinth and
-    GraviTrax, having a diameter of 12.7 mm and a weight of 9 g.
+    GraviTrax, having a diameter of 12.7 mm.
     """
-    def __init__(self, radius=0.635, weightGram=9.0):
+    def __init__(self, radius=0.635):
         """
         Constructor.
 
@@ -410,8 +408,6 @@ class Ball:
         ----------
         radius : float, optional
             Raidus in [cm]. The default is 0.635.
-        weightGram : float, optional
-            Weight in [g]. The default is 9.0. NOT USED
 
         Returns
         -------
@@ -419,4 +415,3 @@ class Ball:
 
         """
         self.radius = radius
-        self.weightGram = weightGram
