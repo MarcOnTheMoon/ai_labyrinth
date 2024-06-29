@@ -108,6 +108,8 @@ class LabyrinthEnvironment(gym.Env):
         #self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
         #self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
         self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
+        if (self.__geometry.layout == '2 holes real'):
+            self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
         self.num_actions_per_component = len(self.__action_to_angle_degree)  # There are 9 possible actions per component (x,y)
         self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
 
@@ -141,6 +143,10 @@ class LabyrinthEnvironment(gym.Env):
         if (self.__geometry.layout == '0 holes') and not self.firstepisode:
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
+        elif (self.__geometry.layout == '2 holes real') and not self.firstepisode:
+            startpoint = [-0.79, 9.86]
+            self.__ball_start_position.x = startpoint[0] + random.uniform(-0.4, 0.4)
+            self.__ball_start_position.y = startpoint[1] + random.uniform(-0.4, 0.4)
         elif (self.__geometry.layout == '8 holes') and not self.firstepisode:
             startpoints = [[4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23], [-12.6, -7.03]]
             start_index = random.randint(0, len(startpoints )-1)
@@ -154,6 +160,8 @@ class LabyrinthEnvironment(gym.Env):
             round(self.__ball_start_position.y, 3),
             0.0,
             0.0,
+            #round(self.__ball_start_position.x, 3),
+            #round(self.__ball_start_position.y, 3),
             0.0,
             0.0
         ], dtype=np.float32)
@@ -525,6 +533,22 @@ class LabyrinthEnvironment(gym.Env):
                 #print("right direction")
             else:
                 reward = -1
+        elif self.__geometry.layout == '2 holes real':
+            if is_ball_at_destination:
+                print("Ball reached destination")
+                reward = 600
+            elif is_ball_in_hole:
+                print("Ball lost")
+                reward = -200
+            elif is_ball_to_close_hole:
+                print("Ball close to hole")
+                reward = -10
+            elif self.interim_reward():
+                reward = 3/len(self.areas) *(len(self.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
+            elif self.__right_direction:
+                reward = -1
+            else:
+                reward = -2
         else: #self.__geometry.layout == '0 holes'
             if is_ball_at_destination:
                 print("Ball reached destination")
@@ -557,7 +581,7 @@ class LabyrinthEnvironment(gym.Env):
 
         if self.number_actions >= 300 and self.__geometry.layout == '0 holes':
             truncated = True
-        elif self.number_actions >= 500 and self.__geometry.layout == '2 holes':
+        elif self.number_actions >= 500 and (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
             truncated = True
         elif self.number_actions >= 800 and self.__geometry.layout == '8 holes':
             print(f'truncated at Ball Pos. x={self.__ball_position.x} y={self.__ball_position.y}')

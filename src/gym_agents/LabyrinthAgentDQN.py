@@ -35,7 +35,7 @@ class DqnAgent:
             state_size,
             action_size,
             degp_epsilon = 1,
-            degp_decay_rate = .99, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
+            degp_decay_rate = .98, #für 0 holes .9, für 2 holes .98 und bisherige 8holes
             degp_min_epsilon = .15, #für 0 holes .1, für 2Holes 0.15
             train_batch_size = 64,
             replay_buffer_size = 100_000,
@@ -176,7 +176,7 @@ class DqnAgent:
         """
         r = random.random() #Erzeugt eine zufällige Zahl zwischen 0 und 1.
         random_action = mode == 'train' and r < self.degp_epsilon #Überprüft, ob eine zufällige Aktion ausgewählt werden soll (im Trainingsmodus und wenn r kleiner als Epsilon ist).
-        if mode == 'test' and r < 0.01: #1% Zufälligkeit bei der evaluation -> besseren Ergebnissen
+        if mode == 'test' and r < 0.00: #1% Zufälligkeit bei der evaluation -> besseren Ergebnissen
             random_action = True
         if random_action: #Wenn eine zufällige Aktion ausgewählt werden soll:
             # Random Policy
@@ -281,16 +281,18 @@ if __name__ == '__main__':
     #angle_degree = [-1, -0.5, 0, 0.5, 1]
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='8 holes', render_mode=None) #training
+    env = LabyrinthEnvironment(layout='2 holes real', render_mode=None) #training
     if env.layout == '0 holes':
         save_path = path + '0holes_dqnagent.pth'
     elif env.layout == '2 holes':
         save_path = path + '2holes_dqnagent.pth'
+    elif env.layout == '2 holes real':
+        save_path = path + '2holesreal_dqnagent.pth'
     elif env.layout == '8 holes':
         save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #agent.load(save_path)
-    episodes = 2000
+    episodes = 500
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()
@@ -318,8 +320,8 @@ if __name__ == '__main__':
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
             agent.save(save_path)
-        if e % 100 == 0 and env.layout == '8 holes': #alle 200 episoden die Gewichte in einer anderen Datei speichern
-            save_path_100 = path + str(e) + '8holes_dqnagent.pth'
+        if e % 25 == 0: #alle 200 episoden die Gewichte in einer anderen Datei speichern
+            save_path_100 = path + str(e) + '2holesreal_dqnagent.pth'
             agent.save(save_path_100)
 
     agent.save(save_path)

@@ -14,9 +14,9 @@ path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
 # PyTorch Implementation
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')  # evaluate
+    env = LabyrinthEnvironment(layout='2 holes real', render_mode='3D')  # evaluate
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    save_path = path + '8holes_dqnagent.pth'
+    save_path = path + '1002holesreal_dqnagent.pth'
 
     agent.load(save_path)
 
