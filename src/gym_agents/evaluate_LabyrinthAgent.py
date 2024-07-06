@@ -14,11 +14,14 @@ path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
 # PyTorch Implementation
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='2 holes real', render_mode='3D')  # evaluate
+    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')  # evaluate
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    save_path = path + '1002holesreal_dqnagent.pth'
-
+    save_path = path + '8holes_dqnagent_part1.pth'
     agent.load(save_path)
+    if env.layout == '8 holes':
+        agent1 = DqnAgent(state_size=6, action_size=env.num_actions_per_component * 2)
+        save_path1 = path + '8holes_dqnagent_part2.pth'
+        agent1.load(save_path1)
 
     episodes = 10
 
@@ -30,11 +33,17 @@ if __name__ == '__main__':
         #state = state[0] #env.reset liefert einen tupel und kein Array, konvertieren ins richtige format
 
         score = 0
-
+        if env.layout == '8 holes':
+            progress = 100
+            secondpart = False #für nicht definierte Kacheln im zweiten Teil, so dass dort trotzdem das richtige Netzwerk verwent wird und nciht das erste weil progress dann eine hohe zahl wäre
         while True:
             env.render()
-            action = agent.act(state, mode = 'test') #greedy policy
-            next_state, reward, done, _ ,_ = env.step(action)
+            action = agent.act(state, mode='test')  # greedy policy
+            if env.layout == '8 holes':
+                if progress < 24 or secondpart == True: #umschaltschwelle der trainierten Netze
+                    action = agent1.act(state, mode='test')
+                    secondpart = True
+            next_state, reward, done, _ , progress = env.step(action)
             state = next_state
             score += reward
             print(reward)

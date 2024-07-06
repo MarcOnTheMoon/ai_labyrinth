@@ -15,7 +15,7 @@ Pyserial in Anaconda by the command 'conda install conda-forge::pyserial'.
 import serial
 import math
 import time
-class Servo_control:
+class ServoCommunication:
 
     # ========== Constructor ==================================================
     def __init__(self, port=None):
@@ -185,7 +185,7 @@ class Servo_control:
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    servo = Servo_control()
+    servo = ServoCommunication()
 
     while True:
         #numx = float(input("Enter x degree: ")) # Taking input from user
