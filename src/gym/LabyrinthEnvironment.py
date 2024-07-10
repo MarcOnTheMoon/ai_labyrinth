@@ -139,8 +139,6 @@ class LabyrinthEnvironment(gym.Env):
 
         """
         # Set random seed
-        if seed == None:
-            seed = 1
         super().reset(seed=seed)
 
         self.number_actions = 0 # action history counter
@@ -164,10 +162,10 @@ class LabyrinthEnvironment(gym.Env):
         self.observation_space = np.array([
             round(self.__ball_start_position.x, 3),
             round(self.__ball_start_position.y, 3),
-            0.0,
-            0.0,
-            #round(self.__ball_start_position.x, 3),
-            #round(self.__ball_start_position.y, 3),
+            #0.0,
+            #0.0,
+            round(self.__ball_start_position.x, 3),
+            round(self.__ball_start_position.y, 3),
             0.0,
             0.0
         ], dtype=np.float32)
@@ -228,8 +226,10 @@ class LabyrinthEnvironment(gym.Env):
 
                 if self.__last_distance - self.__current_distance > 0.075: #genügend Änderung sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
                     return True #in die richtige Richtung
-                else:
+                elif self.__last_distance - self.__current_distance > 0:
                     self.__right_direction = True
+                    return False
+                else:
                     return False
             self.__progress += 1
 
@@ -295,7 +295,7 @@ class LabyrinthEnvironment(gym.Env):
             stop_x_rad = stop_x_degree * pi/180.0
             stop_y_rad = stop_y_degree * pi/180.0
 
-            """delta_x_rad = (stop_x_rad - start_x_rad)
+            delta_x_rad = (stop_x_rad - start_x_rad)
             delta_y_rad = (stop_y_rad - start_y_rad)
             max_delta = -1 * pi/180.0
             if delta_x_rad > 0 or delta_y_rad > 0:
@@ -317,16 +317,16 @@ class LabyrinthEnvironment(gym.Env):
                         y_rad = stop_y_rad
                     else:
                         y_rad = start_y_rad + (i-deadtime) * max_delta
-                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)"""
+                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)
 
-            delta_x_rad = (stop_x_rad - start_x_rad) / self.__physics_steps_per_action
+            """delta_x_rad = (stop_x_rad - start_x_rad) / self.__physics_steps_per_action
             delta_y_rad = (stop_y_rad - start_y_rad) / self.__physics_steps_per_action
             
             for i in range (self.__physics_steps_per_action):
             
                 x_rad = start_x_rad + (i+1) * delta_x_rad
                 y_rad = start_y_rad + (i+1) * delta_y_rad
-                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)
+                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)"""
 
         # Store field's final rotation
         self.__x_degree = stop_x_degree
@@ -345,10 +345,10 @@ class LabyrinthEnvironment(gym.Env):
         self.observation_space = np.array([
             round(self.__ball_position.x, 3), #Runden auf 3 nachkommastellen
             round(self.__ball_position.y, 3),
-            round(self.__ball_physics.get_velocity().x, 3),
-            round(self.__ball_physics.get_velocity().y, 3),
-            #round(self.__last_ball_position.x, 3),
-            #round(self.__last_ball_position.y, 3),
+            #round(self.__ball_physics.get_velocity().x, 3),
+            #round(self.__ball_physics.get_velocity().y, 3),
+            round(self.__last_ball_position.x, 3),
+            round(self.__last_ball_position.y, 3),
             self.__x_degree,
             self.__y_degree
         ], dtype=np.float32)

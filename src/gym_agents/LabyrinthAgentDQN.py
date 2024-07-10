@@ -176,7 +176,7 @@ class DqnAgent:
         """
         r = random.random() #Erzeugt eine zufällige Zahl zwischen 0 und 1.
         random_action = mode == 'train' and r < self.degp_epsilon #Überprüft, ob eine zufällige Aktion ausgewählt werden soll (im Trainingsmodus und wenn r kleiner als Epsilon ist).
-        if mode == 'test' and r < 0.00: #1% Zufälligkeit bei der evaluation -> besseren Ergebnissen
+        if mode == 'test' and r < 0.00: #Zufälligkeit bei der evaluation -> besseren Ergebnissen
             random_action = True
         if random_action: #Wenn eine zufällige Aktion ausgewählt werden soll:
             # Random Policy
@@ -190,7 +190,6 @@ class DqnAgent:
             with torch.no_grad():  # disabling gradient computation #Deaktiviert die Berechnung der Gradienten, um Speicher zu sparen und die Ausführung zu beschleunigen. Während der Aktionsauswahl benötigen wir keine Gradienten, da wir das Modell nur verwenden, um Vorhersagen zu treffen.
                 action_values = self.q_net(state)  # Berechnet die Q-Werte für alle möglichen Aktionen basierend auf dem gegebenen Zustand
             self.q_net.train()  # Schaltet das Netzwerk zurück in den Trainingsmodus, um sicherzustellen, dass es für zukünftige Trainingsschritte bereit ist.
-
             action = np.argmax(
                 action_values.data.numpy())  # Wählt die Aktion mit dem höchsten Q-Wert aus. Dies implementiert eine greedy policy, bei der stets die best bekannte Aktion gewählt wird.
 
@@ -276,23 +275,19 @@ class DqnAgent:
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    # Zufallsfolge auf definierten Anfang setzen
     seed = 1
-    random.seed(seed)  # Zufallsfolge auf definierten Anfang setzen
-    #angle_degree = [-1, -0.5, 0, 0.5, 1]
+    random.seed(seed)
+    np.random.seed(seed)  # Seed für NumPy setzen
+    torch.manual_seed(seed)  # Seed für PyTorch setzen (CPU)
+
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
     env = LabyrinthEnvironment(layout='2 holes real', render_mode=None) #training
-    if env.layout == '0 holes':
-        save_path = path + '0holes_dqnagent.pth'
-    elif env.layout == '2 holes':
-        save_path = path + '2holes_dqnagent.pth'
-    elif env.layout == '2 holes real':
-        save_path = path + '2holesreal_dqnagent.pth'
-    elif env.layout == '8 holes':
-        save_path = path + '8holes_dqnagent.pth'
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
+    #save_path = path + '2holesreal_dqnagent.pth'
     #agent.load(save_path)
-    episodes = 500
+    episodes = 1000
     scores = []
     for e in range(1, episodes + 1):
         state, _ = env.reset()
@@ -307,11 +302,6 @@ if __name__ == '__main__':
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
-            """if action < 5:
-                print(f'Action x {angle_degree[action]}° reward {reward} score {round(score,2)}')
-            else:
-                print(f'Action y {angle_degree[action-5]}° reward {reward} score {round(score, 2)}')
-            """
             if done or truncated: # or score > 2000 bei 0 Holes
                 break
 
@@ -319,15 +309,12 @@ if __name__ == '__main__':
         scores.append(score)  # save most recent score
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
-            agent.save(save_path)
         if e % 25 == 0: #alle 200 episoden die Gewichte in einer anderen Datei speichern
             save_path_100 = path + str(e) + '2holesreal_dqnagent.pth'
             agent.save(save_path_100)
 
-    agent.save(save_path)
-    # Training Results
+    # Training Results scores
     plt.plot(np.arange(len(scores)), scores)
     plt.ylabel('Score')
     plt.xlabel('Episode')
     plt.show()
-
