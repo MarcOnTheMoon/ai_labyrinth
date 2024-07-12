@@ -12,16 +12,19 @@ from LabyrinthEnvironment import LabyrinthEnvironment
 path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
 
-# PyTorch Implementation
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')  # evaluate
+    env = LabyrinthEnvironment(layout='2 holes real', render_mode='3D')  # evaluate
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    save_path = path + '8holes_dqnagent_part1.pth'
-    agent.load(save_path)
+
     if env.layout == '8 holes':
+        save_path = path + '8holes_dqnagent_part1.pth'
+        agent.load(save_path)
         agent1 = DqnAgent(state_size=6, action_size=env.num_actions_per_component * 2)
         save_path1 = path + '8holes_dqnagent_part2.pth'
         agent1.load(save_path1)
+    else:
+        save_path = path + '8502holesreal_dqnagent.pth'
+        agent.load(save_path)
 
     episodes = 10
 
