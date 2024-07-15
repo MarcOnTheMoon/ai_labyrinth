@@ -80,7 +80,7 @@ class LabyrinthEnvironment(gym.Env):
         self.__geometry = LabyrinthGeometry(layout=layout)
         self.layout = layout
 
-        #definition of aeward areas and targetpoints
+        # Defines geometric dimensions for reward calculations
         self.__rewardarea = LabyrinthRewardArea(layout=layout)
 
         # Field rotation
@@ -114,7 +114,7 @@ class LabyrinthEnvironment(gym.Env):
         self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
         if (self.__geometry.layout == '2 holes real'):
             self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
-        self.num_actions_per_component = len(self.__action_to_angle_degree)  # There are 9 possible actions per component (x,y)
+        self.num_actions_per_component = len(self.__action_to_angle_degree)
         self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
 
         self.firstepisode = True
@@ -143,7 +143,7 @@ class LabyrinthEnvironment(gym.Env):
 
         self.number_actions = 0 # action history counter
 
-        # observation space
+        # set different start positions
         if (self.__geometry.layout == '0 holes') and not self.firstepisode:
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
@@ -159,6 +159,7 @@ class LabyrinthEnvironment(gym.Env):
 
         self.firstepisode = False
 
+        # observation space
         self.observation_space = np.array([
             round(self.__ball_start_position.x, 3),
             round(self.__ball_start_position.y, 3),
@@ -184,7 +185,7 @@ class LabyrinthEnvironment(gym.Env):
             self.render()
             self.__render_3d.ball_visibility(True)
 
-        #interim reward counter
+        #interim reward counter for threshold reward
         self.__interim_reward_counter = 0
 
         return self.observation_space, {}
@@ -214,9 +215,17 @@ class LabyrinthEnvironment(gym.Env):
             # Update timestamp
             self.__last_render_timestamp_sec = time.time()
 
-    # ========== interim reward ===============================================
 
+    #=========== right direction reward =======================================
     def interim_reward(self):
+        """
+        Calculation to determine if the ball moved in the correct direction.
+
+        Returns
+        -------
+        True, if the ball has made a larger positional change in the correct maze direction
+
+        """
         self.__progress = 0
         self.__right_direction = False
         for x_min, x_max, y_min, y_max in self.__rewardarea.areas:
@@ -235,8 +244,66 @@ class LabyrinthEnvironment(gym.Env):
 
         return False
 
+    # ========== threshold reward ===========================================
+    def threshold_reward(self):
+        """
+        Calculates whether a defined threshold is crossed.
+
+        Returns
+        -------
+        1, if the threshold was crossed in the correct direction.
+        -1, if the threshold was crossed in the wrong direction.
+        0, otherwise
+
+        """
+        if len(self.__rewardarea.threshold_rewards) <= self.__interim_reward_counter:
+            return 0
+
+        axis = self.__rewardarea.threshold_rewards[self.__interim_reward_counter][0]
+        direction = self.__rewardarea.threshold_rewards[self.__interim_reward_counter][1]
+        threshold = self.__rewardarea.threshold_rewards[self.__interim_reward_counter][2]
+        range_min = self.__rewardarea.threshold_rewards[self.__interim_reward_counter][3]
+        range_max = self.__rewardarea.threshold_rewards[self.__interim_reward_counter][4]
+        if axis == 'x':
+            if direction < 0:
+                if self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                    self.__interim_reward_counter += 1  # Richtige Richung
+                    return 1
+                elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                    self.__interim_reward_counter -= 1  ##Falsche Richtung
+                    return -1
+            elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                self.__interim_reward_counter += 1  # Richtige Richtung
+                return 1
+            elif self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
+                self.__interim_reward_counter -= 1  # Falsche Richtung
+                return -1
+        else:  # axis == 'y'
+            if direction < 0:
+                if self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                    self.__interim_reward_counter += 1  # richtige Richtung
+                    return 1
+                elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                    self.__interim_reward_counter -= 1  # falsche Richtung
+                    return -1
+            elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                self.__interim_reward_counter += 1
+                return 1
+            elif self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
+                self.__interim_reward_counter -= 1
+                return -1
+        return 0
+
     # ========== close_hole_discount reward ===================================
     def close_hole_discount(self):
+        """
+        Calculates whether the ball is near a hole.
+
+        Returns
+        -------
+        True, if the ball is near a hole
+
+        """
         pos_x = self.__ball_position.x
         pos_y = self.__ball_position.y
 
@@ -245,7 +312,6 @@ class LabyrinthEnvironment(gym.Env):
             if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.4) **2:
                 return True
         return False
-
 
 
     # ========== Step =========================================================
@@ -267,6 +333,8 @@ class LabyrinthEnvironment(gym.Env):
             Reward of applying the action.
         done : boolean
             True if the episode has ended, else False.
+        truncated : boolean
+            True if the episode is terminated due to too many actions being taken.
         info : dict
             Information (currently not used).
 
@@ -301,8 +369,8 @@ class LabyrinthEnvironment(gym.Env):
             if delta_x_rad > 0 or delta_y_rad > 0:
                 max_delta = 1 * pi/180.0
             deadtime = 1
-            for i in range(self.__physics_steps_per_action): #ist auf 10ms Aktualisierungen angepasst
-                if i <= deadtime: #20ms
+            for i in range(self.__physics_steps_per_action): #The game board rotation is adjusted to 10ms updates.
+                if i <= deadtime: # 20ms is only calculated with the old field rotation.
                     x_rad = start_x_rad
                     y_rad = start_y_rad
                 elif stop_x_degree != start_x_degree:
@@ -378,7 +446,7 @@ class LabyrinthEnvironment(gym.Env):
                 print("Ball close to hole")
                 reward = -10
             elif self.interim_reward():
-                reward = 5/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
+                reward = 5/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
                 #print("right direction")
             #elif self.__right_direction:
             #    reward = -1
@@ -396,7 +464,7 @@ class LabyrinthEnvironment(gym.Env):
                 reward = -11
             elif self.interim_reward():
                 #reward = 0.5
-                reward = 2/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
+                reward = 2/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
                 #print("right direction")
             else:
                 reward = -1
@@ -411,7 +479,7 @@ class LabyrinthEnvironment(gym.Env):
                 print("Ball close to hole")
                 reward = -10
             elif self.interim_reward():
-                reward = 3/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #den wegfortschritt positiv belohnen, jede kachel weiter dann gibt es mehr Belohnung für die richtige Bewegungsrichtung
+                reward = 3 / len(self.__rewardarea.areas) * (len(self.__rewardarea.areas) - self.__progress)  # Positively reward progress, giving more reward for each additional tile in the correct movement direction.
             elif self.__right_direction:
                 reward = -1
             else:
@@ -467,9 +535,9 @@ if __name__ == '__main__':
     env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
     env.reset()
 
-    """for action in [0, 1, 6, 6]:
+    for action in [0, 1, 6, 6]:
         env.step(action)
     for action in range(4):
         env.step(6)
     for action in range(20):
-        env.step(9)"""
+        env.step(9)
