@@ -283,7 +283,7 @@ if __name__ == '__main__':
 
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='2 holes real', render_mode=None) #training
+    env = LabyrinthEnvironment(layout='8 holes', render_mode=None) #training
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #save_path = path + '2holesreal_dqnagent.pth'
     #agent.load(save_path)

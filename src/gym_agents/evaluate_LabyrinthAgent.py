@@ -1,3 +1,13 @@
+"""
+The training of the neural network can be evaluated
+
+@authors: Sandra Lassahn, Marc Hensel
+@contact: http://www.haw-hamburg.de/marc-hensel
+@copyright: 2024
+@version: 2024.05.24
+@license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+"""
+
 import os
 import sys
 import numpy as np
@@ -23,7 +33,7 @@ if __name__ == '__main__':
         save_path1 = path + '8holes_dqnagent_part2.pth'
         agent1.load(save_path1)
     else:
-        save_path = path + '8502holesreal_dqnagent.pth'
+        save_path = path + '6002holesreal_dqnagent.pth'
         agent.load(save_path)
 
     episodes = 10

@@ -1,11 +1,37 @@
+"""
+Defines geometric dimensions for reward calculations.
 
+    - right direction reward with tiles (areas) and target points
+    - thresholds rewards
+
+@authors: Sandra Lassahn, Marc Hensel
+@contact: http://www.haw-hamburg.de/marc-hensel
+@copyright: 2024
+@version: 2024.05.24
+@license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
+"""
 class LabyrinthRewardArea():
 
     def __init__(self, layout):
+        """
+            Constructor. initializes the layers of the neural network
+
+            Parameters
+            ----------
+            layout: String
+                Layout of holes and walls as defined in LabyrinthGeometry.py.
+
+            Returns
+            -------
+            None.
+
+        """
+
         self.layout = layout
 
-        # Für Fortschritt
-        # Reihnfolge ziel nach anfang, mit jeweils [x,y] Zwischenzielkoordinaten
+        # ========== right direction reward ===========================================
+        # The order of target points and areas is defined from the goal to the start.
+        # target point coordinates [x, y].
         if self.layout == '0 holes':
             self.target_points = [[0, 0]]
     
@@ -71,7 +97,7 @@ class LabyrinthRewardArea():
 
                              [-12.45, 10.83],
                              [-12.45, 10.83]]
-        # [x_min, x_max, y_min, y_max]
+        # areas coordinates  [x_min, x_max, y_min, y_max]
         if self.layout == '0 holes':
             self.areas = [[-13.06, 13.06, -10.76, 10.76]]
     
@@ -138,34 +164,56 @@ class LabyrinthRewardArea():
                           [-11.66, -5.34, 9.99, 11.4],
                           [-5.34, 0.5, 9.99, 11.4]]
 
-        """def interim_reward(self):
-        #Für Schwellenbelohnung
-        #[Koordinate x oder y, Richtung der Querung, Schwelle, Bereich min, Bereich max]
-        # mit Richtung der Querung: 1 = von kleiner zu größeren werten, -1 = von größeren zu kleineren werten
-        interim_rewards = [['x', -1, 7.77, -8.16, -3.98],
-                           ['x', -1, 3.83, -11.4, -9.59]]
-        if len(interim_rewards) <= self.__interim_reward_counter:
-            return False
 
-        axis = interim_rewards[self.__interim_reward_counter][0]
-        direction = interim_rewards[self.__interim_reward_counter][1]
-        threshold = interim_rewards[self.__interim_reward_counter][2]
-        range_min = interim_rewards[self.__interim_reward_counter][3]
-        range_max = interim_rewards[self.__interim_reward_counter][4]
-        if axis == 'x':
-            if direction < 0:
-                if self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                    self.__interim_reward_counter += 1
-                    return True
-            elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                self.__interim_reward_counter += 1
-                return True
-        else: #axis == 'y'
-            if direction < 0:
-                if self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                    self.__interim_reward_counter += 1
-                    return True
-            elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                self.__interim_reward_counter += 1
-                return True
-        return False """
+        # ========== threshold reward ===========================================
+
+        # The order of thresholds is defined from the start to the goal.
+        # threshold reward list [coordinate x or y, Direction of crossing, threshold, min range, max range]
+        # with direction of crossing: 1 = from smaller to larger values, -1 = from larger to smaller values
+        if self.layout == '2 holes real':
+            self.threshold_rewards = [['x', 1, 0.14, 2.52, 11.4],
+                               ['y', -1, 2.25, 0.14, 4.57],
+                               ['y', -1, -5.26, -2.13, 4.57],
+                               ['y', -1, -8.8, -0.27, 2.81]]
+        elif self.layout == '8 holes':
+            self.threshold_rewards = [['x', -1, -4.63, 9.99, 11.4],
+                                      ['x', -1, -10.07, 9.99, 11.4],
+                                      ['y', -1, 7.09, -13.7, -11.87],
+                                      ['x', 1, -11.66, 0.45, 4.38],
+                                      ['x', 1, -10.10, 2.13, 5.64],
+
+                                      ['x', 1, -6.57, 2.13, 5.64],
+                                      ['y', -1, 2.09, -6.21, -2.52],
+                                      ['x', -1, -4.94, -3.56, -0.2],
+                                      ['x', -1, -8.98, -2.76, -0.2],
+                                      ['y', -1, -2.79, -12.01, -9.18],
+
+                                      ['y', -1, -6.31, -13.7, -10.95],
+                                      ['x', 1, -10.95, -11.4, -6.8],
+                                      ['x', 1, -8.91, -11.4, -6.8],
+                                      ['y', 1, -6.53, -8.64, -6.37],
+                                      ['x', 1, -6.19, -6.65, -4.24],
+
+                                      ['x', 1, -3.27, -8.86, -6.69],
+                                      ['x', 1, 0.19, -7.45, -4.28],
+                                      ['y', 1, -3.75, 2.03, 4.61],
+                                      ['x', -1, 1.28, -3.48, -0.89],
+                                      ['y', 1, -0.16, -1.95, -2.66],
+
+                                      ['x', 1, 1.45, 0.18, 3.77],
+                                      ['y', 1, 4.15, 3.42, 8.78],
+                                      ['y', 1, 7.13, 3.78, 7.66],
+                                      ['y', 1, 9.34, 2.26, 6.1],
+                                      ['x', 1, 7.97, 9.6, 11.4],
+
+                                      ['y', -1, 7.43, 10.62, 13.7],
+                                      ['y', -1, 4.15, 10.82, 13.7],
+                                      ['y', -1, -0.58, 9.36, 11.74],
+                                      ['y', -1, -4.13, 11.03, 13.7],
+                                      ['y', -1, -6.34, 10.52, 13.7],
+
+                                      ['x', -1, 10.52, -11.4, -6.34],
+                                      ['x', -1, 7.8, -8.17, -4.66],
+                                      ['y', -1, -9.13, 5.18, 7.46],
+                                      ['x', -1, 0.53, -11.4, -9.55]
+                                      ]
