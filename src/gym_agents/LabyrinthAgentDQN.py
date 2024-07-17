@@ -282,8 +282,8 @@ if __name__ == '__main__':
     torch.manual_seed(seed)  # Seed für PyTorch setzen (CPU)
 
     # Init environment and agent
-    #env = LabyrinthEnvironment(layout='0 holes', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='8 holes', render_mode=None) #training
+    #env = LabyrinthEnvironment(layout='0 holes real', render_mode='3D') #evaluate
+    env = LabyrinthEnvironment(layout='0 holes real', render_mode=None) #training
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
     #save_path = path + '2holesreal_dqnagent.pth'
     #agent.load(save_path)
@@ -302,7 +302,7 @@ if __name__ == '__main__':
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
-            if done or truncated: # or score > 2000 bei 0 Holes
+            if done or truncated or score > 2000: # score > 2000 nur bei 0 Holes
                 break
 
         print(f'Episode {e} Score: {score}')
@@ -310,7 +310,7 @@ if __name__ == '__main__':
         if e % 10 == 0:
             print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
         if e % 25 == 0: #alle 200 episoden die Gewichte in einer anderen Datei speichern
-            save_path_100 = path + str(e) + '2holesreal_dqnagent.pth'
+            save_path_100 = path + str(e) + '0holesreal_.pth'
             agent.save(save_path_100)
 
     # Training Results scores

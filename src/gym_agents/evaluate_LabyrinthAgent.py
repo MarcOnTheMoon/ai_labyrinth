@@ -23,7 +23,7 @@ path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
 
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='2 holes real', render_mode='3D')  # evaluate
+    env = LabyrinthEnvironment(layout='0 holes real', render_mode='3D')  # evaluate
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
 
     if env.layout == '8 holes':
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         save_path1 = path + '8holes_dqnagent_part2.pth'
         agent1.load(save_path1)
     else:
-        save_path = path + '6002holesreal_dqnagent.pth'
+        save_path = path + '9500holesreal_.pth'
         agent.load(save_path)
 
     episodes = 10

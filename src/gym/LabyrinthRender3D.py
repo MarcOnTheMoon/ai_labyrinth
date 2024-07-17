@@ -184,7 +184,7 @@ class LabyrinthRender3D:
         labyrinth_elements = []
         labyrinth_elements.append(field)
 
-        if geometry.layout != '0 holes':
+        if geometry.layout != '0 holes' and geometry.layout != '0 holes real':
             # Add walls
             walls_data = geometry.walls.data
             for wall_data in walls_data:
@@ -201,6 +201,8 @@ class LabyrinthRender3D:
         # Compile all elements into a board with background picture
         if geometry.layout == '0 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/0_holes.png')
+        elif geometry.layout == '0 holes real':
+            labyrinth = compound(labyrinth_elements, texture='textures/0_holes_real.png')
         elif geometry.layout == '2 holes':
             labyrinth = compound(labyrinth_elements, texture='textures/2_holes.png')
         elif geometry.layout == '2 holes real':

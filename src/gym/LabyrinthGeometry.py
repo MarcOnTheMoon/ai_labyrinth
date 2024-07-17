@@ -21,27 +21,31 @@ class LabyrinthGeometry:
     # ========== Field layouts ================================================
 
     # Define layout names (walls and holes)
-    layouts = ['0 holes', '2 holes', '2 holes real', '8 holes', '21 holes']
+    layouts = ['0 holes', '0 holes real', '2 holes', '2 holes real', '8 holes', '21 holes']
 
     # Define start position and destination area
     #für Random Startposition [x_min, x_max, y_min, y_max]
     # area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole, innerer bereich
     area_start = [-13.06, 13.06, -10.76, 10.76]  # 0_hole # komplette Spielplatte
     #area_start = [-1.3, 2.3, 6.76, 10.76] #2 holes
+    random.seed(1)
     start_positions = {
         '0 holes' : vec(random.uniform(area_start[0], area_start[1]), random.uniform(area_start[2], area_start[3]), 0),
+        '0 holes real': vec(random.uniform(area_start[0], area_start[1]), random.uniform(area_start[2], area_start[3]), 0),
         #'2 holes': vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
         '2 holes real': vec(-0.79, 9.86, 0),
-        '8 holes'  : vec( 0.13, 10.53, 0),
-        #'8 holes': vec(13, -5.0, 0), #näher am ziel
+        #'8 holes'  : vec( 0.13, 10.53, 0),
+        '8 holes': vec(13, -5.0, 0), #näher am ziel
         '21 holes' : vec( 3.2,   10.47,  0)
         }
     destinations_xy = {
         '0 holes'  : [[-0.25, 0.25], [-0.25, 0.25]],
+        '0 holes real': [[-0.25, 0.25], [-0.25, 0.25]],
         '2 holes'  : [[-1.9, 1.56], [-6.62, -5.5]],
         '2 holes real': [[-0.24, 2.73], [-11.4, -10.08]],
         '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
+        #'8 holes'  : [[0.16, 4.59], [-6.95, -3.85]], #näher am Start
         '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
         }
 
@@ -72,7 +76,7 @@ class LabyrinthGeometry:
         # Init geometry
         self.box = Box()
         self.field = Field()
-        if layout != '0 holes':
+        if layout != '0 holes' and layout != '0 holes real':
             self.walls = Walls(layout=layout)
             self.holes = Holes(layout=layout, depth=self.field.plate_depth)
         self.ball = Ball()

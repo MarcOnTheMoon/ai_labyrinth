@@ -112,7 +112,7 @@ class LabyrinthEnvironment(gym.Env):
         #self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
         #self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
         self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
-        if (self.__geometry.layout == '2 holes real'):
+        if (self.__geometry.layout == '2 holes real' or self.__geometry.layout == '0 holes real' or self.__geometry.layout == '0 holes'):
             self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
         self.num_actions_per_component = len(self.__action_to_angle_degree)
         self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
@@ -144,7 +144,7 @@ class LabyrinthEnvironment(gym.Env):
         self.number_actions = 0 # action history counter
 
         # set different start positions
-        if (self.__geometry.layout == '0 holes') and not self.firstepisode:
+        if (self.__geometry.layout == '0 holes' or self.__geometry.layout != '0 holes real') and not self.firstepisode:
             self.__ball_start_position.x = random.uniform(self.__geometry.area_start[0], self.__geometry.area_start[1])
             self.__ball_start_position.y = random.uniform(self.__geometry.area_start[2], self.__geometry.area_start[3])
         elif (self.__geometry.layout == '2 holes real') and not self.firstepisode:
@@ -294,6 +294,27 @@ class LabyrinthEnvironment(gym.Env):
                 return -1
         return 0
 
+    # ========== 0hole reward ===========================================
+    def zerohole_reward(self):
+        """
+        calculates in witch circular segment the ball is lacated
+
+        Returns
+        -------
+        radius_progress: int
+            The higher the number, the closer the ball is to the center
+        """
+        if self.__geometry.layout == '0 holes real':
+            radius = [10, 7.5, 5, 2.5, 1.25]
+        elif self.__geometry.layout == '0 holes':
+            radius = [5, 2.5, 1.25]
+        radius_progress = 1
+        for num in radius:
+            if self.__current_distance > radius[radius_progress-1]**2:
+                return radius_progress
+            radius_progress +=1
+        return radius_progress
+
     # ========== close_hole_discount reward ===================================
     def close_hole_discount(self):
         """
@@ -427,7 +448,7 @@ class LabyrinthEnvironment(gym.Env):
         is_ball_at_destination = is_destination_x and is_destination_y
 
         # Ball has fallen into a hole?
-        if self.__geometry.layout != '0 holes':
+        if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
             is_ball_in_hole = self.__ball_physics.is_ball_in_hole
             is_ball_to_close_hole = self.close_hole_discount()
         else:
@@ -438,18 +459,17 @@ class LabyrinthEnvironment(gym.Env):
         if self.__geometry.layout == '8 holes':
             if is_ball_at_destination:
                 print("Ball reached destination")
-                reward = 800
+                reward = 1000
             elif is_ball_in_hole:
                 print("Ball lost")
                 reward = -300
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
-                reward = -10
+                reward = -15
             elif self.interim_reward():
-                reward = 5/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
-                #print("right direction")
-            #elif self.__right_direction:
-            #    reward = -1
+                reward = 6/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
+            elif self.__right_direction:
+                reward = -1
             else:
                 reward = -2
         elif self.__geometry.layout == '2 holes':
@@ -461,13 +481,13 @@ class LabyrinthEnvironment(gym.Env):
                 reward = -200
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
-                reward = -11
-            elif self.interim_reward():
-                #reward = 0.5
-                reward = 2/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
-                #print("right direction")
-            else:
                 reward = -1
+            elif self.interim_reward():
+                reward = 3/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
+            elif self.__right_direction:
+                reward= -1
+            else:
+                reward = -2
         elif self.__geometry.layout == '2 holes real':
             if is_ball_at_destination:
                 print("Ball reached destination")
@@ -484,7 +504,7 @@ class LabyrinthEnvironment(gym.Env):
                 reward = -1
             else:
                 reward = -2
-        else: #self.__geometry.layout == '0 holes'
+        elif self.__geometry.layout == '0 holes':
             if is_ball_at_destination:
                 print("Ball reached destination")
                 reward = 600
@@ -509,17 +529,24 @@ class LabyrinthEnvironment(gym.Env):
                         reward = -0.4
                 else:
                     reward = -1
+        else: #self.__geometry.layout != '0 holes real':
+            if is_ball_at_destination:
+                print("Ball reached destination")
+                reward = 600
+            elif self.interim_reward() or self.__right_direction:
+                reward = self.zerohole_reward()**3
+            else:
+                reward = -2
 
         # Episode completed or truncated?
-        done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes'
+        done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real'
         self.number_actions += 1 # Action history
 
-        if self.number_actions >= 300 and self.__geometry.layout == '0 holes':
+        if self.number_actions >= 300 and (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
             truncated = True
         elif self.number_actions >= 500 and (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
             truncated = True
         elif self.number_actions >= 800 and self.__geometry.layout == '8 holes':
-            print(f'truncated at Ball Pos. x={self.__ball_position.x} y={self.__ball_position.y}')
             truncated = True
         else:
             truncated = False

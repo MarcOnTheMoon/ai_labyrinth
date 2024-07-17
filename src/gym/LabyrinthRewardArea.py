@@ -32,15 +32,19 @@ class LabyrinthRewardArea():
         # ========== right direction reward ===========================================
         # The order of target points and areas is defined from the goal to the start.
         # target point coordinates [x, y].
-        if self.layout == '0 holes':
+        if self.layout == '0 holes' or self.layout == '0 holes real':
             self.target_points = [[0, 0]]
-    
+
+
         elif self.layout == '2 holes':
-            self.target_points = [[-0.13, -6],
-                             [-0.13, -1.52],
-                             [0.33, 1.2],
-                             [0.33, 1.2],
-                             [1.97, 5.81]]
+            self.target_points = [[-0.7, -5.98],
+                                  [-0.7, -5.98],
+                                  [-0.7, -5.98],
+                                  [0.17, 1.63],
+                                  [0.17, 1.63],
+
+                                  [1.51, 5.72],
+                                  [0.31, 7.92]]
     
         elif self.layout == '2 holes real':
             self.target_points = [[1.24, -10.42],
@@ -98,15 +102,18 @@ class LabyrinthRewardArea():
                              [-12.45, 10.83],
                              [-12.45, 10.83]]
         # areas coordinates  [x_min, x_max, y_min, y_max]
-        if self.layout == '0 holes':
+        if self.layout == '0 holes' or self.layout == '0 holes real':
             self.areas = [[-13.06, 13.06, -10.76, 10.76]]
-    
+
         elif self.layout == '2 holes':
-            self.areas = [[-3.13, 3.33, -6.53, -1.03],
-                          [-3.13, 1.0, -1.03, 4.08],
-                          [1.0, 3.33, 0.47, 4.08],
-                          [-0.7, 3.33, 4.08, 6.48],
-                          [-3.13, 3.33, 6.48, 11.4]]
+            self.areas = [[-3.15, 3.3, -6.55, -4.38],
+                          [-3.15, 3.3, -4.38, -1.02],
+                          [-3.15, 1.02, -1.02, 4.16],
+                          [1.02, 3.3, 0.5, 4.16],
+                          [-0.74, 3.3, 4.16, 6.44],
+
+                          [-0.74, 3.3, 6.44, 11.4],
+                          [-3.15, -0.74, 6.44, 11.4]]
     
         elif self.layout == '2 holes real':
             self.areas = [[-2.09, 4.6, -9.9, -6.05],
@@ -168,13 +175,18 @@ class LabyrinthRewardArea():
         # ========== threshold reward ===========================================
 
         # The order of thresholds is defined from the start to the goal.
-        # threshold reward list [coordinate x or y, Direction of crossing, threshold, min range, max range]
+        # threshold reward list [coordinate x or y of crossing, Direction of crossing, threshold, min range, max range]
         # with direction of crossing: 1 = from smaller to larger values, -1 = from larger to smaller values
-        if self.layout == '2 holes real':
+        if self.layout == '2 holes':
+            self.threshold_rewards = [['x', 1, -0.93, 4.21, 11.4],
+                                      ['y', -1, 4.21, -1.04, 3.28],
+                                      ['y', -1, -0.96, -3.15, 3.28],
+                                      ['y', -1, -4.35, -1.81, 1.71]]
+        elif self.layout == '2 holes real':
             self.threshold_rewards = [['x', 1, 0.14, 2.52, 11.4],
-                               ['y', -1, 2.25, 0.14, 4.57],
-                               ['y', -1, -5.26, -2.13, 4.57],
-                               ['y', -1, -8.8, -0.27, 2.81]]
+                                      ['y', -1, 2.25, 0.14, 4.57],
+                                      ['y', -1, -5.26, -2.13, 4.57],
+                                      ['y', -1, -8.8, -0.27, 2.81]]
         elif self.layout == '8 holes':
             self.threshold_rewards = [['x', -1, -4.63, 9.99, 11.4],
                                       ['x', -1, -10.07, 9.99, 11.4],
@@ -215,5 +227,4 @@ class LabyrinthRewardArea():
                                       ['x', -1, 10.52, -11.4, -6.34],
                                       ['x', -1, 7.8, -8.17, -4.66],
                                       ['y', -1, -9.13, 5.18, 7.46],
-                                      ['x', -1, 0.53, -11.4, -9.55]
-                                      ]
+                                      ['x', -1, 0.53, -11.4, -9.55]]
