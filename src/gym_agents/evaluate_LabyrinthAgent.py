@@ -48,8 +48,6 @@ if __name__ == '__main__':
     for e in range(1, episodes + 1):
 
         state, _ = env.reset()
-        #state = state[0] #env.reset liefert einen tupel und kein Array, konvertieren ins richtige format
-
         score = 0
         if env.layout == '8 holes':
             progress = 100
@@ -64,7 +62,7 @@ if __name__ == '__main__':
             state = next_state
             score += reward
             print(reward)
-            if done or score > 3000 or truncated: #war score 5000 und ohne truncated
+            if done or score > 3000 or truncated:
                 break
 
         scores.append(score)
