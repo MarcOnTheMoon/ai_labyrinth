@@ -25,7 +25,7 @@ class ServoCommunication:
         Parameters
         ----------
         port : String, optional
-            Port number for serial communication to the arduino
+            Port number for serial communication to the arduino, default COM5
 
         Returns
         -------
@@ -33,7 +33,7 @@ class ServoCommunication:
         """
 
         if port is None:
-            port = 'COM3'
+            port = 'COM5'
         arduino = serial.Serial(port=port, baudrate=115200, timeout=.1)
         self.__arduino = arduino
         self.__x_channel = 1  #Connected channel of the servo to the PWM driver

@@ -63,7 +63,7 @@ class ImageAcquisition():
         # Set rotation
         self.__isRotate180 = isRotate180
 
-        # Set initial region in camera frame regarded as pinball field
+        # Set initial region in camera frame regarded as labyrinth field
         boarder = 25
         self.__field['upper left'] = [boarder, boarder]
         self.__field['upper right'] = [self.__camera.width - boarder, boarder]
@@ -134,7 +134,7 @@ class ImageAcquisition():
 
     def __updatePerpectiveTransform(self):
         """
-        Update the 3x3 matrix to map ROI in frame to image containing pinball
+        Update the 3x3 matrix to map ROI in frame to image containing labyrinth
         field.
 
         Returns
@@ -149,7 +149,7 @@ class ImageAcquisition():
             self.__field['lower left'],
             self.__field['lower right']])
         
-        # Corners of destination ROI (i.e., image containing pinball field)
+        # Corners of destination ROI (i.e., image containing labyrinth field)
         dstCorners = np.float32([
             [0, 0],
             [self.__field['width'], 0],
@@ -186,13 +186,13 @@ class ImageAcquisition():
         if self.__isRotate180 == True:
             self.frame = cv2.rotate(self.frame, cv2.ROTATE_180)
         
-        # Get pinball area from camera frame
+        # Get labyrinth area from camera frame
         self.fieldImage = cv2.warpPerspective(
             self.frame,
             self.__transformMatrix,
             (self.__field['width'], self.__field['height']))
         
-        # Draw source ROI of pinball area in camera frame
+        # Draw source ROI of labyrinth area in camera frame
         if isDrawSourceROI:
             points = np.array([
                 self.__field['upper left'],
@@ -203,3 +203,7 @@ class ImageAcquisition():
             cv2.polylines(self.frame, [points], True, (0,0,255))
         
         return self.frame, self.fieldImage
+
+    def get_field(self):
+        #needed for calculating in the correct coordinate system
+        return self.__field['width'], self.__field['height']

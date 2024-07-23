@@ -25,6 +25,10 @@ project_dir = os.path.dirname(os.path.abspath(__file__))
 gym_dir = os.path.join(project_dir, '../gym')
 sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
+project_dir = os.path.dirname(os.path.abspath(__file__))
+prototype_dir = os.path.join(project_dir, '../prototype')
+sys.path.append(prototype_dir)
+from LabyrinthEnvironmentPrototype import LabyrinthEnvironmentPrototype
 
 path = "C:/Users/Sandra/Documents/" #lokal Path to load and store weight data
 
@@ -283,9 +287,10 @@ if __name__ == '__main__':
 
     # Init environment and agent
     #env = LabyrinthEnvironment(layout='0 holes real', render_mode='3D') #evaluate
-    env = LabyrinthEnvironment(layout='0 holes real', render_mode=None) #training
+    env = LabyrinthEnvironment(layout='2 holes real', render_mode=None) #training simulation
+    #env = LabyrinthEnvironmentPrototype(layout='0 holes real', cameraID=0) # training prototype
     agent = DqnAgent(state_size = 6, action_size = env.num_actions_per_component * 2)
-    #save_path = path + '2holesreal_dqnagent.pth'
+    #save_path = path + '0holesreal.pth'
     #agent.load(save_path)
     episodes = 1000
     scores = []
@@ -302,7 +307,7 @@ if __name__ == '__main__':
             agent.step(state, action, reward, next_state, done)
             state = next_state
             score += reward
-            if done or truncated or score > 2000: # score > 2000 nur bei 0 Holes
+            if done or truncated: # score > 2000 nur bei 0 Holes
                 break
 
         print(f'Episode {e} Score: {score}')

@@ -84,7 +84,7 @@ class App():
             startTime = time.time()
             
             # Get and process next camera frame
-            image, ballCenter, ballRadius = self.__processNextFrame()
+            image, ballCenter, ballRadius = self.processNextFrame()
 
             if ballCenter is not None:
                 print('Object at ({:5.1f}, {:5.1f}) with r = {:4.1f}'.format(ballCenter[0], ballCenter[1], ballRadius))
@@ -98,7 +98,7 @@ class App():
     # Imaging
     # ----------------------------------------------------------------------
 
-    def __processNextFrame(self):
+    def processNextFrame(self):
         """
         Get and analyse next image.
         
@@ -114,7 +114,7 @@ class App():
             Blob's radius or 0.0.
 
         """
-        # Get next camera frame and extracted pinball area
+        # Get next camera frame and extracted labyrinth area
         frame, image = self.imaging.nextFrame()
         ballCenter = None
         ballRadius = 0.0
