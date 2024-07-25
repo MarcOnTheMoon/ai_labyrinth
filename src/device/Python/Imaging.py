@@ -131,8 +131,6 @@ class Imaging():
 
         Returns
         -------
-        diffImage : numpy.ndarray
-            Gray-valued image of positive temporal differences.
         binImage : numpy.ndarray
             Binary difference image with detected blobs marked in color.
         ballCenter : [float, float]

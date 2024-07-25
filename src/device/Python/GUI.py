@@ -76,7 +76,7 @@ class GUI():
             Information on type of button event.
         x : int
             x-coordinate of the new point.
-        y : TYPE
+        y : int
             y-coordinate of the new point.
         flags : TYPE
             Not used.

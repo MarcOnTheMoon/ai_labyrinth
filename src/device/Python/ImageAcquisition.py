@@ -4,7 +4,7 @@ Acquire image input data for AI labyrinth.
 The data contains the original camera frame as well as the labyrinth area cut
 out (i.e., mapped to an image).
 
-@author: Marc Hensel
+@author: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 
 @copyright: 2024, Marc Hensel
@@ -205,5 +205,19 @@ class ImageAcquisition():
         return self.frame, self.fieldImage
 
     def get_field(self):
+        """
+            Get field width and height
+
+            Parameters
+            ----------
+            None
+
+            Returns
+            -------
+            int
+               Field width
+            int
+               Field height
+        """
         #needed for calculating in the correct coordinate system
         return self.__field['width'], self.__field['height']
