@@ -20,16 +20,14 @@ from tkinter import messagebox
 import os
 import sys
 
+from App import App
+from ServoCommunication import ServoCommunication
+
 project_dir = os.path.dirname(os.path.abspath(__file__))
 gym_dir = os.path.join(project_dir, '../../gym')
 sys.path.append(gym_dir)
-from LabyrinthEnvironment import LabyrinthEnvironment
 from LabyrinthGeometry import LabyrinthGeometry
 from LabyrinthRewardArea import LabyrinthRewardArea
-gym_dir = os.path.join(project_dir, '../device/Python')
-sys.path.append(gym_dir)
-from App import App
-from ServoCommunication import ServoCommunication
 
 class LabyrinthMachine(gym.Env):
     """
