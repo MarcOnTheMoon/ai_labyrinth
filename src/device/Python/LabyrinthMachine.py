@@ -21,7 +21,7 @@ import os
 import sys
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
-gym_dir = os.path.join(project_dir, '../gym')
+gym_dir = os.path.join(project_dir, '../../gym')
 sys.path.append(gym_dir)
 from LabyrinthEnvironment import LabyrinthEnvironment
 from LabyrinthGeometry import LabyrinthGeometry
@@ -31,7 +31,7 @@ sys.path.append(gym_dir)
 from App import App
 from ServoCommunication import ServoCommunication
 
-class LabyrinthEnvironmentPrototype(gym.Env):
+class LabyrinthMachine(gym.Env):
     """
     Observation space:
     ------------------
@@ -454,7 +454,7 @@ class LabyrinthEnvironmentPrototype(gym.Env):
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnvironmentPrototype(layout='0 holes real')
+    env = LabyrinthMachine(layout='0 holes real')
     env.reset()
 
     for action in [0, 1, 6, 6]:
