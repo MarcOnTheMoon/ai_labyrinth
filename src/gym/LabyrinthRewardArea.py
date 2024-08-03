@@ -27,16 +27,15 @@ class LabyrinthRewardArea():
 
         """
 
-        self.layout = layout
+        self.__layout = layout
 
         # ========== right direction reward ===========================================
         # The order of target points and areas is defined from the goal to the start.
         # target point coordinates [x, y].
-        if self.layout == '0 holes' or self.layout == '0 holes real':
+        if self.__layout == '0 holes' or self.__layout == '0 holes real':
             self.target_points = [[0, 0]]
 
-
-        elif self.layout == '2 holes':
+        elif self.__layout == '2 holes':
             self.target_points = [[-0.7, -5.98],
                                   [-0.7, -5.98],
                                   [-0.7, -5.98],
@@ -46,7 +45,7 @@ class LabyrinthRewardArea():
                                   [1.51, 5.72],
                                   [0.31, 7.92]]
     
-        elif self.layout == '2 holes real':
+        elif self.__layout == '2 holes real':
             self.target_points = [[1.24, -10.42],
                              [0.3, -6.77],
                              [-0.22, -3.57],
@@ -56,7 +55,7 @@ class LabyrinthRewardArea():
                              [2.71, 4.28],
                              [1.13, 6.55]]
     
-        elif self.layout == '8 holes':
+        elif self.__layout == '8 holes':
             self.target_points = [[-4.4, -10.32],
                              [-4.4, -10.32],
                              [6.92, -10.32],
@@ -102,10 +101,10 @@ class LabyrinthRewardArea():
                              [-12.45, 10.83],
                              [-12.45, 10.83]]
         # areas coordinates  [x_min, x_max, y_min, y_max]
-        if self.layout == '0 holes' or self.layout == '0 holes real':
+        if self.__layout == '0 holes' or self.__layout == '0 holes real':
             self.areas = [[-13.06, 13.06, -10.76, 10.76]]
 
-        elif self.layout == '2 holes':
+        elif self.__layout == '2 holes':
             self.areas = [[-3.15, 3.3, -6.55, -4.38],
                           [-3.15, 3.3, -4.38, -1.02],
                           [-3.15, 1.02, -1.02, 4.16],
@@ -115,7 +114,7 @@ class LabyrinthRewardArea():
                           [-0.74, 3.3, 6.44, 11.4],
                           [-3.15, -0.74, 6.44, 11.4]]
     
-        elif self.layout == '2 holes real':
+        elif self.__layout == '2 holes real':
             self.areas = [[-2.09, 4.6, -9.9, -6.05],
                           [-2.09, 1.96, -6.05, -2.92],
                           [-2.09, 1.96, -2.92, 2.28],
@@ -125,7 +124,7 @@ class LabyrinthRewardArea():
                           [0.14, 4.6, 5.03, 10.27],
                           [-2.09, 0.14, 5.03, 10.27]]
     
-        elif self.layout == '8 holes':
+        elif self.__layout == '8 holes':
             self.areas = [[-5.86, 0.14, -11.40, -9.52],
                           [0.14, 7.46, -11.40, -9.52],
                           [5.21, 7.46, -9.52, -4.63],
@@ -177,17 +176,17 @@ class LabyrinthRewardArea():
         # The order of thresholds is defined from the start to the goal.
         # threshold reward list [coordinate x or y of crossing, Direction of crossing, threshold, min range, max range]
         # with direction of crossing: 1 = from smaller to larger values, -1 = from larger to smaller values
-        if self.layout == '2 holes':
+        if self.__layout == '2 holes':
             self.threshold_rewards = [['x', 1, -0.93, 4.21, 11.4],
                                       ['y', -1, 4.21, -1.04, 3.28],
                                       ['y', -1, -0.96, -3.15, 3.28],
                                       ['y', -1, -4.35, -1.81, 1.71]]
-        elif self.layout == '2 holes real':
+        elif self.__layout == '2 holes real':
             self.threshold_rewards = [['x', 1, 0.14, 2.52, 11.4],
                                       ['y', -1, 2.25, 0.14, 4.57],
                                       ['y', -1, -5.26, -2.13, 4.57],
                                       ['y', -1, -8.8, -0.27, 2.81]]
-        elif self.layout == '8 holes':
+        elif self.__layout == '8 holes':
             self.threshold_rewards = [['x', -1, -4.63, 9.99, 11.4],
                                       ['x', -1, -10.07, 9.99, 11.4],
                                       ['y', -1, 7.09, -13.7, -11.87],

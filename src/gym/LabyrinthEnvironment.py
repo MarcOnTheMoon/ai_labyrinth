@@ -27,12 +27,15 @@ class LabyrinthEnvironment(gym.Env):
     Observation space:
     ------------------
     1. The xy-position of the ball (2 values, np.float32)
-    2. The xy-components of the ball's velocity vector (2 values, np.float32)
+    2. The last xy-position of the ball (2 values, np.float32)
+       (also possible xy-components of the ball's velocity vector)
     3. The field's x- and y-rotation angles in degree (2 values, np.float32)
         
     Action space:
     -------------
-    To be defined
+    A Discrete space where the number of actions is `2 * self.num_actions_per_component`.
+    `self.num_actions_per_component` is the number of discrete angle options per x- and y-component,
+    there are 5 to 7 components per axis.
     """
 
     metadata = {'render_modes': ['3D']}
@@ -46,8 +49,8 @@ class LabyrinthEnvironment(gym.Env):
         The parameters include two time periods dt, where actions_dt specifies
         the frequency with which a reinforcement agent shall take actions,
         while physics_dt specifies the frequency with which ball movements are
-        updated. The physics need to be updated in small time intervalls to
-        prevent the ball virutalle moving through walls.
+        updated. The physics need to be updated in smaller time intervals to
+        prevent the ball virtual moving through walls.
         
         For instance:
             actions_dt=0.1 means that an action is taken every 100 ms.
@@ -57,7 +60,7 @@ class LabyrinthEnvironment(gym.Env):
         Parameters
         ----------
         layout : string
-            Layout of holes and walls as defined in LabyrinthGeometry.py. The default is '8 holes'
+            Layout of holes and walls as defined in LabyrinthGeometry.py.
         render_mode : String, optional
             Render mode to visualize the states (or None). The default is '3D'.
         actions_dt : float, optional
@@ -78,7 +81,6 @@ class LabyrinthEnvironment(gym.Env):
         
         # Create labyrinth geometry
         self.__geometry = LabyrinthGeometry(layout=layout)
-        self.layout = layout
 
         # Defines geometric dimensions for reward calculations
         self.__rewardarea = LabyrinthRewardArea(layout=layout)
@@ -96,73 +98,63 @@ class LabyrinthEnvironment(gym.Env):
 
         # Rendering
         assert render_mode is None or render_mode in self.metadata["render_modes"]
-        self.render_mode = render_mode
-        if self.render_mode == '3D':
+        self.__render_mode = render_mode
+        if self.__render_mode == '3D':
             self.__render_3d = LabyrinthRender3D(self.__geometry)
-            self.render()
+            self.__render()
 
         # Declare observation space (see class documentation above)
-        self.observation_space = spaces.Box(
+        self.__observation_space = spaces.Box(
             low=np.array([-np.inf, -np.inf, -np.inf, -np.inf, -np.inf, -np.inf], dtype=np.float32),
             high=np.array([np.inf, np.inf, np.inf, np.inf, np.inf, np.inf], dtype=np.float32)
         )
 
-
         # Declare action space (see class documentation above)
-        #self.action_space = spaces.MultiDiscrete([num_actions_per_component, num_actions_per_component]) # MultiDiscrete Aktionsraum erlaubt es, für jede Komponente (x und y) unabhängige diskrete Werte zu definieren. Hier haben beide Komponenten 9 mögliche Werte.
-        #self.__action_to_angle_degree = [-2, -1.5, -1, -0.5, 0, 0.5, 1, 1.5, 2]
         self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
         if (self.__geometry.layout == '2 holes real'):
             self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
         self.num_actions_per_component = len(self.__action_to_angle_degree)
-        self.action_space = spaces.Discrete(2 * self.num_actions_per_component)
 
-        self.firstepisode = True
+        self.__firstepisode = True
 
     # ========== Reset ========================================================
 
-    def reset(self, seed=None):
+    def reset(self):
         """
         Reset the environment.
 
         Parameters
         ----------
-        seed : int, optional
-            Seed to initialize the random generator. The default is None.
+        None
 
         Returns
         -------
-        Dict
+        numpy.ndarray
             Observation.
         None
             Information (currently not used).
 
         """
-        # Set random seed
-        super().reset(seed=seed)
-
-        self.number_actions = 0 # action history counter
-
         # set different start positions
-        if (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real') and not self.firstepisode:
-            #area_start = [-6.06, 6.06, -5.76, 5.76]  # 0_hole, innerer bereich
-            area_start = [-13.06, 13.06, -10.76, 10.76]
+        if (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real') and not self.__firstepisode:
+            #area_start = [-6.06, 6.06, -5.76, 5.76]  # inner area, closer to middel
+            area_start = [-13.06, 13.06, -10.76, 10.76] # outer area
             self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
             self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
-        elif (self.__geometry.layout == '2 holes real') and not self.firstepisode:
+        elif (self.__geometry.layout == '2 holes real') and not self.__firstepisode:
             startpoint = [-0.79, 9.86]
             self.__ball_start_position.x = startpoint[0] + random.uniform(-0.4, 0.4)
             self.__ball_start_position.y = startpoint[1] + random.uniform(-0.4, 0.4)
-        elif (self.__geometry.layout == '8 holes') and not self.firstepisode:
-            startpoints = [[4.54, 9.6], [-1.2, 1.14], [3.35, -2.99], [0.94, -5.23], [-5.82, -5.23], [-12.6, -7.03]]
+        elif (self.__geometry.layout == '8 holes') and not self.__firstepisode:
+            startpoints = [[-5.82, -5.23], [-12.6, -7.03], [-9.8, -1.49], [-3.8, 1.29], [-12.85, 3.92], [0.13, 10.53]]
             start_index = random.randint(0, len(startpoints )-1)
             self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
             self.__ball_start_position.y = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
 
-        self.firstepisode = False
+        self.__firstepisode = False
 
         # observation space
-        self.observation_space = np.array([
+        self.__observation_space = np.array([
             round(self.__ball_start_position.x, 3),
             round(self.__ball_start_position.y, 3),
             #0.0,
@@ -183,27 +175,32 @@ class LabyrinthEnvironment(gym.Env):
         self.__ball_physics.reset(position=self.__ball_start_position)
 
         # Rendering (ball in hole became invisible)
-        if self.render_mode == '3D':
-            self.render()
+        if self.__render_mode == '3D':
+            self.__render()
             self.__render_3d.ball_visibility(True)
 
-        #interim reward counter for threshold reward
-        self.__interim_reward_counter = 0
+        # Init counters
+        self.__number_actions = 0  # action history counter
+        self.__interim_reward_counter = 0 # interim reward counter for threshold reward
 
-        return self.observation_space, {}
+        return self.__observation_space, {}
 
     # ========== Rendering ====================================================
 
-    def render(self):
+    def __render(self):
         """
         Render state.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
         None.
 
         """
-        if self.render_mode == '3D':
+        if self.__render_mode == '3D':
             # Field rotation
             self.__render_3d.rotate_to(self.__x_degree, self.__y_degree)
             
@@ -213,23 +210,25 @@ class LabyrinthEnvironment(gym.Env):
                 
             # Ball position
             self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y)
-            
-            # Update timestamp
-            self.__last_render_timestamp_sec = time.time()
 
 
     #=========== right direction reward =======================================
-    def interim_reward(self):
+    def __interim_reward(self):
         """
         Calculation to determine if the ball moved in the correct direction.
 
+        Parameters
+        ----------
+        None
+
         Returns
         -------
-        True, if the ball has made a larger positional change in the correct maze direction
+        boolean
+            True, if the ball has made a larger positional change in the correct maze direction
 
         """
-        self.__progress = 0
-        self.__right_direction = False
+        self.__progress = 0 # Progress describes the labyrintharea advancement, with numbering increasing from the goal to start, because the areas are defined from the goal to the start.
+        self.__right_direction = False # __right_direction change to True when the ball made a smaller positional change in the correct maze direction
         for x_min, x_max, y_min, y_max in self.__rewardarea.areas:
             if x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x and y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y:
                 self.__last_distance = (self.__last_ball_position.x - self.__rewardarea.target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - self.__rewardarea.target_points[self.__progress][1]) ** 2
@@ -247,9 +246,14 @@ class LabyrinthEnvironment(gym.Env):
         return False
 
     # ========== threshold reward ===========================================
-    def threshold_reward(self):
+    def __threshold_reward(self):
         """
         Calculates whether a defined threshold is crossed.
+        (Not used now, but can be used to try threshold rewards)
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -269,37 +273,41 @@ class LabyrinthEnvironment(gym.Env):
         if axis == 'x':
             if direction < 0:
                 if self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                    self.__interim_reward_counter += 1  # Richtige Richung
+                    self.__interim_reward_counter += 1  # right crossing direction
                     return 1
                 elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                    self.__interim_reward_counter -= 1  ##Falsche Richtung
+                    self.__interim_reward_counter -= 1  # false crossing direction
                     return -1
             elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                self.__interim_reward_counter += 1  # Richtige Richtung
+                self.__interim_reward_counter += 1  # right crossing direction
                 return 1
             elif self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                self.__interim_reward_counter -= 1  # Falsche Richtung
+                self.__interim_reward_counter -= 1  # false crossing direction
                 return -1
         else:  # axis == 'y'
             if direction < 0:
                 if self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                    self.__interim_reward_counter += 1  # richtige Richtung
+                    self.__interim_reward_counter += 1  # right crossing direction
                     return 1
                 elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                    self.__interim_reward_counter -= 1  # falsche Richtung
+                    self.__interim_reward_counter -= 1  # false crossing direction
                     return -1
             elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                self.__interim_reward_counter += 1
+                self.__interim_reward_counter += 1 # right crossing direction
                 return 1
             elif self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                self.__interim_reward_counter -= 1
+                self.__interim_reward_counter -= 1 # false crossing direction
                 return -1
         return 0
 
     # ========== 0hole reward ===========================================
-    def zerohole_reward(self):
+    def __zerohole_reward(self):
         """
         calculates in witch circular segment the ball is lacated
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -326,9 +334,13 @@ class LabyrinthEnvironment(gym.Env):
         return radius_progress
 
     # ========== close_hole_discount reward ===================================
-    def close_hole_discount(self):
+    def __close_hole_discount(self):
         """
         Calculates whether the ball is near a hole.
+
+        Parameters
+        ----------
+        None
 
         Returns
         -------
@@ -358,7 +370,7 @@ class LabyrinthEnvironment(gym.Env):
 
         Returns
         -------
-        observation :
+        observation : numpy.ndarray
             Observation after applying the action.
         reward : int
             Reward of applying the action.
@@ -366,8 +378,8 @@ class LabyrinthEnvironment(gym.Env):
             True if the episode has ended, else False.
         truncated : boolean
             True if the episode is terminated due to too many actions being taken.
-        info : dict
-            Information (currently not used).
+        info : int
+            Information: used for progress information for the evaluation of game plate 8 holes
 
         """
         # Field's rotation angles before and after applying the action
@@ -418,7 +430,9 @@ class LabyrinthEnvironment(gym.Env):
                         y_rad = start_y_rad + (i-deadtime) * max_delta
                 self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)
 
-            """delta_x_rad = (stop_x_rad - start_x_rad) / self.__physics_steps_per_action
+            """
+            # old field rotation
+            delta_x_rad = (stop_x_rad - start_x_rad) / self.__physics_steps_per_action
             delta_y_rad = (stop_y_rad - start_y_rad) / self.__physics_steps_per_action
             
             for i in range (self.__physics_steps_per_action):
@@ -432,16 +446,16 @@ class LabyrinthEnvironment(gym.Env):
         self.__y_degree = stop_y_degree
         
         # Rendering active (Wait until period between steps has passed and render)
-        if self.render_mode == '3D':
+        if self.__render_mode == '3D':
             timestamp = time.time()
             elapsed_time = timestamp - self.__last_action_timestamp_sec
             wait_time = float(max(self.__actions_dt - elapsed_time, 0))
             time.sleep(wait_time)
             self.__last_action_timestamp_sec = timestamp + wait_time
-            self.render()
+            self.__render()
             
         # Observation_space
-        self.observation_space = np.array([
+        self.__observation_space = np.array([
             round(self.__ball_position.x, 3), #Runden auf 3 nachkommastellen
             round(self.__ball_position.y, 3),
             #round(self.__ball_physics.get_velocity().x, 3),
@@ -460,7 +474,7 @@ class LabyrinthEnvironment(gym.Env):
         # Ball has fallen into a hole?
         if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
             is_ball_in_hole = self.__ball_physics.is_ball_in_hole
-            is_ball_to_close_hole = self.close_hole_discount()
+            is_ball_to_close_hole = self.__close_hole_discount()
         else:
             is_ball_in_hole = False
             is_ball_to_close_hole = False
@@ -476,7 +490,7 @@ class LabyrinthEnvironment(gym.Env):
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
                 reward = -15
-            elif self.interim_reward():
+            elif self.__interim_reward():
                 reward = 6/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
             elif self.__right_direction:
                 reward = -1
@@ -492,7 +506,7 @@ class LabyrinthEnvironment(gym.Env):
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
                 reward = -10
-            elif self.interim_reward():
+            elif self.__interim_reward():
                 reward = 3/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
             elif self.__right_direction:
                 reward= -1
@@ -508,7 +522,7 @@ class LabyrinthEnvironment(gym.Env):
             elif is_ball_to_close_hole:
                 print("Ball close to hole")
                 reward = -10
-            elif self.interim_reward():
+            elif self.__interim_reward():
                 reward = 3 / len(self.__rewardarea.areas) * (len(self.__rewardarea.areas) - self.__progress)  # Positively reward progress, giving more reward for each additional tile in the correct movement direction.
             elif self.__right_direction:
                 reward = -1
@@ -518,7 +532,7 @@ class LabyrinthEnvironment(gym.Env):
             if is_ball_at_destination:
                 print("Ball reached destination")
                 reward = 600
-            elif self.interim_reward():
+            elif self.__interim_reward():
                 if self.__current_distance < 1.25 ** 2:
                     reward = 100
                     print("close to destination_3")
@@ -540,12 +554,12 @@ class LabyrinthEnvironment(gym.Env):
                 else:
                     reward = -1
         else: #self.__geometry.layout == '0 holes real':
-            self.interim_reward()
-            progress = self.zerohole_reward()
+            self.__interim_reward()
+            progress = self.__zerohole_reward()
             if is_ball_at_destination:
                 print("Ball reached destination")
                 reward = 600
-            elif (self.interim_reward() or self.__right_direction) and progress != 1:
+            elif (self.__interim_reward() or self.__right_direction) and progress != 1:
                 if progress == 2:
                     reward = -0.4
                 elif progress == 3:
@@ -568,18 +582,18 @@ class LabyrinthEnvironment(gym.Env):
 
         # Episode completed or truncated?
         done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real'
-        self.number_actions += 1 # Action history
+        self.__number_actions += 1 # Action history
 
-        if self.number_actions >= 300 and (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
+        if self.__number_actions >= 300 and (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
             truncated = True
-        elif self.number_actions >= 500 and (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
+        elif self.__number_actions >= 500 and (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
             truncated = True
-        elif self.number_actions >= 800 and self.__geometry.layout == '8 holes':
+        elif self.__number_actions >= 800 and self.__geometry.layout == '8 holes':
             truncated = True
         else:
             truncated = False
 
-        return self.observation_space, reward, done, truncated, self.__progress
+        return self.__observation_space, reward, done, truncated, self.__progress
 
 
 # -----------------------------------------------------------------------------
