@@ -227,3 +227,49 @@ class LabyrinthRewardArea():
                                       ['x', -1, 7.8, -8.17, -4.66],
                                       ['y', -1, -9.13, 5.18, 7.46],
                                       ['x', -1, 0.53, -11.4, -9.55]]
+
+
+        # ========== reward dictionarys =========================================
+        if self.__layout == '2 holes' or self.__layout == '2 holes real':
+            self.reward_dict = {
+                'is_ball_at_destination': 600,
+                'is_ball_in_hole': -200,
+                'is_ball_to_close_hole': -10,
+                'interim_reward': lambda progress, areas: 3 / len(areas) * (len(areas) - progress),
+                'right_direction': -1,
+                'default': -2}
+        elif self.__layout == '8 holes':
+            self.reward_dict = {
+                'is_ball_at_destination': 1000,
+                'is_ball_in_hole': -300,
+                'is_ball_to_close_hole': -15,
+                'interim_reward': lambda progress, areas: 6 / len(areas) * (len(areas) - progress),
+                'right_direction': -1,
+                'default': -2}
+
+        #The higher the first number for interim or default, the closer the circle element is to the center (smaller the circle) in which the ball is located
+        elif self.__layout == '0 holes':
+            self.reward_dict = {
+                'destination': 600,
+                'interim': {
+                    4: 100,
+                    3: 20,
+                    2: 2,
+                    'default': -0.2 },
+                'default': {
+                    4: -0.2,
+                    3: -0.4,
+                    'default': -1 }}
+        elif self.__layout == '0 holes':
+            self.reward_dict = {
+                'destination': 600,
+                'interim': {
+                    6: 100,
+                    5: 25,
+                    4: 2,
+                    3: -0.2,
+                    2: -0.4 },
+                'default': {
+                    6: -0.2,
+                    5: -0.4,
+                    'default': -2 }}

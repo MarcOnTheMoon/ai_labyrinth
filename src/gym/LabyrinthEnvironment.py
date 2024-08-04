@@ -480,105 +480,34 @@ class LabyrinthEnvironment(gym.Env):
             is_ball_to_close_hole = False
 
         # Reward
-        if self.__geometry.layout == '8 holes':
+        if self.__geometry.layout == '8 holes' or self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real':
             if is_ball_at_destination:
+                reward = self.__rewardarea.reward_dict['is_ball_at_destination']
                 print("Ball reached destination")
-                reward = 1000
             elif is_ball_in_hole:
+                reward = self.__rewardarea.reward_dict['is_ball_in_hole']
                 print("Ball lost")
-                reward = -300
             elif is_ball_to_close_hole:
+                reward = self.__rewardarea.reward_dict['is_ball_to_close_hole']
                 print("Ball close to hole")
-                reward = -15
             elif self.__interim_reward():
-                reward = 6/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
+                reward = self.__rewardarea.reward_dict['interim_reward'](self.__progress, self.__rewardarea.areas)
             elif self.__right_direction:
-                reward = -1
+                reward = self.__rewardarea.reward_dict['right_direction']
             else:
-                reward = -2
-        elif self.__geometry.layout == '2 holes':
-            if is_ball_at_destination:
-                print("Ball reached destination")
-                reward = 600
-            elif is_ball_in_hole:
-                print("Ball lost")
-                reward = -200
-            elif is_ball_to_close_hole:
-                print("Ball close to hole")
-                reward = -10
-            elif self.__interim_reward():
-                reward = 3/len(self.__rewardarea.areas) *(len(self.__rewardarea.areas)-self.__progress) #Positively reward progress, giving more reward for each additional tile in the correct movement direction.
-            elif self.__right_direction:
-                reward= -1
-            else:
-                reward = -2
-        elif self.__geometry.layout == '2 holes real':
-            if is_ball_at_destination:
-                print("Ball reached destination")
-                reward = 600
-            elif is_ball_in_hole:
-                print("Ball lost")
-                reward = -200
-            elif is_ball_to_close_hole:
-                print("Ball close to hole")
-                reward = -10
-            elif self.__interim_reward():
-                reward = 3 / len(self.__rewardarea.areas) * (len(self.__rewardarea.areas) - self.__progress)  # Positively reward progress, giving more reward for each additional tile in the correct movement direction.
-            elif self.__right_direction:
-                reward = -1
-            else:
-                reward = -2
-        elif self.__geometry.layout == '0 holes':
-            if is_ball_at_destination:
-                print("Ball reached destination")
-                reward = 600
-            elif self.__interim_reward():
-                if self.__current_distance < 1.25 ** 2:
-                    reward = 100
-                    print("close to destination_3")
-                elif self.__current_distance < 2.5 ** 2:
-                    reward = 20
-                    print("close to destination_2")
-                elif self.__current_distance < 5 ** 2:
-                    reward = 2
-                    print("close to destination_1")
-                else:
-                    reward = -0.2
-                    #print("right direction")
-            else:
-                if self.__current_distance < 1.25 ** 2:
-                    reward = -0.2
-                    print("close to destination false direction")
-                    if self.__current_distance < 2.5 ** 2:
-                        reward = -0.4
-                else:
-                    reward = -1
-        else: #self.__geometry.layout == '0 holes real':
-            self.__interim_reward()
+                reward = self.__rewardarea.reward_dict['default']
+        elif self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real':
+            interim_reward = self.__interim_reward()
             progress = self.__zerohole_reward()
             if is_ball_at_destination:
                 print("Ball reached destination")
-                reward = 600
-            elif (self.__interim_reward() or self.__right_direction) and progress != 1:
-                if progress == 2:
-                    reward = -0.4
-                elif progress == 3:
-                    reward = -0.2
-                elif progress == 4:
-                    reward = 2
-                elif progress == 5:
-                    reward = 25
-                elif progress == 6:
-                    reward = 100
-            elif progress == 6:
-                reward = -0.2
-            elif progress == 5:
-                reward = -0.4
+                reward = self.__rewardarea.reward_dict['destination']
+            elif interim_reward or self.__right_direction:
+                reward = self.__rewardarea.reward_dict['interim'].get(progress, self.__rewardarea.reward_dict['interim']['default'])
+                if reward == 100:
+                    print("Ball is close to center")
             else:
-                reward = -2
-            if self.__current_distance < 1.25 ** 2:
-                print("close to destination")
-
+                reward = self.__rewardarea.reward_dict['default'].get(progress, self.__rewardarea.reward_dict['default']['default'])
 
         # Episode completed or truncated?
         done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real'
@@ -601,12 +530,12 @@ class LabyrinthEnvironment(gym.Env):
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnvironment(layout='8 holes', render_mode='3D')
+    env = LabyrinthEnvironment(layout='0 holes', render_mode='3D')
     env.reset()
 
-    for action in [0, 1, 6, 6]:
-        env.step(action)
-    for action in range(4):
-        env.step(6)
-    for action in range(20):
+    """for action in [0, 4, 6, 6]:
+        env.step(action)"""
+    for action in range(5):
+        env.step(1)
+    for action in range(30):
         env.step(9)
