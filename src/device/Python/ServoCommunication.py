@@ -2,9 +2,6 @@
 The pulse width is determined from the desired angular positions according to
 the used servos and transmitted to the Arduino via a serial interface.
 
-In order to be able to establish serial communication with the Arduino install
-Pyserial in Anaconda by the command 'conda install conda-forge::pyserial'.
-
 @authors: Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
@@ -12,9 +9,10 @@ Pyserial in Anaconda by the command 'conda install conda-forge::pyserial'.
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 
-import serial
 import math
 import time
+from ArduinoCOM import ArduinoCOM
+
 class ServoCommunication:
 
     # ========== Constructor ==================================================
@@ -32,26 +30,21 @@ class ServoCommunication:
         None.
         """
 
-        if port is None:
-            port = 'COM5'
-        arduino = serial.Serial(port=port, baudrate=115200, timeout=.1)
+        arduino = ArduinoCOM(serialCOM = port, baudRate = 115200, readTimeoutSec = .1)
+    
         self.__arduino = arduino
-        self.__x_channel = 1  #Connected channel of the servo to the PWM driver
-        self.__x_pulse_width_max = 2650 #The maximum and minimum pulse width is different for each servo
-        self.__x_pulse_width_min = 350
-        self.__x_pulse_middle = (self.__x_pulse_width_max + self.__x_pulse_width_min) / 2
-        self.__x_pulse_per_degree = (self.__x_pulse_width_max - self.__x_pulse_middle)/(math.asin(8.6/155.5)*180/math.pi)
-        self.__x_degree = 0.0
-        self.__x_min_degree = (self.__x_pulse_width_min - self.__x_pulse_middle) / self.__x_pulse_per_degree
-        self.__x_max_degree = (self.__x_pulse_width_max - self.__x_pulse_middle) / self.__x_pulse_per_degree
-        self.__y_channel = 0
-        self.__y_pulse_width_max = 2540
-        self.__y_pulse_width_min = 420
-        self.__y_pulse_middle = (self.__y_pulse_width_max + self.__y_pulse_width_min) / 2
-        self.__y_pulse_per_degree = (self.__y_pulse_width_max - self.__y_pulse_middle) / (math.asin(5.2 / 122.5) * 180 / math.pi)
-        self.__y_degree = 0.0
-        self.__y_min_degree = (self.__y_pulse_width_min - self.__y_pulse_middle) / self.__y_pulse_per_degree
-        self.__y_max_degree = (self.__y_pulse_width_max - self.__y_pulse_middle) / self.__y_pulse_per_degree
+        self.__channel = [1, 0] #Connected channel of the servo to the PWM driver, [x,y]
+        self.__pulse_width_max = [2650, 2540] #The maximum and minimum pulse width is different for each servo
+        self.__pulse_width_min = [350, 420]
+        self.__pulse_middle = [((self.__pulse_width_max[0] + self.__pulse_width_min[0]) / 2), 
+                               ((self.__pulse_width_max[1] + self.__pulse_width_min[1]) / 2)]
+        self.__pulse_per_degree = [((self.__pulse_width_max[0] - self.__pulse_middle[0])/(math.asin(8.6/155.5)*180/math.pi)), 
+                                   ((self.__pulse_width_max[1] - self.__pulse_middle[1]) / (math.asin(5.2 / 122.5) * 180 / math.pi))]
+        self.__degree = [0.0, 0.0]
+        self.__min_degree = [((self.__pulse_width_min[0] - self.__pulse_middle[0]) / self.__pulse_per_degree[0]), 
+                             ((self.__pulse_width_min[1] - self.__pulse_middle[1]) / self.__pulse_per_degree[1])]
+        self.__max_degree = [((self.__pulse_width_max[0] - self.__pulse_middle[0]) / self.__pulse_per_degree[0]),
+                             ((self.__pulse_width_max[1] - self.__pulse_middle[1]) / self.__pulse_per_degree[1])]
 
     # ========== transmit message to the Arduino =========================================
     def __write_pulse(self, channel):
@@ -67,15 +60,15 @@ class ServoCommunication:
         -------
 
         """
-        if channel == self.__x_channel:
+        if channel == self.__channel[0]:
             command = str(channel) + ";" + str(self.__x_pulse)
-        elif channel == self.__y_channel:
+        elif channel == self.__channel[1]:
             command = str(channel) + ";" + str(self.__y_pulse)
 
         print(command)
-        self.__arduino.write(bytes(command, 'ascii'))
+        self.__arduino.writeData(command)
         time.sleep(0.05)
-        data = self.__arduino.readline().decode('ascii').strip()
+        data = self.__arduino.readLine()
         return data
 
     # ========== Calculate degree to pulse ====================================
@@ -92,14 +85,14 @@ class ServoCommunication:
         -------
         None.
         """
-        self.__x_pulse = int(self.__x_degree * self.__x_pulse_per_degree + self.__x_pulse_middle)
+        self.__x_pulse = int(self.__degree[0] * self.__pulse_per_degree[0] + self.__pulse_middle[0])
         #Check whether the calculated pulse width is within the permitted range, otherwise limit it
-        if self.__x_pulse < self.__x_pulse_width_min:
-            self.__x_pulse = self.__x_pulse_width_min
-            self.__x_degree = self.__x_min_degree
-        elif self.__x_pulse > self.__x_pulse_width_max:
-            self.__x_pulse = self.__x_pulse_width_max
-            self.__x_degree = self.__x_max_degree
+        if self.__x_pulse < self.__pulse_width_min[0]:
+            self.__x_pulse = self.__pulse_width_min[0]
+            self.__degree[0] = self.__min_degree[0]
+        elif self.__x_pulse > self.__pulse_width_max[0]:
+            self.__x_pulse = self.__pulse_width_max[0]
+            self.__degree[0] = self.__max_degree[0]
 
     # -------------------------------------------------------------------------
     def __calc_y_degree_to_pulse(self):
@@ -115,14 +108,14 @@ class ServoCommunication:
         -------
         None.
         """
-        self.__y_pulse = int(self.__y_degree * self.__y_pulse_per_degree + self.__y_pulse_middle)
+        self.__y_pulse = int(self.__degree[1] * self.__pulse_per_degree[1] + self.__pulse_middle[1])
         # Check whether the calculated pulse width is within the permitted range, otherwise limit it
-        if self.__y_pulse < self.__y_pulse_width_min:
-            self.__y_pulse = self.__y_pulse_width_min
-            self.__y_degree = self.__y_min_degree
-        elif self.__y_pulse > self.__y_pulse_width_max:
-            self.__y_pulse = self.__y_pulse_width_max
-            self.__y_degree = self.__y_max_degree
+        if self.__y_pulse < self.__pulse_width_min[1]:
+            self.__y_pulse = self.__pulse_width_min[1]
+            self.__degree[1] = self.__min_degree[1]
+        elif self.__y_pulse > self.__pulse_width_max[1]:
+            self.__y_pulse = self.__pulse_width_max[1]
+            self.__degree[1] = self.__max_degree[1]
 
     # ========== function for rotating =======================================
     def rotate_by_angle(self, x_degree = None, y_degree = None):
@@ -141,13 +134,13 @@ class ServoCommunication:
 
         """
         if x_degree != None:
-            self.__x_degree += x_degree
+            self.__degree[0] += x_degree
             self.__calc_x_degree_to_pulse()
-            channel = self.__x_channel
+            channel = self.__channel[0]
         if y_degree != None:
-            self.__y_degree += y_degree
+            self.__degree[1] += y_degree
             self.__calc_y_degree_to_pulse()
-            channel = self.__y_channel
+            channel = self.__channel[1]
 
         data = self.__write_pulse(channel)
         return data
@@ -169,13 +162,13 @@ class ServoCommunication:
 
         """
         if x_degree != None:
-            self.__x_degree = x_degree
+            self.__degree[0] = x_degree
             self.__calc_x_degree_to_pulse()
-            channel = self.__x_channel
+            channel = self.__channel[0]
         elif y_degree != None:
-            self.__y_degree = y_degree
+            self.__degree[1] = y_degree
             self.__calc_y_degree_to_pulse()
-            channel = self.__y_channel
+            channel = self.__channel[1]
 
         data = self.__write_pulse(channel)
         return data

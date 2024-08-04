@@ -260,7 +260,7 @@ class LabyrinthRewardArea():
                     4: -0.2,
                     3: -0.4,
                     'default': -1 }}
-        elif self.__layout == '0 holes':
+        elif self.__layout == '0 holes real':
             self.reward_dict = {
                 'destination': 600,
                 'interim': {

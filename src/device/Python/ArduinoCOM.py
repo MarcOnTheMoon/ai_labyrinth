@@ -1,7 +1,7 @@
 """
 Communcation with Arduino board using USB.
 
-@author: Marc Hensel
+@author: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 
 @copyright: 2023, Marc Hensel
@@ -117,25 +117,25 @@ class ArduinoCOM():
         Returns
         -------
         string
-            Data read from port (8-bit Unicode, without new line symbol) or None.
+            Data read from port.
 
         """
         if self._serial != None:
-            data = self._serial.readline()
+            data = self._serial.readline().decode('ascii').strip()
             if data:
-                return str(data, 'utf-8').rstrip('\n')
+                return data
         return None
 
     # ----------------------------------------------------------------------
 
-    def writeString(self, data):
+    def writeData(self, data):
         """
-        Send string data to a connected Arduino.
+        Send data to a connected Arduino.
 
         Parameters
         ----------
-        data : string
-            Data to send (gets encoded as 8-bit Unicode).
+        data : bytes
+            Data to send.
 
         Returns
         -------
@@ -144,7 +144,7 @@ class ArduinoCOM():
 
         """
         if self._serial != None:
-            self._serial.write(data.encode('utf-8'))
+            self._serial.write(bytes(data, 'ascii'))
             self._serial.flush()
             return True
         else:
