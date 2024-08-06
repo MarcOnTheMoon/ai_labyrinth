@@ -37,19 +37,19 @@ class LabyrinthQNet(nn.Module): # LabyrinthQNet, die von nn.Module erbt. nn.Modu
 
         """
         super(LabyrinthQNet, self).__init__() #Calls the constructor of the base class (nn.Module). This is necessary to properly initialize inheritance
-        self.__fc1 = nn.Linear(state_size, fc1_units) #Defines the first fully connected layer (Linear Layer) with state_size input neurons and fc1_units output neurons
-        self.__bn1 = nn.BatchNorm1d(fc1_units) #Performs batch normalization for a 1-dimensional (1D) tensor. 1D Tensor typically in fully connected layers
-        self.__fc2 = nn.Linear(fc1_units, fc2_units) # Defines the second fully connected layers with fc1_units input neurons and fc2_units output neurons
-        self.__bn2 = nn.BatchNorm1d(fc2_units)
-        self.__fc3 = nn.Linear(fc2_units, fc3_units)
-        self.__bn3 = nn.BatchNorm1d(fc3_units)
-        self.__fc4 = nn.Linear(fc3_units, action_size) #Defines the fourth fully connected layer with fc3_units input neurons and action_size output neurons. This layer outputs the Q-values for each possible action.
+        self.fc1 = nn.Linear(state_size, fc1_units) #Defines the first fully connected layer (Linear Layer) with state_size input neurons and fc1_units output neurons
+        self.bn1 = nn.BatchNorm1d(fc1_units) #Performs batch normalization for a 1-dimensional (1D) tensor. 1D Tensor typically in fully connected layers
+        self.fc2 = nn.Linear(fc1_units, fc2_units) # Defines the second fully connected layers with fc1_units input neurons and fc2_units output neurons
+        self.bn2 = nn.BatchNorm1d(fc2_units)
+        self.fc3 = nn.Linear(fc2_units, fc3_units)
+        self.bn3 = nn.BatchNorm1d(fc3_units)
+        self.fc4 = nn.Linear(fc3_units, action_size) #Defines the fourth fully connected layer with fc3_units input neurons and action_size output neurons. This layer outputs the Q-values for each possible action.
 
         # Weight initialization using He-initialization with uniform distribution
-        nn.init.kaiming_uniform_(self.__fc1.weight)
-        nn.init.kaiming_uniform_(self.__fc2.weight)
-        nn.init.kaiming_uniform_(self.__fc3.weight)
-        nn.init.kaiming_uniform_(self.__fc4.weight)
+        nn.init.kaiming_uniform_(self.fc1.weight)
+        nn.init.kaiming_uniform_(self.fc2.weight)
+        nn.init.kaiming_uniform_(self.fc3.weight)
+        nn.init.kaiming_uniform_(self.fc4.weight)
 
     def forward(self, state):
         """
@@ -62,11 +62,11 @@ class LabyrinthQNet(nn.Module): # LabyrinthQNet, die von nn.Module erbt. nn.Modu
 
             Returns
             -------
-                self.__fc4(x): torch.Tensor
+                self.fc4(x): torch.Tensor
                     Compute Q-values for the input state.
 
         """
-        x = F.leaky_relu(self.__bn1(self.__fc1(state))) #The input state is passed through the first fully connected layer fc1, then through batch normalization, and then through the leaky ReLU activation function. The result is stored in x.
-        x = F.leaky_relu(self.__bn2(self.__fc2(x))) # The output of the first layer is passed through the second fully connected layers fc2, then through batch normalization, and then again through the leaky ReLU activation function. The result is stored in x.
-        x = F.leaky_relu(self.__bn3(self.__fc3(x)))
-        return self.__fc4(x) #The output of the third layer is passed through fc4. This layer has no activation function because it outputs the final Q-values for each action.
+        x = F.leaky_relu(self.bn1(self.fc1(state))) #The input state is passed through the first fully connected layer fc1, then through batch normalization, and then through the leaky ReLU activation function. The result is stored in x.
+        x = F.leaky_relu(self.bn2(self.fc2(x))) # The output of the first layer is passed through the second fully connected layers fc2, then through batch normalization, and then again through the leaky ReLU activation function. The result is stored in x.
+        x = F.leaky_relu(self.bn3(self.fc3(x)))
+        return self.fc4(x) #The output of the third layer is passed through fc4. This layer has no activation function because it outputs the final Q-values for each action.

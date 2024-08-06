@@ -23,16 +23,14 @@ class ServoCommunication:
         Parameters
         ----------
         port : String, optional
-            Port number for serial communication to the arduino, default COM5
+            Port number for serial communication to the arduino
 
         Returns
         -------
         None.
         """
+        self.__arduino = ArduinoCOM(serialCOM = port, baudRate = 115200, readTimeoutSec = .1)
 
-        arduino = ArduinoCOM(serialCOM = port, baudRate = 115200, readTimeoutSec = .1)
-    
-        self.__arduino = arduino
         self.__channel = [1, 0] #Connected channel of the servo to the PWM driver, [x,y]
         self.__pulse_width_max = [2650, 2540] #The maximum and minimum pulse width is different for each servo
         self.__pulse_width_min = [350, 420]
@@ -58,6 +56,7 @@ class ServoCommunication:
 
         Returns
         -------
+        String
 
         """
         if channel == self.__channel[0]:

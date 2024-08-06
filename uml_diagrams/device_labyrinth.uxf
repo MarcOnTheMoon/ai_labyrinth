@@ -1,104 +1,111 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="15.0.0">
-  <zoom_level>6</zoom_level>
+  <zoom_level>5</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>150</x>
-      <y>0</y>
-      <w>84</w>
-      <h>24</h>
+      <x>430</x>
+      <y>45</y>
+      <w>70</w>
+      <h>20</h>
     </coordinates>
-    <panel_attributes>gymnasium::Env
+    <panel_attributes>LabyrinthAgent
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>66</x>
-      <y>48</y>
-      <w>252</w>
-      <h>180</h>
+      <x>165</x>
+      <y>25</y>
+      <w>205</w>
+      <h>255</h>
     </coordinates>
-    <panel_attributes>LabyrinthEnvironmentPrototype
+    <panel_attributes>LabyrinthMachine
 --
-
+- __actions_dt: float
+- __last_action_timestamp_sec: float
+- __geometry: LabyrinthGeometry
+- __rewardarea: LabyrinthRewardArea
+- __servo: Servocommunication
+- __x_degree: float
+- __y_degree: float
+- __app: App
+- __position_factor: float
+- __ball_start_position: list
+- __destination_X: list
+- __destination_y: list
+- __action_to_angle_degree: list
+- __number_actions: int
+- __last_action_timestamp_sec: float
+- __observation_space: numpy.ndarray
+- __ball_position: list
+- __last_ball_position: list
+- __progress: int
+- __right_direction: boolean
+- __last_distance: float
+- __current_distance: float
++ num_actions_per_component: int
 --
-</panel_attributes>
+- __init__(layout: String, cameraID = 0: int, actions_dt=0.1: float)
+- __interim_reward(): boolean
+- __zerohole_reward(): int
+- __close_hole_discount(): boolean
++ reset(): numpy.ndarray, None
++ step(action: int): numpy.ndarray, float, boolean, boolean, int</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>186</x>
-      <y>18</y>
-      <w>18</w>
-      <h>42</h>
-    </coordinates>
-    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>348</x>
-      <y>276</y>
-      <w>210</w>
-      <h>30</h>
+      <x>400</x>
+      <y>365</y>
+      <w>45</w>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;20.0;320.0;20.0;320.0;30.0</additional_attributes>
+    <additional_attributes>10.0;10.0;70.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>378</x>
-      <y>30</y>
-      <w>258</w>
-      <h>204</h>
+      <x>525</x>
+      <y>45</y>
+      <w>155</w>
+      <h>165</h>
     </coordinates>
     <panel_attributes>ServoCommunication
 --
-
+- __arduino: ArduinoCOM
+- __channel: list
+- __pulse_width_max: list
+- __pulse_width_min: list
+- __pulse_middle: list
+- __pulse_per_degree: list
+- __min_degree: list
+- __max_degree: list
+- __x_pulse: int
+- __y_pulse: int
 --
-
-</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>66</x>
-      <y>264</y>
-      <w>288</w>
-      <h>120</h>
-    </coordinates>
-    <panel_attributes>App
---
-- __framePeriodsMs=100: int
-- __isShowImageAnalysis: boolean
-- __ballCenter: list
-- __ballRadius: int
-+ imaging: Imaging
-+ gui: GUI
---
-- __init__(cameraID=1: int,fps=10: int, isShowImageAnalysis=True: boolean)
-+ close(): None
-+ run(): None
-+ processNextFrame(): numpy.ndarray, float[2], float
-</panel_attributes>
+- __init__(port=None: String)
+- __write_pulse(channel: int): String
+- __calc_x_degree_to_pulse(): None
+- __calc_y_degree_to_pulse(): None
++ rotate_by_angle(x_degree=None: float, 
+                              y_degree=None: float): String
++ rotate_to_angle(x_degree=None: float, 
+                              y_degree=None: float): String</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>186</x>
-      <y>222</y>
-      <w>24</w>
-      <h>54</h>
+      <x>280</x>
+      <y>275</y>
+      <w>20</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -108,23 +115,23 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>312</x>
-      <y>102</y>
-      <w>78</w>
-      <h>36</h>
+      <x>365</x>
+      <y>115</y>
+      <w>170</w>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;30.0;110.0;10.0</additional_attributes>
+    <additional_attributes>10.0;10.0;320.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>414</x>
-      <y>294</y>
-      <w>294</w>
-      <h>168</h>
+      <x>435</x>
+      <y>325</y>
+      <w>245</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>Imaging
 --
@@ -150,10 +157,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>48</x>
-      <y>432</y>
-      <w>324</w>
-      <h>90</h>
+      <x>165</x>
+      <y>440</y>
+      <w>215</w>
+      <h>85</h>
     </coordinates>
     <panel_attributes>GUI
 --
@@ -163,30 +170,31 @@ m2=1</panel_attributes>
 - __close(): None
 + onMouseClick(event, x: int, y: int, flags, param:App): None
 + onTrackbarThreshold(value: int): None
-+ showImages(cameraFrame: numpy.ndarray, labyrinthImage: numpy.ndarray): None
++ showImages(cameraFrame: numpy.ndarray, 
+                        labyrinthImage: numpy.ndarray): None
 + showImage(windowName: String, image: numpy.ndarray): None</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>204</x>
-      <y>378</y>
-      <w>24</w>
-      <h>66</h>
+      <x>295</x>
+      <y>405</y>
+      <w>20</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>384</x>
-      <y>498</y>
-      <w>336</w>
-      <h>126</h>
+      <x>400</x>
+      <y>495</y>
+      <w>280</w>
+      <h>105</h>
     </coordinates>
     <panel_attributes>ImageAcquisition
 --
@@ -207,10 +215,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>546</x>
-      <y>456</y>
-      <w>24</w>
-      <h>54</h>
+      <x>535</x>
+      <y>460</y>
+      <w>20</w>
+      <h>45</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -220,10 +228,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>108</x>
-      <y>564</y>
-      <w>252</w>
-      <h>78</h>
+      <x>165</x>
+      <y>535</y>
+      <w>105</w>
+      <h>65</h>
     </coordinates>
     <panel_attributes>Camera
 --
@@ -240,14 +248,136 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>234</x>
-      <y>534</y>
-      <w>162</w>
-      <h>42</h>
+      <x>265</x>
+      <y>545</y>
+      <w>145</w>
+      <h>20</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>250.0;10.0;10.0;10.0;10.0;50.0</additional_attributes>
+    <additional_attributes>270.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>445</x>
+      <y>225</y>
+      <w>235</w>
+      <h>85</h>
+    </coordinates>
+    <panel_attributes>ArduinoCOM
+--
+# _serial: serial.Serial
+--
+- __init__(serialCOM=None: int, baudRate=9600: int, 
+               readTimeoutSec=30.0: float, terminateOnFailure=True: boolean)
++ isConnected(): boolean
++ close(): None
++ readLine(): String
++ writeData(data: String): boolean
+# _connect(serialCOM: int, baudRate: int, readTimeoutSec: float): boolean
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>490</x>
+      <y>195</y>
+      <w>45</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>165</x>
+      <y>310</y>
+      <w>240</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>App
+--
+- __framePeriodsMs=100: int
+- __isShowImageAnalysis: boolean
+- __ballCenter: list
+- __ballRadius: int
++ imaging: Imaging
++ gui: GUI
+--
+- __init__(cameraID=1: int,fps=10: int, isShowImageAnalysis=True: boolean)
++ close(): None
++ run(): None
++ processNextFrame(): numpy.ndarray, float[2], float
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>365</x>
+      <y>60</y>
+      <w>115</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>200.0;10.0;200.0;40.0;10.0;40.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>410</x>
+      <y>175</y>
+      <w>70</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>LabyrinthGeometry
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>410</x>
+      <y>145</y>
+      <w>75</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>LabyrinthRewardArea
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>365</x>
+      <y>180</y>
+      <w>55</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>365</x>
+      <y>150</y>
+      <w>55</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
   </element>
 </diagram>

@@ -82,7 +82,7 @@ class LabyrinthEnvironment(gym.Env):
         # Create labyrinth geometry
         self.__geometry = LabyrinthGeometry(layout=layout)
 
-        # Defines geometric dimensions for reward calculations
+        # Defines geometric dimensions for reward calculations and specific rewards
         self.__rewardarea = LabyrinthRewardArea(layout=layout)
 
         # Field rotation
@@ -234,8 +234,8 @@ class LabyrinthEnvironment(gym.Env):
                 self.__last_distance = (self.__last_ball_position.x - self.__rewardarea.target_points[self.__progress][0])** 2 + (self.__last_ball_position.y - self.__rewardarea.target_points[self.__progress][1]) ** 2
                 self.__current_distance = (self.__ball_position.x - self.__rewardarea.target_points[self.__progress][0])** 2 + (self.__ball_position.y - self.__rewardarea.target_points[self.__progress][1]) ** 2
 
-                if self.__last_distance - self.__current_distance > 0.075: #genügend Änderung sonst tricks der agent ein aus, dass Änderungen in der 4 Nachkommastelle belohnt werden obwohl der ball gefühlt an einer Wand klebt
-                    return True #in die richtige Richtung
+                if self.__last_distance - self.__current_distance > 0.075: #sufficient change otherwise the agent will trick itself into rewarding changes in the 4th decimal place even though the ball feels like it's stuck to a wall.
+                    return True
                 elif self.__last_distance - self.__current_distance > 0:
                     self.__right_direction = True
                     return False
@@ -303,7 +303,7 @@ class LabyrinthEnvironment(gym.Env):
     # ========== 0hole reward ===========================================
     def __zerohole_reward(self):
         """
-        calculates in witch circular segment the ball is lacated
+        calculates in witch circular segment the ball is lacated only used for layout "0 holes" and "0 holes real"
 
         Parameters
         ----------
@@ -320,7 +320,7 @@ class LabyrinthEnvironment(gym.Env):
             radius = [5, 2.5, 1.25]
         radius_progress = 1
         """
-        # nur benötigt wenn thresholdreward verwendet werden soll (vergleich kreis vorher und nach der actions ausführung)
+        # Only needed if threshold reward is to be used (comparison of the circle before and after the action execution)
         self.__last_radius_progress = 1
         for num in radius:
             if self.__last_distance > radius[self.__last_radius_progress-1]**2:
@@ -344,7 +344,8 @@ class LabyrinthEnvironment(gym.Env):
 
         Returns
         -------
-        True, if the ball is near a hole
+        boolean
+            True, if the ball is near a hole
 
         """
         pos_x = self.__ball_position.x
@@ -352,7 +353,7 @@ class LabyrinthEnvironment(gym.Env):
 
         for hole in self.__geometry.holes.data:
             hole_center = hole["pos"]
-            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius + self.__geometry.holes.radius*0.4) **2:
+            if ((pos_x - hole_center.x) ** 2 + (pos_y - hole_center.y) ** 2) < (self.__geometry.holes.radius *1.4) **2:
                 return True
         return False
 
@@ -372,7 +373,7 @@ class LabyrinthEnvironment(gym.Env):
         -------
         observation : numpy.ndarray
             Observation after applying the action.
-        reward : int
+        reward : float
             Reward of applying the action.
         done : boolean
             True if the episode has ended, else False.
@@ -386,9 +387,9 @@ class LabyrinthEnvironment(gym.Env):
         stop_x_degree = start_x_degree = self.__x_degree
         stop_y_degree = start_y_degree = self.__y_degree
         # rotate only one axes
-        if action < self.num_actions_per_component:
+        if action < self.num_actions_per_component: # x-axis
             stop_x_degree = self.__action_to_angle_degree[action]
-        else:
+        else: # y-axis
             stop_y_degree = self.__action_to_angle_degree[action - self.num_actions_per_component]
         is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 

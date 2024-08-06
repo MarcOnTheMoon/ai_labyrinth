@@ -1,5 +1,5 @@
 """
-Defines geometric dimensions for reward calculations.
+Defines geometric dimensions for reward calculations and defines specific rewards.
 
     - right direction reward with tiles (areas) and target points
     - thresholds rewards
@@ -268,7 +268,8 @@ class LabyrinthRewardArea():
                     5: 25,
                     4: 2,
                     3: -0.2,
-                    2: -0.4 },
+                    2: -0.4,
+                    'default': -2},
                 'default': {
                     6: -0.2,
                     5: -0.4,

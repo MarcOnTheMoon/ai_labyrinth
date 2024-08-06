@@ -30,7 +30,7 @@ class ArduinoCOM():
         baudRate : int, optional
             Connection's baud rate. Must match rate set in Arduino. (Default: 9600)
         readTimeoutSec : float, optional
-            Maximum time in [s] to wait when reading data from Arduino. (Default: 60.0)
+            Maximum time in [s] to wait when reading data from Arduino. (Default: 30.0)
         terminateOnFailure : bool, optional
             Shall script terminate when no connection is possible? (Default: True)
 

@@ -19,13 +19,13 @@ _+ path: String_
 - __epsilon_min: float
 - __learn_period: int
 - __learning_rate: float
-- __memory:LabyrinthReplayBuffer
+- __memory: LabyrinthReplayBuffer
 - __training_steps_count=0: int
 - __gamma: float
 - __error_print_iteration=0: int
 - __q_net:LabyrinthQNet
-- __optimizer:torch.optim.Adam
-- __loss:torch.nn.MSELoss
+- __optimizer: torch.optim.Adam
+- __loss: torch.nn.MSELoss
 --
 - __init__(state_size: int, action_sice: int, epsilon=1.0: float, epsilon_decay_rate=.98: float, epsilon_min=.15: float, 
                 batch_size=64, int, replay_buffer_size=100_000: int, gamma=.99: float, learning_rate=5e-4: float, learn_period=1: int)
@@ -48,13 +48,13 @@ _+ path: String_
     </coordinates>
     <panel_attributes>LabyrinthQNet
 --
-- __fc1: torch.nn.Linear
-- __bn1: torch.nn.BatchNorm1d
-- __fc2: torch.nn.Linear
-- __bn2: torch.nn.BatchNorm1d
-- __fc3: torch.nn.Linear
-- __bn3: torch.nn.BatchNorm1d
-- __fc4: torch.nn.Linear
++ fc1: torch.nn.Linear
++ bn1: torch.nn.BatchNorm1d
++ fc2: torch.nn.Linear
++ bn2: torch.nn.BatchNorm1d
++ fc3: torch.nn.Linear
++ bn3: torch.nn.BatchNorm1d
++ fc4: torch.nn.Linear
 --
 - __init__(state_size: int, action_size: int, fc1_units=2048: int, 
                 fc2_units=1024: int, fc3_units=256: int)
@@ -90,12 +90,12 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>264</x>
+      <x>288</x>
       <y>360</y>
-      <w>126</w>
+      <w>78</w>
       <h>24</h>
     </coordinates>
-    <panel_attributes>LabyrinthEnvironmentPrototype
+    <panel_attributes>LabyrinthMachine
 </panel_attributes>
     <additional_attributes/>
   </element>
