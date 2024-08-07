@@ -115,6 +115,14 @@ class LabyrinthEnvironment(gym.Env):
             self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
         self.num_actions_per_component = len(self.__action_to_angle_degree)
 
+        # defines max actions per episode for truncated
+        if (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
+            self.__max_number_actions = 300
+        elif (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
+            self.__max_number_actions = 500
+        else: #if self.__geometry.layout == '8 holes':
+            self.__max_number_actions = 800
+
         self.__firstepisode = True
 
     # ========== Reset ========================================================
@@ -514,11 +522,7 @@ class LabyrinthEnvironment(gym.Env):
         done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real'
         self.__number_actions += 1 # Action history
 
-        if self.__number_actions >= 300 and (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
-            truncated = True
-        elif self.__number_actions >= 500 and (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
-            truncated = True
-        elif self.__number_actions >= 800 and self.__geometry.layout == '8 holes':
+        if self.__number_actions >= self.__max_number_actions:
             truncated = True
         else:
             truncated = False

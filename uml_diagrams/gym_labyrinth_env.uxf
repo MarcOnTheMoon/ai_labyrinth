@@ -29,7 +29,7 @@ fontsize=10
     <id>UMLClass</id>
     <coordinates>
       <x>224</x>
-      <y>14</y>
+      <y>21</y>
       <w>77</w>
       <h>21</h>
     </coordinates>
@@ -43,7 +43,7 @@ fontsize=10
       <x>119</x>
       <y>84</y>
       <w>196</w>
-      <h>322</h>
+      <h>329</h>
     </coordinates>
     <panel_attributes>LabyrinthEnv
 --
@@ -68,6 +68,7 @@ _+ metadata: Dict_
 - __last_ball_position: vpython::vector 
 - __number_actions: int
 - __interim_reward_counter: int
+- __max_number_actions: int
 - __progress: int
 - __right_direction: boolean
 - __last_distance: float
@@ -89,7 +90,7 @@ _+ metadata: Dict_
     <id>UMLClass</id>
     <coordinates>
       <x>329</x>
-      <y>364</y>
+      <y>371</y>
       <w>112</w>
       <h>119</h>
     </coordinates>
@@ -113,7 +114,7 @@ _+ destinations_xy: Dict_
     <id>Relation</id>
     <coordinates>
       <x>287</x>
-      <y>455</y>
+      <y>462</y>
       <w>56</w>
       <h>21</h>
     </coordinates>
@@ -126,7 +127,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>308</x>
-      <y>567</y>
+      <y>574</y>
       <w>189</w>
       <h>77</h>
     </coordinates>
@@ -145,7 +146,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>350</x>
-      <y>70</y>
+      <y>77</y>
       <w>210</w>
       <h>224</h>
     </coordinates>
@@ -182,7 +183,7 @@ _+ colors: Dict_
     <id>UMLClass</id>
     <coordinates>
       <x>469</x>
-      <y>308</y>
+      <y>315</y>
       <w>154</w>
       <h>84</h>
     </coordinates>
@@ -202,7 +203,7 @@ _+ colors: Dict_
     <id>UMLClass</id>
     <coordinates>
       <x>525</x>
-      <y>553</y>
+      <y>560</y>
       <w>98</w>
       <h>42</h>
     </coordinates>
@@ -217,7 +218,7 @@ _+ colors: Dict_
     <id>Relation</id>
     <coordinates>
       <x>385</x>
-      <y>287</y>
+      <y>294</y>
       <w>56</w>
       <h>91</h>
     </coordinates>
@@ -229,7 +230,7 @@ initializes ^</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>308</x>
-      <y>98</y>
+      <y>105</y>
       <w>56</w>
       <h>21</h>
     </coordinates>
@@ -242,7 +243,7 @@ m2=0..1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>119</x>
-      <y>441</y>
+      <y>448</y>
       <w>175</w>
       <h>203</h>
     </coordinates>
@@ -277,7 +278,7 @@ m2=0..1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>203</x>
-      <y>399</y>
+      <y>406</y>
       <w>21</w>
       <h>56</h>
     </coordinates>
@@ -290,7 +291,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>469</x>
-      <y>406</y>
+      <y>413</y>
       <w>154</w>
       <h>63</h>
     </coordinates>
@@ -308,7 +309,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>483</x>
-      <y>483</y>
+      <y>490</y>
       <w>140</w>
       <h>56</h>
     </coordinates>
@@ -357,18 +358,18 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>252</x>
-      <y>28</y>
+      <y>35</y>
       <w>21</w>
-      <h>70</h>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>434</x>
-      <y>343</y>
+      <y>350</y>
       <w>49</w>
       <h>56</h>
     </coordinates>
@@ -381,7 +382,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>434</x>
-      <y>427</y>
+      <y>434</y>
       <w>49</w>
       <h>21</h>
     </coordinates>
@@ -394,7 +395,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>434</x>
-      <y>476</y>
+      <y>483</y>
       <w>63</w>
       <h>42</h>
     </coordinates>
@@ -407,7 +408,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>406</x>
-      <y>476</y>
+      <y>483</y>
       <w>133</w>
       <h>119</h>
     </coordinates>
@@ -420,7 +421,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>385</x>
-      <y>476</y>
+      <y>483</y>
       <w>21</w>
       <h>105</h>
     </coordinates>
@@ -433,7 +434,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>301</x>
-      <y>399</y>
+      <y>406</y>
       <w>42</w>
       <h>56</h>
     </coordinates>
@@ -446,7 +447,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>322</x>
-      <y>14</y>
+      <y>21</y>
       <w>77</w>
       <h>21</h>
     </coordinates>
@@ -458,13 +459,13 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
-      <y>28</y>
+      <y>35</y>
       <w>91</w>
-      <h>70</h>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>110.0;10.0;110.0;40.0;10.0;40.0;10.0;80.0</additional_attributes>
+    <additional_attributes>110.0;10.0;110.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
   </element>
 </diagram>

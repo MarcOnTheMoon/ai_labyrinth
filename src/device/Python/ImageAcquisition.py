@@ -70,7 +70,7 @@ class ImageAcquisition():
         self.__field['lower left'] = [boarder, self.__camera.height - boarder]
         self.__field['lower right'] = [self.__camera.width - boarder, self.__camera.height - boarder]
 
-        # Calculate transformation to cut out pinball field
+        # Calculate transformation to cut out labyrinth field
         self.__updatePerpectiveTransform()
 
         # Get first pair of images
