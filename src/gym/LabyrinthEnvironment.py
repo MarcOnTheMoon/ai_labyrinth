@@ -322,10 +322,7 @@ class LabyrinthEnvironment(gym.Env):
         radius_progress: int
             The higher the number, the closer the ball is to the center
         """
-        if self.__geometry.layout == '0 holes real':
-            radius = [10, 7.5, 5, 2.5, 1.25]
-        elif self.__geometry.layout == '0 holes':
-            radius = [5, 2.5, 1.25]
+        radius = [10, 7.5, 5, 2.5, 1.25]
         radius_progress = 1
         """
         # Only needed if threshold reward is to be used (comparison of the circle before and after the action execution)

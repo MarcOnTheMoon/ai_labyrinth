@@ -248,19 +248,7 @@ class LabyrinthRewardArea():
                 'default': -2}
 
         #The higher the first number for interim or default, the closer the circle element is to the center (smaller the circle) in which the ball is located
-        elif self.__layout == '0 holes':
-            self.reward_dict = {
-                'destination': 600,
-                'interim': {
-                    4: 100,
-                    3: 20,
-                    2: 2,
-                    'default': -0.2 },
-                'default': {
-                    4: -0.2,
-                    3: -0.4,
-                    'default': -1 }}
-        elif self.__layout == '0 holes real':
+        elif self.__layout == '0 holes real' or self.__layout == '0 holes':
             self.reward_dict = {
                 'destination': 600,
                 'interim': {
