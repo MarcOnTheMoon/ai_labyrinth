@@ -34,10 +34,10 @@ if __name__ == '__main__':
     agent = LabyrinthAgentDQN(state_size = 6, action_size = env.num_actions_per_component * 2)
 
     if layout == '8 holes':
-        save_path = path + '8holes_dqnagent_part1.pth'
+        save_path = path + '8holes_part1.pth'
         agent.load(save_path)
         agent1 = LabyrinthAgentDQN(state_size=6, action_size=env.num_actions_per_component * 2)
-        save_path1 = path + '8holes_dqnagent_part2.pth'
+        save_path1 = path + '8holes_part2.pth'
         agent1.load(save_path1)
     else:
         save_path = path + '0holesreal.pth'

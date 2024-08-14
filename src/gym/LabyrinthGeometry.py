@@ -35,8 +35,8 @@ class LabyrinthGeometry:
         #'2 holes': vec(x, y, 0),
         '2 holes'  : vec(-1.52,  9.25, 0),
         '2 holes real': vec(-0.79, 9.86, 0),
-        #'8 holes'  : vec( 0.13, 10.53, 0),
-        '8 holes': vec(13, -5.0, 0), #näher am ziel
+        '8 holes'  : vec( 0.13, 10.53, 0),
+        #'8 holes': vec(13, -5.0, 0), #näher am ziel
         '21 holes' : vec( 3.2,   10.47,  0)
         }
     destinations_xy = {
