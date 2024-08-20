@@ -5,7 +5,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>415</x>
-      <y>180</y>
+      <y>175</y>
       <w>70</w>
       <h>20</h>
     </coordinates>
@@ -17,7 +17,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>165</x>
-      <y>20</y>
+      <y>15</y>
       <w>205</w>
       <h>265</h>
     </coordinates>
@@ -61,7 +61,7 @@
     <id>Relation</id>
     <coordinates>
       <x>400</x>
-      <y>370</y>
+      <y>365</y>
       <w>45</w>
       <h>20</h>
     </coordinates>
@@ -73,28 +73,19 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>525</x>
-      <y>155</y>
-      <w>155</w>
-      <h>165</h>
+      <x>520</x>
+      <y>150</y>
+      <w>160</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>ServoCommunication
 --
 - __arduino: ArduinoCOM
 - __channel: list
-- __pulse_width_max: list
-- __pulse_width_min: list
-- __pulse_middle: list
-- __pulse_per_degree: list
-- __min_degree: list
-- __max_degree: list
-- __x_pulse: int
-- __y_pulse: int
+- __degree: list
 --
 - __init__(port=None: String)
-- __write_pulse(channel: int): String
-- __calc_x_degree_to_pulse(): None
-- __calc_y_degree_to_pulse(): None
+- __write_angle(channel: int, degree: float): String
 + rotate_by_angle(x_degree=None: float, 
                               y_degree=None: float): String
 + rotate_to_angle(x_degree=None: float, 
@@ -105,7 +96,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>280</x>
-      <y>280</y>
+      <y>275</y>
       <w>20</w>
       <h>45</h>
     </coordinates>
@@ -118,20 +109,20 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>365</x>
-      <y>215</y>
-      <w>170</w>
+      <y>210</y>
+      <w>165</w>
       <h>20</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;320.0;10.0</additional_attributes>
+    <additional_attributes>10.0;10.0;310.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
       <x>435</x>
-      <y>330</y>
+      <y>325</y>
       <w>245</w>
       <h>140</h>
     </coordinates>
@@ -160,7 +151,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>165</x>
-      <y>445</y>
+      <y>440</y>
       <w>215</w>
       <h>85</h>
     </coordinates>
@@ -181,7 +172,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>295</x>
-      <y>410</y>
+      <y>405</y>
       <w>20</w>
       <h>45</h>
     </coordinates>
@@ -194,7 +185,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>400</x>
-      <y>500</y>
+      <y>495</y>
       <w>280</w>
       <h>105</h>
     </coordinates>
@@ -218,7 +209,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>535</x>
-      <y>465</y>
+      <y>460</y>
       <w>20</w>
       <h>45</h>
     </coordinates>
@@ -231,7 +222,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>165</x>
-      <y>540</y>
+      <y>535</y>
       <w>105</w>
       <h>65</h>
     </coordinates>
@@ -251,7 +242,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>265</x>
-      <y>550</y>
+      <y>545</y>
       <w>145</w>
       <h>20</h>
     </coordinates>
@@ -264,7 +255,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>445</x>
-      <y>35</y>
+      <y>30</y>
       <w>235</w>
       <h>85</h>
     </coordinates>
@@ -286,7 +277,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>595</x>
-      <y>115</y>
+      <y>110</y>
       <w>20</w>
       <h>50</h>
     </coordinates>
@@ -299,7 +290,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>165</x>
-      <y>315</y>
+      <y>310</y>
       <w>240</w>
       <h>100</h>
     </coordinates>
@@ -323,7 +314,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>365</x>
-      <y>185</y>
+      <y>180</y>
       <w>60</w>
       <h>20</h>
     </coordinates>
@@ -336,7 +327,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>415</x>
-      <y>270</y>
+      <y>265</y>
       <w>70</w>
       <h>20</h>
     </coordinates>
@@ -348,7 +339,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>415</x>
-      <y>240</y>
+      <y>235</y>
       <w>75</w>
       <h>20</h>
     </coordinates>
@@ -360,7 +351,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>365</x>
-      <y>275</y>
+      <y>270</y>
       <w>60</w>
       <h>20</h>
     </coordinates>
@@ -373,7 +364,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>365</x>
-      <y>245</y>
+      <y>240</y>
       <w>60</w>
       <h>20</h>
     </coordinates>
@@ -386,7 +377,7 @@ m2=1</panel_attributes>
     <id>UMLClass</id>
     <coordinates>
       <x>415</x>
-      <y>135</y>
+      <y>130</y>
       <w>70</w>
       <h>20</h>
     </coordinates>
@@ -398,7 +389,7 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>445</x>
-      <y>115</y>
+      <y>110</y>
       <w>15</w>
       <h>30</h>
     </coordinates>
