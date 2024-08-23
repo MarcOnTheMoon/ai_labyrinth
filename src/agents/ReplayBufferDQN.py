@@ -4,7 +4,7 @@ Represents the replay buffer for the DQN agent.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.22
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import numpy as np
@@ -68,7 +68,7 @@ class ReplayBuffer:
 
     # ========== Add element (experience) =====================================
 
-    def batch(self):
+    def get_random_batch(self):
         """
         Randomly sample a batch of experiences from the memory
 
@@ -94,7 +94,7 @@ class ReplayBuffer:
         experiences = random.sample(self.__memory, k = self.__batch_size)
 
         # Create NumPy arrays of entries within batch of experiences
-        # TODO Faster to have 5 queues or dequeues (i.e., for states, actions, and so on, each)?
+        # TODO Faster to have 5 queues or deques (i.e., for states, actions, and so on, each)?
         states = np.vstack([e.state for e in experiences if e is not None])
         actions = np.vstack([e.action for e in experiences if e is not None])
         rewards = np.vstack([e.reward for e in experiences if e is not None])

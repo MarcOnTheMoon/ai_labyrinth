@@ -4,7 +4,7 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.22
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import random
@@ -72,17 +72,17 @@ class AgentDQN:
         self.__epsilon_min = epsilon_min
 
         # Q-Network
-        self.__learn_period = learn_period      # Training frequency
+        self.__learn_period = learn_period      # Training frequency (number of actions after which to train the network)
         self.__learning_rate = learning_rate
         self.__init_q_net(state_size=state_size, action_size=action_size)   # Initialize Q-network
 
-        # Replay memory
+        # Replay memory and further training attributes
         self.__memory = ReplayBuffer(replay_buffer_size, batch_size)
+        self.__training_steps_count = 0     # Counter for training steps
+        self.__gamma = gamma                # Reinforcement learning discount factor
 
-        self.__training_steps_count = 0 # Initializes the counter for training steps.
-        self.__gamma = gamma # Sets the discount factor
-
-        self.__error_print_iteration = 0 # Counter for printing the learning error
+        # Console output
+        self.__print_loss_counter = 0    # Counter for printing the learning error
 
     # ========== Q-network ====================================================
 
@@ -108,14 +108,15 @@ class AgentDQN:
 
     # ========== Adjust epsilon at each new episode ===========================
 
-    def before_episode(self):
+    def decay_epsilon(self):
         """
-        Adjust epsilon before a new episode.
+        Reduce epsilon for the next episode.
+        
+        Decays epsilon while ensuring epsilon >= epsilon_min.
 
         Parameters
         ----------
         None
-
 
         Returns
         -------
@@ -125,114 +126,156 @@ class AgentDQN:
         self.__epsilon *= self.__epsilon_decay_rate                 # Reduce epsilon according to the decay rate
         self.__epsilon = max(self.__epsilon, self.__epsilon_min)    # Ensures epsilon does not fall below the minimum value
 
-    # ==========  ====================================================
+    # ========== Select next action (epsilon-greedy) ==========================
+
+    def select_action(self, state, mode='train'):
+        """
+        Select an action according to the epsilon-greedy policy.
+        
+        Random actions are selected with following probabilities:
+            - Training: epsilon
+            - Evaluation: 0 %
+            
+        Else the 'best' known action is selected, being the one with highest
+        Q-value. The Q-value is approximated by feeding the state into the
+        Q-network.
+
+        Parameters
+        ----------
+        state: numpy.ndarray
+        mode: String, optional
+            Possible modes: 'train' or 'evaluate'
+
+        Returns
+        -------
+        action: int
+            Selected action
+
+        """
+        # Choose random or greedy action? (Some randomness during evaluation yields better results.)
+        # TODO Expression 'random_value < 0.0' is always False, because Random value is in [0, 1]!
+        random_value = random.random()  # Random value in [0, 1]
+        is_random = (mode == 'train' and random_value < self.__epsilon) or (mode == 'evaluate' and random_value < 0.0)
+        
+        # Choose action (randomly or greedy)
+        if is_random:
+            action = random.choice(np.arange(self.__action_size))
+        else:
+            # Switch network to evaluation mode (e.g., disables batch normalization)
+            self.__q_net.eval()
+
+            # Get network response (action) to state
+            state = torch.from_numpy(state).float().unsqueeze(0)    # Convert state from NumPy array to PyTorch tensor and adds an additional dimension to transform the 1D state vector into a 2D batch with a single element. This is important because neural networks typically expect batch processing.
+            with torch.no_grad():                                   # Disable gradient computation to speed up execution. (No gradients needed for feed-forward predictions.)
+                action_values = self.__q_net(state)                 # Calculate Q-values for all possible actions based on given state
+            
+            # Switch network back to training mode (for future training steps)
+            self.__q_net.train()
+            
+            # Select action with highest Q-value ('best action')
+            action = np.argmax(action_values.data.numpy())
+            
+        return action
+
+    # ========== Add experience and learn =====================================
 
     def step(self, state, action, reward, next_state, done):
         """
-            Stores experiences and triggers the training/learning process
+        Stores an experiences and trigger the training/learning process.
+        
+        Attribute __learn_period controls how many actions are performed
+        before triggering the learning process the next time.
 
-            Parameters
-            ----------
-            state: numpy.ndarray
-            action: int
-            reward: float
-            next_state: numpy.ndarray
-            done: boolean
+        Parameters
+        ----------
+        state: numpy.ndarray
+        action: int
+        reward: float
+        next_state: numpy.ndarray
+        done: boolean
 
-
-            Returns
-            -------
-            None.
-
-        """
-        self.__memory.add(state, action, reward, next_state, done) # Save experience in replay memory
-
-        self.__training_steps_count += 1 # Increments the training steps counter
-
-        if self.__training_steps_count % self.__learn_period == 0: # Checks if it is time to learn.
-            # If enough samples are available in memory, get random subset and learn
-            if len(self.__memory) > 200: #Checks if there are enough samples in the replay buffer.
-                self.__learn() #Calls the learning method.
-
-    # ==========  ====================================================
-
-    def act(self, state, mode = 'train'):
-        """
-            Selection of an action according to the epsilon-greedy policy.
-
-            Parameters
-            ----------
-            state: numpy.ndarray
-            mode: String, optional
-                Possible modes: train or test
-
-
-            Returns
-            -------
-            action: int
-                chose action to rotate the field.
+        Returns
+        -------
+        None.
 
         """
-        r = random.random() #Generates a random number between 0 and 1.
-        random_action = mode == 'train' and r < self.__epsilon #Checks if a random action should be selected (in training mode and if r is less than epsilon).
-        if mode == 'evaluate' and r < 0.00: #some randomness during evaluation -> better results
-            random_action = True
-        if random_action: #When a random action should be selected:
-            # Random Policy
-            action = random.choice(np.arange(self.__action_size)) #Choose a random action
-        else:
-            # Greedy Policy
-            state = torch.from_numpy(state).float().unsqueeze(0)  # Converts the state from a NumPy array to a PyTorch tensor and adds an additional dimension to transform the 1D state vector into a 2D batch with a single element. This is important because neural networks typically expect batch processing.
-            self.__q_net.eval()  # Sets the network to evaluation mode (e.g., disables batch normalization).
-            with torch.no_grad():  # Disables gradient computation to save memory and speed up execution. During action selection, we do not need gradients since we are only using the model to make predictions.
-                action_values = self.__q_net(state)  # Calculates the Q-values for all possible actions based on the given state.
-            self.__q_net.train()  # Switches the network back to training mode to ensure it is ready for future training steps.
-            action = np.argmax(action_values.data.numpy())  # Selects the action with the highest Q-value. This implements a greedy policy, where the best-known action is always chosen.
-        return action #Returns the selected action.
+        # Add experience to replay buffer
+        self.__memory.add(state, action, reward, next_state, done)
 
-    # ==========  ====================================================
+        # Trigger learning process if enough samples in replay buffer (every k = learn_process actions)
+        self.__training_steps_count += 1
+        if self.__training_steps_count == self.__learn_period:
+            self.__training_steps_count = 0
+            # TODO Why at least 200 samples in replay buffer required? Why this value?
+            if len(self.__memory) > 200:
+                self.__batch_temporal_difference_step()
 
-    def __learn(self):
+    # -------------------------------------------------------------------------
+
+    def __batch_temporal_difference_step(self):
         """
-            trains the agent
+        Trains the neural network by one step of temporal differnce learning.
+        
+        The step uses a random batch from the replay buffer as training data.
+        The network is trained to minimize the temporal difference defined as:
+            
+            TD = r + g * V(s') - Q(s,a)
+                               
+        with
+            s  : state
+            a  : action
+            s' : next state
+            r  : reward
+            g  : discount factor (gamma)
+            
+        If there is no next state s' (episode terminated), it has no value,
+        meaning V(s') = 0 which results in:
+               
+            TD = r - Q(s,a)
+                               
+        Parameters
+        ----------
+        None
 
-            Parameters
-            ----------
-            None
-
-            Returns
-            -------
-            None
+        Returns
+        -------
+        None
 
         """
-        samples = self.__memory.batch() # Samples experiences from the replay buffer.
-        s, a, r, s_next, dones = samples # Unpacks the sample into states s, actions a, rewards r, next states s_next, and end states dones.
+        # Get and unpack batch of random samples from replay buffer
+        samples = self.__memory.get_random_batch()
+        states, actions, rewards, next_states, dones = samples
 
-        # The following lines convert the NumPy arrays into PyTorch tensors:
-        s = torch.from_numpy(s).float()
-        a = torch.from_numpy(a).long()
-        r = torch.from_numpy(r).float()
-        s_next = torch.from_numpy(s_next).float()
+        # Convert NumPy arrays into PyTorch tensors
+        states = torch.from_numpy(states).float()
+        actions = torch.from_numpy(actions).long()
+        rewards = torch.from_numpy(rewards).float()
+        next_states = torch.from_numpy(next_states).float()
         dones = torch.from_numpy(dones).float()
 
-        # V(s') = max(Q(s',a'))
-        v_s_next = self.__q_net(s_next).detach().max(1)[0].unsqueeze(1) # Calculates the maximum Q-value for the next states s_next without gradient computation (using .detach()) and adds an additional dimension.
+        # V(s') = max(Q(s',a')) of array of next states
+        v_next_states = self.__q_net(next_states).detach().max(1)[0].unsqueeze(1)   # Disables gradient computation using .detach() and adds an additional dimension.
 
-        # Q(s,a)
-        q_sa_pure = self.__q_net(s) #Calculates the Q-values for the current state s.
-        q_sa = q_sa_pure.gather(dim = 1, index = a) # Extracts the Q-values of the chosen actions a from the computed Q-values.
+        # Q(s,a) of state/action pairs
+        q_states = self.__q_net(states)                             # Q-values for the states (and all actions)
+        q_states_actions = q_states.gather(dim=1, index=actions)    # Extract Q-values of the chosen actions from the Q-values
 
-        # TD = r + g * V(s') - Q(s,a) for non-terminal; TD = r - Q(s,a) for terminal
-        td = r + (self.__gamma * v_s_next * (1 - dones)) - q_sa # Calculates the Temporal Difference (TD) error according to the Q-learning update rule. self.__gamma is the discount factor. 1-done is used because there is no subsequent state after a terminal state; thus, V(s′) is 0 in such cases, otherwise V(s′) is 1.
+        # Temporal difference TD = r + gamma * V(s') - Q(s,a).
+        # Expression (1 - dones) is 0 for terminal / last steps in an episode => V(s') = 0 => TD = r - Q(s,a).
+        td = rewards + (self.__gamma * v_next_states * (1 - dones)) - q_states_actions
 
-        # Compute loss: TD -> 0
-        error = self.__loss(td, torch.zeros(td.shape)) # Calculates the loss between the TD error and zero.
-        self.__error_print_iteration = (self.__error_print_iteration + 1) % 100 # Prints the error every 100 steps.
-        if self.__error_print_iteration == 0:
-            print(f'error: {error}')
-        self.__optimizer.zero_grad() # Resets the gradients of the optimizers to zero. Gradients are accumulated by default with each call to backward(). If the gradients are not reset to zero, they would accumulate with each new backpropagation step, leading to incorrect updates.
-        error.backward() # Backward= backpropagation: Calculates the gradients of the error with respect to the model parameters.
-        self.__optimizer.step() # Updates the network parameters based on the calculated gradients.
+        # Compute loss function between TD and target value 0
+        loss = self.__loss(td, torch.zeros(td.shape))
+        self.__print_loss_counter += 1
+        if self.__print_loss_counter == 100:
+            self.__print_loss_counter = 0
+            print(f'Loss (each 100 training steps): {loss}')
+            
+        # Train neural network one step (i.e., minimize TD -> 0)
+        # TODO What about hyperparameter alpha? Not required when minimizing loss of neural network?
+        self.__optimizer.zero_grad()    # Reset optimizer's gradients to zero. Gradients are accumulated with each call to backward(). If gradients are not reset, they accumulate with each backpropagation step, leading to incorrect updates.
+        loss.backward()                 # Calculat gradient by backpropagation
+        self.__optimizer.step()         # Updates the network based on calculated gradients
 
     # ========== File input / output ==========================================
 

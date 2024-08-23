@@ -4,7 +4,7 @@ Main application to train and solve virtual and physical labyrinths.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.22
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import os
@@ -16,18 +16,18 @@ sys.path.append(project_dir + '/../environments/physical/Python')
 
 import random
 import numpy as np
+import torch
 import matplotlib.pyplot as plt
-from LabyrinthEnvironment import LabyrinthEnvironment
+from LabyrinthEnv import LabyrinthEnv
 from AgentDQN import AgentDQN
 
+# TODO Measure and optimize runtime (speed-up)
 
 # =========== Settings ========================================================
 
 #episodes = 5500
 episodes = 2
 models_path = '../models/'
-
-
 
 class App():
     
@@ -38,8 +38,8 @@ class App():
     def __init__(self, load_model=None, random_seed=None):
         if random_seed != None:
             random.seed(random_seed)
-            np.random.seed(random_seed)  # Seed for NumPy
-#            torch.manual_seed(random_seed)  # Seed for PyTorch (CPU)
+            np.random.seed(random_seed)     # Seed for NumPy
+            torch.manual_seed(random_seed)  # Seed for PyTorch (CPU)
 
         self.__scores = []
 
@@ -47,7 +47,7 @@ class App():
             
     def train_virtual(self, layout, episodes):
         # Create environment and agent
-        env = LabyrinthEnvironment(layout=layout, render_mode=None)
+        env = LabyrinthEnv(layout=layout, render_mode=None)
         agent = AgentDQN(state_size = 6, action_size = env.num_actions_per_component * 2)
         
         # Train model
@@ -62,10 +62,10 @@ class App():
         for e in range(1, episodes + 1):
             state, _ = env.reset()
             score = 0
-            agent.before_episode()
+            agent.decay_epsilon()
     
             while True:
-                action = agent.act(state)
+                action = agent.select_action(state)
                 next_state, reward, done, truncated, _ = env.step(action)
                 agent.step(state, action, reward, next_state, done)
                 state = next_state

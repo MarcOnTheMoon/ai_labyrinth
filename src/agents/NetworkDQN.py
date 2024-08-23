@@ -4,13 +4,14 @@ Deep Q-Network for a DQN agent solving labyrinth environments.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.22
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import torch.nn as nn
 import torch.nn.functional as F
 
 # TODO Replace by Tensorflow/Keras as standard lib for all projects?
+# TODO Use GPU, if available
 
 class QNet(nn.Module):
 
@@ -74,7 +75,7 @@ class QNet(nn.Module):
             Computed Q-values for the input state.
 
         """
-        # TODO Are input values not normalized?! Normalize input valued?
+        # TODO Are input values not normalized?! Normalize input values?
         x = F.leaky_relu(self.bn1(self.fc1(state))) # Pass through 1st layer, batch normalization, and activation function
         x = F.leaky_relu(self.bn2(self.fc2(x)))
         x = F.leaky_relu(self.bn3(self.fc3(x)))

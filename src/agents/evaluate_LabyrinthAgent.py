@@ -5,14 +5,14 @@ Main to evaluate the trained agent
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.24
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 
 import os
 import sys
 import numpy as np
-from LabyrinthAgentDQN import LabyrinthAgentDQN
+from AgentDQN import AgentDQN
 
 #Path to access LabyrinthEnvironment
 project_dir = os.path.dirname(os.path.abspath(__file__))
@@ -31,12 +31,12 @@ if __name__ == '__main__':
     layout = '0 holes real'
     env = LabyrinthEnvironment(layout=layout, render_mode='3D')  # evaluate simulation
     #env = LabyrinthMachine(layout=layout, cameraID=0)  # evaluate prototype
-    agent = LabyrinthAgentDQN(state_size = 6, action_size = env.num_actions_per_component * 2)
+    agent = AgentDQN(state_size = 6, action_size = env.num_actions_per_component * 2)
 
     if layout == '8 holes':
         save_path = path + '8holes_part1.pth'
         agent.load(save_path)
-        agent1 = LabyrinthAgentDQN(state_size=6, action_size=env.num_actions_per_component * 2)
+        agent1 = AgentDQN(state_size=6, action_size=env.num_actions_per_component * 2)
         save_path1 = path + '8holes_part2.pth'
         agent1.load(save_path1)
     else:
