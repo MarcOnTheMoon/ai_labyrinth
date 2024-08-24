@@ -6,12 +6,13 @@ Lengths are stated without unit, but are interpreted as [cm].
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.24
+@version: 2024.08.25
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import numpy as np
 from vpython import vector as vec
 import random
+from LabLayouts import Layout
 
 # -----------------------------------------------------------------------------
 # Class containing individual components of labyrinth game geometry
@@ -23,37 +24,34 @@ class Geometry:
     # TODO Replace all these 'settings' by parameters and commented out code
 
     # Set start areas for random start position as [x_min, x_max, y_min, y_max]
-#    start_area = [-6.06, 6.06, -5.76, 5.76]         # Layout '0 holes', close to destination
-    start_area = np.array([-13.06, 13.06, -10.76, 10.76], dtype=np.float32)     # Layout '0 holes', whole board
-#    start_area = [-1.3, 2.3, 6.76, 10.76]           # Layout '2 holes'
+#    start_area = [-6.06, 6.06, -5.76, 5.76]         # Layout.HOLES_0, close to destination
+    start_area = np.array([-13.06, 13.06, -10.76, 10.76], dtype=np.float32)     # Layout.HOLES_0, whole board
+#    start_area = [-1.3, 2.3, 6.76, 10.76]           # Layout.HOLES_2
     
     # Set random set for random start position
     random.seed(1)
     
     # ========== Field layouts ================================================
 
-    # Define layout names (walls and holes)
-    layouts = ['0 holes', '0 holes real', '2 holes', '2 holes real', '8 holes', '21 holes']
-
     # Define start start positions and destination areas
     start_positions = {
-        '0 holes' : vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
-        '0 holes real': vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
-        #'2 holes': vec(x, y, 0),
-        '2 holes'  : vec(-1.52,  9.25, 0),
-        '2 holes real': vec(-0.79, 9.86, 0),
-        '8 holes'  : vec( 0.13, 10.53, 0),
-        #'8 holes': vec(13, -5.0, 0),                   # Closer to the destination position
-        '21 holes' : vec( 3.2,   10.47,  0)
+        Layout.HOLES_0      : vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
+        Layout.HOLES_0_REAL : vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
+        #Layout.HOLES_2      : vec(x, y, 0),
+        Layout.HOLES_2      : vec(-1.52,  9.25, 0),
+        Layout.HOLES_2_REAL : vec(-0.79, 9.86, 0),
+        Layout.HOLES_8      : vec( 0.13, 10.53, 0),
+        #Layout.HOLES_8      : vec(13, -5.0, 0),                   # Closer to the destination position
+        Layout.HOLES_21     : vec( 3.2,   10.47,  0)
         }
     destinations_xy = {
-        '0 holes'  : [[-0.25, 0.25], [-0.25, 0.25]],
-        '0 holes real': [[-0.25, 0.25], [-0.25, 0.25]],
-        '2 holes'  : [[-1.9, 1.56], [-6.62, -5.5]],
-        '2 holes real': [[-0.24, 2.73], [-11.4, -10.08]],
-        '8 holes'  : [[-5.9, -3.83], [-11.4, -9.52]],
-        #'8 holes'  : [[0.16, 4.59], [-6.95, -3.85]],   # Closer to the start position
-        '21 holes' : [[-4.2, -2.55], [-11.4, -8.91]]
+        Layout.HOLES_0      : [[-0.25, 0.25], [-0.25, 0.25]],
+        Layout.HOLES_0_REAL : [[-0.25, 0.25], [-0.25, 0.25]],
+        Layout.HOLES_2      : [[-1.9, 1.56], [-6.62, -5.5]],
+        Layout.HOLES_2_REAL : [[-0.24, 2.73], [-11.4, -10.08]],
+        Layout.HOLES_8      : [[-5.9, -3.83], [-11.4, -9.52]],
+        #Layout.HOLES_8      : [[0.16, 4.59], [-6.95, -3.85]],   # Closer to the start position
+        Layout.HOLES_21     : [[-4.2, -2.55], [-11.4, -8.91]]
         }
 
     # ========== Constructor ==================================================
@@ -61,14 +59,14 @@ class Geometry:
     """
     Representation of complete labyrinth geometry.
     """
-    def __init__(self, layout='8 holes'):
+    def __init__(self, layout=Layout.HOLES_8):
         """
         Constructor.
 
         Parameters
         ----------
-        layout : string
-            Layout of holes and walls. The default is '8 holes'
+        layout : enum LabLayouts.Layout
+            Layout of holes and walls. The default is Layout.HOLES_8.
 
         Returns
         -------
@@ -76,14 +74,13 @@ class Geometry:
 
         """
         # Set layout information
-        if layout not in Geometry.layouts:
-            layout = '8 holes'
+        assert type(layout) == Layout
         self.layout = layout
         
         # Init geometry
         self.box = Box()
         self.field = Field()
-        if layout != '0 holes' and layout != '0 holes real':
+        if layout.number_holes != 0:
             self.walls = Walls(layout=layout)
             self.holes = Holes(layout=layout, depth=self.field.plate_depth)
         self.ball = Ball()
@@ -175,8 +172,8 @@ class Walls:
 
         Parameters
         ----------
-        layout : string
-            Layout to generate (see LabyrinthGeometry.layouts).
+        layout : enum LabLayouts.Layout
+            Layout to generate.
         thickness : float, optional
             Thickness of walls. The default is 0.58.
         height : float, optional
@@ -193,7 +190,7 @@ class Walls:
 
         # Data
         z_pos = height / 2
-        if layout == '2 holes':
+        if layout == Layout.HOLES_2:
             self.data = [
                 {"pos": vec(-3.41, 3.5, z_pos), "size": vec(thickness, 15.81, height)},
                 {"pos": vec(-2.37, 4, z_pos), "size": vec(2.64, thickness, height)},
@@ -206,7 +203,7 @@ class Walls:
                 {"pos": vec(3.61, 3.5, z_pos), "size": vec(thickness, 15.81, height)}
             ]
 
-        elif layout == '2 holes real':
+        elif layout == Layout.HOLES_2_REAL:
             self.data = [
                 {"pos": vec(-2.44, 1.08, z_pos), "size": vec(thickness, 20.65, height)},
                 {"pos": vec(-1.35, 2.35, z_pos), "size": vec(2.75, thickness, height)},
@@ -218,7 +215,7 @@ class Walls:
                 {"pos": vec(3.04, -10.12, z_pos), "size": vec(thickness, 2.56, height)},
             ]
 
-        elif layout == '8 holes':
+        elif layout == Layout.HOLES_8:
             self.data = [
                 {"pos": vec(2.01, 9.09, z_pos), "size": vec(thickness, 4.54, height)},
                 {"pos": vec(-4.08, 9.49, z_pos), "size": vec(11.72, thickness, height)},
@@ -259,7 +256,7 @@ class Walls:
                 {"pos": vec(7.77, -9.66, z_pos), "size": vec(thickness, 3, height)}
             ]
 
-        elif layout == '21 holes':
+        elif layout == Layout.HOLES_21:
             self.data = [
                 {"pos": vec(4.19, 9.38, z_pos), "size": vec(thickness, 4, height)},
                 {"pos": vec(8.88, 9.79, z_pos), "size": vec(9.63, thickness, height)},
@@ -329,8 +326,8 @@ class Holes:
 
         Parameters
         ----------
-        layout : string
-            Layout to generate (see LabyrinthGeometry.layouts).
+        layout : enum LabLayouts.Layout
+            Layout to generate.
         radius : float, optional
             Radius of the holes. The default is 0.75.
         depth : float, optional
@@ -344,19 +341,19 @@ class Holes:
         # Dimension
         self.radius = radius
 
-        if layout == '2 holes':
+        if layout == Layout.HOLES_2:
             self.data = [
                 {"pos": vec(-1.6, 5.31, 0.001), "axis": vec(0.0, 0.0, -depth)},
                 {"pos": vec(2.06, -0.39, 0.001), "axis": vec(0.0, 0.0, -depth)},
             ]
 
-        elif layout == '2 holes real':
+        elif layout == Layout.HOLES_2_REAL:
             self.data = [
                 {"pos": vec(-1.12, 3.36, 0.001), "axis": vec(0.0, 0.0, -depth)},
                 {"pos": vec(3.41, -4.72, 0.001), "axis": vec(0.0, 0.0, -depth)},
             ]
 
-        elif layout == '8 holes':
+        elif layout == Layout.HOLES_8:
             self.data = [
                 {"pos": vec(-10.52, 7.03, 0.001), "axis": vec(0.0, 0.0, -depth)},
                 {"pos": vec(-8.06, 1.28, 0.001), "axis": vec(0.0, 0.0, -depth)},
@@ -369,7 +366,7 @@ class Holes:
                 {"pos": vec(10.57, -5.8, 0.001), "axis": vec(0.0, 0.0, -depth)}
             ]
 
-        elif layout == '21 holes':
+        elif layout == Layout.HOLES_21:
             self.data = [
                 {"pos": vec(-10.71, 7.03, 0.001), "axis": vec(0.0, 0.0, -depth)},
                 {"pos": vec(-5.81, 4.45, 0.001), "axis": vec(0.0, 0.0, -depth)},

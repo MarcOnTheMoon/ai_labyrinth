@@ -1,19 +1,16 @@
 """
 Models realistic behavior of the ball on the field for a labyrinth OpenAI gym environment.
 
-The graphical user interface is based on VPython ( https://vpython.org/ ).
-The library uses the default browser to display images and animations. Install
-VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
-
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.25
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
 from math import sqrt, sin, cos
 import time
+from LabLayouts import Layout
 from LabRender3D import Render3D
 from LabGeometry import Geometry
 
@@ -43,7 +40,7 @@ class BallPhysics:
         # Ball state
         self.is_ball_in_hole = False            # Ball has fallen into hole if True
         self.__position = vec(0.0, 0.0, 0.0)    # Ball's position [cm]^3, z-component not used
-                                                      # Use of vec as a standardized structure of vpython (vec requires 3 components): in the render class the z component of the ball position is added for visualisation
+                                                    # Use of vec as a standardized structure of vpython (vec requires 3 components): in the render class the z component of the ball position is added for visualisation
         self.__velocity = vec(0.0, 0.0, 0.0)    # Ball's velocity [cm/s]^3
         
         # Field tilting
@@ -156,7 +153,7 @@ class BallPhysics:
         None.
 
         """
-        if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
+        if self.__geometry.layout.number_holes != 0:
             # Interior walls (copied from Geometry)
             walls_data = self.__geometry.walls.data.copy()
         else:
@@ -264,7 +261,7 @@ class BallPhysics:
         # Velocity
         self.__velocity = vec(velocity_x, velocity_y, 0.0)
         self.__detect_and_process_collision()
-        if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
+        if self.__geometry.layout.number_holes != 0:
             self.__detect_ball_in_hole()
 
         return self.__position
@@ -337,7 +334,7 @@ class BallPhysics:
                 self.__position.y = pos_y = corner[2].y - radius
                 is_collision_edge = True
 
-        if is_collision_edge == True or self.__geometry.layout == '0 holes' or self.__geometry.layout != '0 holes real': # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball) and its the game plate with 0 holes.
+        if (is_collision_edge == True) or (self.__geometry.layout.number_holes == 0): # Check for corner collisions only if there has been no wall collision (preventing misbehavior of the ball) and its the game plate with 0 holes.
             return
 
         # ---------- Check for collision with a corner ------------------------
@@ -432,7 +429,7 @@ class BallPhysics:
 
 if __name__ == '__main__':
     # Init geometry and rendering
-    layout = '21 holes'
+    layout = Layout.HOLES_21
     geometry = Geometry(layout=layout)
     ball_start_position = geometry.start_positions[layout]
     render = Render3D(geometry, ball_position=ball_start_position)

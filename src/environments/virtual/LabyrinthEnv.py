@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.24
+@version: 2024.08.25
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -19,6 +19,7 @@ import random
 import time
 
 from LabRender3D import Render3D
+from LabLayouts import Layout
 from LabGeometry import Geometry
 from LabBallPhysics import BallPhysics
 from LabRewardsByAreas import RewardsByAreas
@@ -61,11 +62,10 @@ class LabyrinthEnv(gym.Env):
         For instance:
             actions_dt=0.1 means that an action is taken every 100 ms.
             physics_dt=0.01 means that the ball's position is updated every 10 ms.
-        
 
         Parameters
         ----------
-        layout : string
+        layout : enum LabLayouts.Layout
             Layout of holes and walls as defined in LabGeometry.py.
         render_mode : String, optional
             Render mode to visualize the states (or None). The default is '3D'.
@@ -116,19 +116,20 @@ class LabyrinthEnv(gym.Env):
         )
 
         # Declare action space (see class documentation above)
-        # TODO Why different action space for '2 holes real'? This is not consistent.
+        # TODO Why different action space for Layout.HOLES_2_REAL? This is not consistent.
         self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
-        if (self.__geometry.layout == '2 holes real'):
+        if (self.__geometry.layout == Layout.HOLES_2_REAL):
             self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
         self.num_actions_per_component = len(self.__action_to_angle_degree)
 
         # Define max. actions per episode for truncated
         # TODO Why distinguish? Would there be any harm in setting highest value 800 for all cases?
-        if (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
+        # TODO What about Layout.HOLES_21?
+        if self.__geometry.layout.number_holes == 0:
             self.__max_number_actions = 300
-        elif (self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real'):
+        elif self.__geometry.layout.number_holes == 2:
             self.__max_number_actions = 500
-        else: #if self.__geometry.layout == '8 holes':
+        else: #if self.__geometry.layout == Layout.HOLES_8:
             self.__max_number_actions = 800
 
         self.__first_episode = True
@@ -154,16 +155,17 @@ class LabyrinthEnv(gym.Env):
         # Set start position
         # TODO I do not understand __first_episode. How initialized for first episode? Why not initialized the same way?
         if self.__first_episode == False:
-            if (self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real'):
+            if self.__geometry.layout.number_holes == 0:
                 #area_start = [-6.06, 6.06, -5.76, 5.76]  # Inner area, closer to center
                 area_start = [-13.06, 13.06, -10.76, 10.76] # Outer area
                 self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
                 self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
-            elif (self.__geometry.layout == '2 holes real'):
+            # TODO What about Layout.HOLES_2?
+            elif self.__geometry.layout == Layout.HOLES_2_REAL:
                 startpoint = [-0.79, 9.86]
                 self.__ball_start_position.x = startpoint[0] + random.uniform(-0.4, 0.4)
                 self.__ball_start_position.y = startpoint[1] + random.uniform(-0.4, 0.4)
-            elif (self.__geometry.layout == '8 holes'):
+            elif self.__geometry.layout == Layout.HOLES_8:
                 startpoints = [[-5.82, -5.23], [-12.6, -7.03], [-9.8, -1.49], [-3.8, 1.29], [-12.85, 3.92], [0.13, 10.53]]
                 start_index = random.randint(0, len(startpoints )-1)
                 self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
@@ -516,7 +518,7 @@ class LabyrinthEnv(gym.Env):
         is_ball_at_destination = is_destination_x and is_destination_y
 
         # Ball has fallen into a hole?
-        if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
+        if self.__geometry.layout.number_holes != 0:
             is_ball_in_hole = self.__ball_physics.is_ball_in_hole
             is_ball_to_close_hole = self.__is_close_to_hole()
         else:
@@ -524,7 +526,8 @@ class LabyrinthEnv(gym.Env):
             is_ball_to_close_hole = False
 
         # Reward
-        if self.__geometry.layout == '8 holes' or self.__geometry.layout == '2 holes' or self.__geometry.layout == '2 holes real':
+        # TODO Replace by layout.number_holes > 0? What about Layout.HOLES_21?
+        if self.__geometry.layout == Layout.HOLES_8 or self.__geometry.layout == Layout.HOLES_2 or self.__geometry.layout == Layout.HOLES_2_REAL:
             if is_ball_at_destination:
                 reward = self.__reward_area.reward_dict['is_ball_at_destination']
                 print("Ball reached destination")
@@ -540,7 +543,7 @@ class LabyrinthEnv(gym.Env):
                 reward = self.__reward_area.reward_dict['right_direction']
             else:
                 reward = self.__reward_area.reward_dict['default']
-        elif self.__geometry.layout == '0 holes' or self.__geometry.layout == '0 holes real':
+        elif self.__geometry.layout.number_holes == 0:
             interim_reward = self.__is_moved_in_correct_direction()
             progress = self.__reward_for_layout_0_holes()
             if is_ball_at_destination:
@@ -554,7 +557,7 @@ class LabyrinthEnv(gym.Env):
                 reward = self.__reward_area.reward_dict['default'].get(progress, self.__reward_area.reward_dict['default']['default'])
 
         # Episode completed or truncated?
-        done = (is_ball_at_destination or is_ball_in_hole) and self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real'
+        done = (is_ball_at_destination or is_ball_in_hole) and (self.__geometry.layout.number_holes != 0)
         self.__number_actions += 1 # Action history
 
         if self.__number_actions >= self.__max_number_actions:
@@ -570,7 +573,7 @@ class LabyrinthEnv(gym.Env):
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnv(layout='0 holes', render_mode='3D')
+    env = LabyrinthEnv(layout=Layout.HOLES_0, render_mode='3D')
     env.reset()
 
     """for action in [0, 4, 6, 6]:

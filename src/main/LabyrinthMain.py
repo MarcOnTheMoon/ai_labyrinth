@@ -4,7 +4,7 @@ Main application to train and solve virtual and physical labyrinths.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.25
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import os
@@ -18,6 +18,7 @@ import random
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+from LabLayouts import Layout
 from LabyrinthEnv import LabyrinthEnv
 from AgentDQN import AgentDQN
 
@@ -27,7 +28,7 @@ from AgentDQN import AgentDQN
 
 #episodes = 5500
 episodes = 2
-layout = '8 holes'
+layout = Layout.HOLES_8
 render_mode = '3D'
 models_path = '../models/'
 

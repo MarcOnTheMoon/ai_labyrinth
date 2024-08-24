@@ -8,13 +8,14 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.25
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import scene, box, cylinder, sphere, rotate, compound, textures
 from vpython import vector as vec
 from math import pi
 import time
+from LabLayouts import Layout
 from LabGeometry import Geometry
 
 import os
@@ -40,12 +41,12 @@ class Render3D:
 
     # Define texture file names
     textures = {
-        '0 holes'       : 'textures/0_holes.png',
-        '0 holes real'  : 'textures/0_holes_real.png',
-        '2 holes'       : 'textures/2_holes.png',
-        '2 holes real'  : 'textures/2_holes_real.png',
-        '8 holes'       : 'textures/8_holes.png',
-        '21 holes'      : 'textures/21_holes.png'
+        Layout.HOLES_0       : 'textures/0_holes.png',
+        Layout.HOLES_0_REAL  : 'textures/0_holes_real.png',
+        Layout.HOLES_2       : 'textures/2_holes.png',
+        Layout.HOLES_2_REAL  : 'textures/2_holes_real.png',
+        Layout.HOLES_8       : 'textures/8_holes.png',
+        Layout.HOLES_21      : 'textures/21_holes.png'
     }
 
     # ========== Constructor ==================================================
@@ -197,7 +198,7 @@ class Render3D:
         labyrinth_elements = []
         labyrinth_elements.append(field)
 
-        if geometry.layout != '0 holes' and geometry.layout != '0 holes real':
+        if geometry.layout.number_holes != 0:
             # Add walls
             walls_data = geometry.walls.data
             for wall_data in walls_data:
@@ -345,7 +346,7 @@ class Render3D:
 
 if __name__ == '__main__':
     # Render initial pinball environment
-    geometry = Geometry(layout='8 holes')
+    geometry = Geometry(layout=Layout.HOLES_8)
     render = Render3D(geometry)
     time.sleep(2.0)
 
