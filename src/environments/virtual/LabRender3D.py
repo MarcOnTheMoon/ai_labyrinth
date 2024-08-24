@@ -8,18 +8,21 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.14
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import scene, box, cylinder, sphere, rotate, compound, textures
 from vpython import vector as vec
 from math import pi
 import time
-from LabyrinthGeometry import LabyrinthGeometry
+from LabGeometry import Geometry
 
-class LabyrinthRender3D:
+import os
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    # ========== Colors =======================================================
+class Render3D:
+
+    # ========== Colors and texture files =====================================
 
     # Define colors for rendering
     colors = {
@@ -35,6 +38,16 @@ class LabyrinthRender3D:
         'arrow_y'   : vec(1.0, 0.0, 0.0)
     }
 
+    # Define texture file names
+    textures = {
+        '0 holes'       : 'textures/0_holes.png',
+        '0 holes real'  : 'textures/0_holes_real.png',
+        '2 holes'       : 'textures/2_holes.png',
+        '2 holes real'  : 'textures/2_holes_real.png',
+        '8 holes'       : 'textures/8_holes.png',
+        '21 holes'      : 'textures/21_holes.png'
+    }
+
     # ========== Constructor ==================================================
 
     def __init__(self, geometry, scene_width=800, scene_height=600, scene_range=20, ball_position=None):
@@ -43,7 +56,7 @@ class LabyrinthRender3D:
 
         Parameters
         ----------
-        geometry : LabyrinthGeometry
+        geometry : Geometry
             Geometry to render.
         scene_width : int, optional
             Width of the display area in pixel. The default is 800.
@@ -92,7 +105,7 @@ class LabyrinthRender3D:
 
         Parameters
         ----------
-        geometry : LabyrinthGeometry
+        geometry : Geometry
             Labyrinth layout to render.
 
         Returns
@@ -115,7 +128,7 @@ class LabyrinthRender3D:
 
         Parameters
         ----------
-        geometry : LabyrinthGeometry
+        geometry : Geometry
             Labyrinth layout to render.
 
         Returns
@@ -162,7 +175,7 @@ class LabyrinthRender3D:
 
         Parameters
         ----------
-        geometry : LabyrinthGeometry
+        geometry : Geometry
             Labyrinth layout to render.
 
         Returns
@@ -199,19 +212,8 @@ class LabyrinthRender3D:
                 labyrinth_elements.append(hole)
 
         # Compile all elements into a board with background picture
-        if geometry.layout == '0 holes':
-            labyrinth = compound(labyrinth_elements, texture='textures/0_holes.png')
-        elif geometry.layout == '0 holes real':
-            labyrinth = compound(labyrinth_elements, texture='textures/0_holes_real.png')
-        elif geometry.layout == '2 holes':
-            labyrinth = compound(labyrinth_elements, texture='textures/2_holes.png')
-        elif geometry.layout == '2 holes real':
-            labyrinth = compound(labyrinth_elements, texture='textures/2_holes_real.png')
-        elif geometry.layout == '8 holes':
-            labyrinth = compound(labyrinth_elements, texture='textures/8_holes.png')
-        elif geometry.layout == '21 holes':
-            labyrinth = compound(labyrinth_elements, texture='textures/21_holes.png')
-        self.__labyrinth = labyrinth
+        texture = Render3D.textures[geometry.layout]
+        self.__labyrinth = compound(labyrinth_elements, texture=texture)
 
         # Rotate plate
         self.rotate_by(x_degree=geometry.field.rotation_x_deg, y_degree=geometry.field.rotation_y_deg)
@@ -343,8 +345,8 @@ class LabyrinthRender3D:
 
 if __name__ == '__main__':
     # Render initial pinball environment
-    geometry = LabyrinthGeometry(layout='8 holes')
-    render = LabyrinthRender3D(geometry)
+    geometry = Geometry(layout='8 holes')
+    render = Render3D(geometry)
     time.sleep(2.0)
 
     # Do some sample movements

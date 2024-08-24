@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.24
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -18,10 +18,14 @@ from math import pi
 import random
 import time
 
-from LabyrinthRender3D import LabyrinthRender3D
-from LabyrinthGeometry import LabyrinthGeometry
-from LabyrinthBallPhysics import LabyrinthBallPhysics
-from LabyrinthRewardArea import LabyrinthRewardArea
+from LabRender3D import Render3D
+from LabGeometry import Geometry
+from LabBallPhysics import BallPhysics
+from LabRewardsByAreas import RewardsByAreas
+
+# TODO Numpy array significantly faster and less memory than Python lists => Replace with Numpy where appropriate
+# TODO Rename layouts '... real' to '... physical' in all project files?
+# TODO Why distinguish '0 holes' and '0 holes real'? Use physical layout also for virtual and remove the other one? (Same question for 2 holes.)
 
 class LabyrinthEnv(gym.Env):
     # TODO Observation space unclear. Why 'possible components'? Why not include these values in the space? It is up to the agent to use them or ignore them, anyhow.
@@ -62,7 +66,7 @@ class LabyrinthEnv(gym.Env):
         Parameters
         ----------
         layout : string
-            Layout of holes and walls as defined in LabyrinthGeometry.py.
+            Layout of holes and walls as defined in LabGeometry.py.
         render_mode : String, optional
             Render mode to visualize the states (or None). The default is '3D'.
         actions_dt : float, optional
@@ -82,17 +86,17 @@ class LabyrinthEnv(gym.Env):
         self.__last_action_timestamp_sec = 0.0
         
         # Create labyrinth geometry
-        self.__geometry = LabyrinthGeometry(layout=layout)
+        self.__geometry = Geometry(layout=layout)
 
         # Defines geometric dimensions for reward calculations and specific rewards
-        self.__reward_area = LabyrinthRewardArea(layout=layout)
+        self.__reward_area = RewardsByAreas(layout=layout)
 
         # Field rotation
         self.__x_degree = 0.0
         self.__y_degree = 0.0
                 
         # Ball (physics, position, and destination)
-        self.__ball_physics = LabyrinthBallPhysics(geometry=self.__geometry, dt=self.__physics_dt)
+        self.__ball_physics = BallPhysics(geometry=self.__geometry, dt=self.__physics_dt)
         self.__ball_start_position = self.__geometry.start_positions[layout]
         self.__ball_position = self.__ball_start_position
         self.__destination_x = self.__geometry.destinations_xy[layout][0]
@@ -102,7 +106,7 @@ class LabyrinthEnv(gym.Env):
         assert render_mode is None or render_mode in self.metadata["render_modes"]
         self.__render_mode = render_mode
         if self.__render_mode == '3D':
-            self.__render_3d = LabyrinthRender3D(self.__geometry)
+            self.__render_3d = Render3D(self.__geometry)
             self.__render()
 
         # Declare observation space (see class documentation above)
@@ -172,7 +176,7 @@ class LabyrinthEnv(gym.Env):
         self.__observation_space = np.array([
             round(self.__ball_start_position.x, 3),
             round(self.__ball_start_position.y, 3),
-            #0.0,       # TODO What do these values mean? Why commented out?
+            #0.0,       # TODO What do these values mean? Velocity? Why commented out?
             #0.0,
             round(self.__ball_start_position.x, 3),
             round(self.__ball_start_position.y, 3),
@@ -256,7 +260,7 @@ class LabyrinthEnv(gym.Env):
         self.__right_direction = False
         
         # Run through defined areas
-        # TODO Progress dependent on order areas are defined in in LabyrinthRewardAreas. Shouldn't distance calculation and progress be in that file/class?
+        # TODO Progress dependent on order areas are defined in in LabRewardsByAreas.py. Shouldn't distance calculation and progress be in that file/class?
         for x_min, x_max, y_min, y_max in self.__reward_area.areas:
             is_in_area_x = x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x
             is_in_area_y = y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y

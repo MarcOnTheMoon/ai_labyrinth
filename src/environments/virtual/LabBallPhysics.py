@@ -8,16 +8,16 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.05.17
+@version: 2024.08.23
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
 from math import sqrt, sin, cos
 import time
-from LabyrinthRender3D import LabyrinthRender3D
-from LabyrinthGeometry import LabyrinthGeometry
+from LabRender3D import Render3D
+from LabGeometry import Geometry
 
-class LabyrinthBallPhysics:
+class BallPhysics:
 
     # ========== Constructor ==================================================
 
@@ -27,7 +27,7 @@ class LabyrinthBallPhysics:
 
         Parameters
         ----------
-        geometry : LabyrinthGeometry
+        geometry : Geometry
             Geometry for calculations
         dt : float
             Time period for each step [s]
@@ -157,7 +157,7 @@ class LabyrinthBallPhysics:
 
         """
         if self.__geometry.layout != '0 holes' and self.__geometry.layout != '0 holes real':
-            # Interior walls (copied from LabyrinthGeometry)
+            # Interior walls (copied from Geometry)
             walls_data = self.__geometry.walls.data.copy()
         else:
             walls_data = []
@@ -433,12 +433,12 @@ class LabyrinthBallPhysics:
 if __name__ == '__main__':
     # Init geometry and rendering
     layout = '21 holes'
-    geometry = LabyrinthGeometry(layout=layout)
+    geometry = Geometry(layout=layout)
     ball_start_position = geometry.start_positions[layout]
-    render = LabyrinthRender3D(geometry, ball_position=ball_start_position)
+    render = Render3D(geometry, ball_position=ball_start_position)
 
     # Init ball physics
-    ball_physics = LabyrinthBallPhysics(geometry=geometry, dt=0.01)
+    ball_physics = BallPhysics(geometry=geometry, dt=0.01)
     ball_physics.reset(position=ball_start_position)
     time.sleep(2.0)
 

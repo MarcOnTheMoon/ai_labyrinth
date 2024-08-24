@@ -6,9 +6,10 @@ Lengths are stated without unit, but are interpreted as [cm].
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.21
+@version: 2024.08.24
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
+import numpy as np
 from vpython import vector as vec
 import random
 
@@ -16,14 +17,14 @@ import random
 # Class containing individual components of labyrinth game geometry
 # -----------------------------------------------------------------------------
 
-class LabyrinthGeometry:
-
+class Geometry:
+    
     # ========== Settings =====================================================
     # TODO Replace all these 'settings' by parameters and commented out code
 
     # Set start areas for random start position as [x_min, x_max, y_min, y_max]
 #    start_area = [-6.06, 6.06, -5.76, 5.76]         # Layout '0 holes', close to destination
-    start_area = [-13.06, 13.06, -10.76, 10.76]     # Layout '0 holes', whole board
+    start_area = np.array([-13.06, 13.06, -10.76, 10.76], dtype=np.float32)     # Layout '0 holes', whole board
 #    start_area = [-1.3, 2.3, 6.76, 10.76]           # Layout '2 holes'
     
     # Set random set for random start position
@@ -75,7 +76,7 @@ class LabyrinthGeometry:
 
         """
         # Set layout information
-        if layout not in LabyrinthGeometry.layouts:
+        if layout not in Geometry.layouts:
             layout = '8 holes'
         self.layout = layout
         

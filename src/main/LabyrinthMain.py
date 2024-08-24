@@ -27,7 +27,11 @@ from AgentDQN import AgentDQN
 
 #episodes = 5500
 episodes = 2
+layout = '8 holes'
+render_mode = '3D'
 models_path = '../models/'
+
+# =========== Class ===========================================================
 
 class App():
     
@@ -45,9 +49,9 @@ class App():
 
     # =========== Training ====================================================
             
-    def train_virtual(self, layout, episodes):
+    def train_virtual(self, layout, episodes, render_mode=None):
         # Create environment and agent
-        env = LabyrinthEnv(layout=layout, render_mode=None)
+        env = LabyrinthEnv(layout=layout, render_mode=render_mode)
         agent = AgentDQN(state_size = 6, action_size = env.num_actions_per_component * 2)
         
         # Train model
@@ -78,8 +82,8 @@ class App():
             if e % 10 == 0:
                 print(f'Episode {e} Average Score: {np.mean(scores[-100:])}')
 #            if e % 25 == 0: #Saves the weights to a different file every 25 episodes.
-            if e % 2 == 0: #Saves the weights to a different file every 25 episodes.
-                agent.save(models_path + 'model.pth')
+#            if e % 2 == 0: #Saves the weights to a different file every 25 episodes.
+#                agent.save(models_path + 'model.pth')
         
         return scores
 
@@ -100,7 +104,7 @@ class App():
 
 if __name__ == '__main__':
     app = App()
-    app.train_virtual(layout='8 holes', episodes=episodes)
+    app.train_virtual(layout=layout, episodes=episodes, render_mode=render_mode)
     app.plot_scores()
     
     # Init environment and agent
