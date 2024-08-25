@@ -15,8 +15,7 @@ from vpython import scene, box, cylinder, sphere, rotate, compound, textures
 from vpython import vector as vec
 from math import pi
 import time
-from LabLayouts import Layout
-from LabGeometry import Geometry
+from LabLayouts import Layout, Geometry
 
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -41,12 +40,12 @@ class Render3D:
 
     # Define texture file names
     textures = {
-        Layout.HOLES_0       : 'textures/0_holes.png',
-        Layout.HOLES_0_REAL  : 'textures/0_holes_real.png',
-        Layout.HOLES_2       : 'textures/2_holes.png',
-        Layout.HOLES_2_REAL  : 'textures/2_holes_real.png',
-        Layout.HOLES_8       : 'textures/8_holes.png',
-        Layout.HOLES_21      : 'textures/21_holes.png'
+        Layout.HOLES_0_VIRTUAL  : 'textures/Holes_0_virtual.png',
+        Layout.HOLES_2_VIRTUAL  : 'textures/Holes_2_virtual.png',
+        Layout.HOLES_0          : 'textures/Holes_0.png',
+        Layout.HOLES_2          : 'textures/Holes_2.png',
+        Layout.HOLES_8          : 'textures/Holes_8.png',
+        Layout.HOLES_21         : 'textures/Holes_21.png'
     }
 
     # ========== Constructor ==================================================
@@ -198,7 +197,7 @@ class Render3D:
         labyrinth_elements = []
         labyrinth_elements.append(field)
 
-        if geometry.layout.number_holes != 0:
+        if geometry.layout.number_holes > 0:
             # Add walls
             walls_data = geometry.walls.data
             for wall_data in walls_data:

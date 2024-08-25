@@ -10,9 +10,8 @@ Models realistic behavior of the ball on the field for a labyrinth OpenAI gym en
 from vpython import vector as vec
 from math import sqrt, sin, cos
 import time
-from LabLayouts import Layout
 from LabRender3D import Render3D
-from LabGeometry import Geometry
+from LabLayouts import Layout, Geometry
 
 class BallPhysics:
 
@@ -153,7 +152,7 @@ class BallPhysics:
         None.
 
         """
-        if self.__geometry.layout.number_holes != 0:
+        if self.__geometry.layout.number_holes > 0:
             # Interior walls (copied from Geometry)
             walls_data = self.__geometry.walls.data.copy()
         else:
@@ -261,7 +260,7 @@ class BallPhysics:
         # Velocity
         self.__velocity = vec(velocity_x, velocity_y, 0.0)
         self.__detect_and_process_collision()
-        if self.__geometry.layout.number_holes != 0:
+        if self.__geometry.layout.number_holes > 0:
             self.__detect_ball_in_hole()
 
         return self.__position
