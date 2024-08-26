@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.25
+@version: 2024.08.26
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -21,20 +21,16 @@ from math import pi
 from LabRender3D import Render3D
 from LabLayouts import Layout, Geometry
 from LabBallPhysics import BallPhysics
-from LabRewardsByAreas import RewardsByAreas
+from LabRewards import RewardsByAreas
 
 # TODO Numpy array significantly faster and less memory than Python lists => Replace with Numpy where appropriate
-# TODO Rename layouts '... real' to '... physical' in all project files?
-# TODO Why distinguish '0 holes' and '0 holes real'? Use physical layout also for virtual and remove the other one? (Same question for 2 holes.)
 
 class LabyrinthEnv(gym.Env):
-    # TODO Observation space unclear. Why 'possible components'? Why not include these values in the space? It is up to the agent to use them or ignore them, anyhow.
     """
     Observation space:
     ------------------
     1. The xy-position of the ball (2 values, np.float32)
     2. The last xy-position of the ball (2 values, np.float32)
-       (also possible xy-components of the ball's velocity vector)
     3. The field's x- and y-rotation angles in degree (2 values, np.float32)
         
     Action space:
@@ -88,8 +84,8 @@ class LabyrinthEnv(gym.Env):
         assert type(layout) == Layout
         self.__geometry = Geometry(layout=layout)
 
-        # Defines geometric dimensions for reward calculations and specific rewards
-        self.__reward_area = RewardsByAreas(layout=layout)
+        # Object to determine rewards of an step
+        self.__rewards_rules = RewardsByAreas(layout=layout)
 
         # Field rotation
         self.__x_degree = 0.0
@@ -117,9 +113,9 @@ class LabyrinthEnv(gym.Env):
 
         # Declare action space (see class documentation above)
         # TODO Why different action space for Layout.HOLES_2? This is not consistent.
-        self.__action_to_angle_degree = [-1, -0.5, 0, 0.5, 1]
+        self.__action_to_angle_degree = np.array([-1, -0.5, 0, 0.5, 1], dtype=np.float32)
         if (self.__geometry.layout == Layout.HOLES_2):
-            self.__action_to_angle_degree = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5]
+            self.__action_to_angle_degree = np.array([-1.5, -1, -0.5, 0, 0.5, 1, 1.5], dtype=np.float32)
         self.num_actions_per_component = len(self.__action_to_angle_degree)
 
         # Define max. actions per episode for truncated
@@ -133,6 +129,28 @@ class LabyrinthEnv(gym.Env):
             self.__max_number_actions = 800
 
         self.__first_episode = True
+
+    # ========== Observation space ============================================
+    
+    def __get_observation(self):
+        """
+        Get the current observed state of the environment.
+
+        Returns
+        -------
+        numpy.float32[6]
+            Array of observed values (see class documentation)
+
+        """
+        # TODO Why round decimals?
+        return np.array([
+            round(self.__ball_position[0], 3),   # Round 3 decimals
+            round(self.__ball_position [1], 3),
+            round(self.__last_ball_position[0], 3),
+            round(self.__last_ball_position[1], 3),
+            self.__x_degree,
+            self.__y_degree
+        ], dtype=np.float32)
 
     # ========== Reset ========================================================
 
@@ -157,37 +175,24 @@ class LabyrinthEnv(gym.Env):
         if self.__first_episode == False:
             match self.__geometry.layout:
                 case Layout.HOLES_0_VIRTUAL | Layout.HOLES_0:
-                    #area_start = [-6.06, 6.06, -5.76, 5.76]  # Inner area, closer to center
-                    area_start = [-13.06, 13.06, -10.76, 10.76] # Outer area
-                    self.__ball_start_position.x = random.uniform(area_start[0], area_start[1])
-                    self.__ball_start_position.y = random.uniform(area_start[2], area_start[3])
+                    #area_start = [-6.06, 6.06, -5.76, 5.76]        # Inner area, closer to center
+                    area_start = [-13.06, 13.06, -10.76, 10.76]     # Outer area
+                    self.__ball_start_position[0] = random.uniform(area_start[0], area_start[1])
+                    self.__ball_start_position[1] = random.uniform(area_start[2], area_start[3])
                 case Layout.HOLES_2:
                     startpoint = [-0.79, 9.86]
-                    self.__ball_start_position.x = startpoint[0] + random.uniform(-0.4, 0.4)
-                    self.__ball_start_position.y = startpoint[1] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[0] = startpoint[0] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[1] = startpoint[1] + random.uniform(-0.4, 0.4)
                 case Layout.HOLES_8:
                     startpoints = [[-5.82, -5.23], [-12.6, -7.03], [-9.8, -1.49], [-3.8, 1.29], [-12.85, 3.92], [0.13, 10.53]]
                     start_index = random.randint(0, len(startpoints )-1)
-                    self.__ball_start_position.x = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
-                    self.__ball_start_position.y = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[0] = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[1] = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
                 case _:
                     # TODO What about Layout.HOLES_2_VIRTUAL?
                     raise Exception(f'Layout not supported: {self.__geometry.layout}')
         else:
             self.__first_episode = False
-
-        # Observation space
-        # TODO Why have a long row of numbers? Why not organize these, e.g., in a dictionary => Much more robust usage?
-        self.__observation_space = np.array([
-            round(self.__ball_start_position.x, 3),
-            round(self.__ball_start_position.y, 3),
-            #0.0,       # TODO What do these values mean? Velocity? Why commented out?
-            #0.0,
-            round(self.__ball_start_position.x, 3),
-            round(self.__ball_start_position.y, 3),
-            0.0,
-            0.0
-        ], dtype=np.float32)
 
         # Field rotation
         self.__x_degree = 0.0
@@ -203,10 +208,12 @@ class LabyrinthEnv(gym.Env):
             self.__render()
             self.__render_3d.ball_visibility(True)
 
-        # Init counters
-        # The "reward counter" is confusing. What is this? A counter? An index to an array? ...?
-        self.__number_actions = 0           # Action history counter
-        self.__is_moved_in_correct_direction_counter = 0   # Interim reward counter for threshold reward
+        # Reset reward object and action history counter
+        self.__rewards_rules.reset()
+        self.__number_actions = 0
+
+        # Observation space
+        self.__observation_space = self.__get_observation()
 
         return self.__observation_space, {}
 
@@ -230,155 +237,15 @@ class LabyrinthEnv(gym.Env):
             self.__render_3d.rotate_to(self.__x_degree, self.__y_degree)
             
             # Ball visibility
-            if self.__ball_physics.is_ball_in_hole:
+            if self.__ball_physics.is_in_hole:
                 self.__render_3d.ball_visibility(False)
                 
             # Ball position
-            self.__render_3d.move_ball(self.__ball_position.x, self.__ball_position.y)
+            self.__render_3d.move_ball(self.__ball_position[0], self.__ball_position[1])
 
     # =========== Rewards =====================================================
     
-    # ----------- Ball moves in the correct direction -------------------------
-    
-    def __is_moved_in_correct_direction(self):
-        """
-        Determines if the ball moved significantly in the correct direction.
-        
-        The method sets self.__right_direction to True for movements in the
-        correct direction. It return True only if a distance of at least 0.25
-        has been moved into the correct direction.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        boolean
-            True, if the ball has made a larger positional change in the correct maze direction
-
-        """
-        # Progress (in number areas) of movement through labyrinth. Value increases from the goal to start, because the areas are defined from the goal to the start.
-        self.__progress = 0
-        
-        # Set to True when the ball made a smaller positional change in the correct direction
-        self.__right_direction = False
-        
-        # Run through defined areas
-        # TODO Progress dependent on order areas are defined in in LabRewardsByAreas.py. Shouldn't distance calculation and progress be in that file/class?
-        for x_min, x_max, y_min, y_max in self.__reward_area.areas:
-            is_in_area_x = x_min < self.__last_ball_position.x and x_max > self.__last_ball_position.x
-            is_in_area_y = y_min < self.__last_ball_position.y and y_max > self.__last_ball_position.y
-
-            # Found area the ball was in during last step            
-            if is_in_area_x and is_in_area_y:
-                target_point_x = self.__reward_area.target_points[self.__progress][0]
-                target_point_y = self.__reward_area.target_points[self.__progress][1]
-           
-                # TODO Replace positions and points by single object (e.g., [self.__ball_position.x, self.__ball_position.y] -> self.__ball_position)?
-                self.__last_distance = math.dist([self.__last_ball_position.x, self.__last_ball_position.y], [target_point_x, target_point_y])
-                self.__current_distance = math.dist([self.__ball_position.x, self.__ball_position.y], [target_point_x, target_point_y])
-
-                if self.__last_distance - self.__current_distance > 0.25:  # Sufficient change otherwise the agent will trick itself into rewarding changes in the 4th decimal place even though the ball feels like it's stuck to a wall.
-                    # TODO Missing line?: self.__right_direction = True
-                    return True
-                elif self.__last_distance - self.__current_distance > 0:
-                    self.__right_direction = True
-                    return False
-                else:
-                    return False
-                
-            self.__progress += 1
-
-        return False
-
-    # ----------- Threshold (currently not used) ------------------------------
-    
-    def __threshold_reward(self):
-        """
-        Calculates whether a defined threshold is crossed.
-        
-        The method is not used so far, but can be used to try thresholding rewards.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        1, if the threshold was crossed in the correct direction.
-        -1, if the threshold was crossed in the wrong direction.
-        0, otherwise
-
-        """
-        # TODO Code review
-        if len(self.__reward_area.threshold_rewards) <= self.__is_moved_in_correct_direction_counter:
-            return 0
-
-        axis = self.__reward_area.threshold_rewards[self.__is_moved_in_correct_direction_counter][0]
-        direction = self.__reward_area.threshold_rewards[self.__is_moved_in_correct_direction_counter][1]
-        threshold = self.__reward_area.threshold_rewards[self.__is_moved_in_correct_direction_counter][2]
-        range_min = self.__reward_area.threshold_rewards[self.__is_moved_in_correct_direction_counter][3]
-        range_max = self.__reward_area.threshold_rewards[self.__is_moved_in_correct_direction_counter][4]
-        if axis == 'x':
-            if direction < 0:
-                if self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                    self.__is_moved_in_correct_direction_counter += 1  # right crossing direction
-                    return 1
-                elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                    self.__is_moved_in_correct_direction_counter -= 1  # false crossing direction
-                    return -1
-            elif self.__last_ball_position.x < threshold and self.__ball_position.x >= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                self.__is_moved_in_correct_direction_counter += 1  # right crossing direction
-                return 1
-            elif self.__last_ball_position.x > threshold and self.__ball_position.x <= threshold and self.__ball_position.y > range_min and self.__ball_position.y < range_max:
-                self.__is_moved_in_correct_direction_counter -= 1  # false crossing direction
-                return -1
-        else:  # axis == 'y'
-            if direction < 0:
-                if self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                    self.__is_moved_in_correct_direction_counter += 1  # right crossing direction
-                    return 1
-                elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                    self.__is_moved_in_correct_direction_counter -= 1  # false crossing direction
-                    return -1
-            elif self.__last_ball_position.y < threshold and self.__ball_position.y >= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                self.__is_moved_in_correct_direction_counter += 1 # right crossing direction
-                return 1
-            elif self.__last_ball_position.y > threshold and self.__ball_position.y <= threshold and self.__ball_position.x > range_min and self.__ball_position.x < range_max:
-                self.__is_moved_in_correct_direction_counter -= 1 # false crossing direction
-                return -1
-        return 0
-
-    # ----------- Layouts without hole: Distance to center --------------------
-    
-    def __reward_for_layout_0_holes(self):
-        """
-        Calculates in witch circular segment the ball is located for the layouts
-        Layout.HOLES_0_VIRTUAL and Layout.HOLES_0.
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        radius_progress: int
-            The higher the number, the closer the ball is to the center
-        """
-        radii = [10, 7.5, 5, 2.5, 1.25]
-        radius_progress = 1
-
-        for radius in radii:
-            if self.__current_distance > radius:
-                return radius_progress
-            radius_progress += 1
-            
-        return radius_progress
-
-    # ========== Is ball close to a hole? =====================================
-    
-    def __is_close_to_hole(self):
+    def __is_near_hole(self):
         """
         Calculates whether the ball is near a hole.
 
@@ -392,15 +259,15 @@ class LabyrinthEnv(gym.Env):
             True, if the ball is near a hole
 
         """
-        pos_x = self.__ball_position.x
-        pos_y = self.__ball_position.y
+        # TODO Replace math.dist() calls by math.dist(a, b) instead of using lists [x, y] for points
+        pos_x = self.__ball_position[0]
+        pos_y = self.__ball_position[1]
 
         for hole in self.__geometry.holes.data:
             hole_center = hole["pos"]
             if math.dist([pos_x, pos_y], [hole_center.x, hole_center.y]) < 1.4 * self.__geometry.holes.radius:
                 return True
         return False
-
 
     # ========== Step =========================================================
 
@@ -423,10 +290,13 @@ class LabyrinthEnv(gym.Env):
             True if the episode has ended, else False.
         truncated : boolean
             True if the episode is terminated due to too many actions being taken.
-        info : int
-            Information: used for progress information for the evaluation of game plate 8 holes
+        info : dict
+            Information: not used
 
         """
+        # Original state (observation space before action)
+        state = self.__get_observation()
+
         # Field's rotation angles before and after applying the action
         stop_x_degree = start_x_degree = self.__x_degree
         stop_y_degree = start_y_degree = self.__y_degree
@@ -459,6 +329,7 @@ class LabyrinthEnv(gym.Env):
             max_delta = -1 * pi/180.0
             if delta_x_rad > 0 or delta_y_rad > 0:
                 max_delta = 1 * pi/180.0
+            # TODO Discuss and refactor "deadtime"
             deadtime = 1
             
             for i in range(self.__physics_steps_per_action): #The game board rotation is adjusted to 10ms updates.
@@ -488,7 +359,8 @@ class LabyrinthEnv(gym.Env):
             
                 x_rad = start_x_rad + (i+1) * delta_x_rad
                 y_rad = start_y_rad + (i+1) * delta_y_rad
-                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)"""
+                self.__ball_position = self.__ball_physics.step(x_rad=x_rad, y_rad=y_rad)
+            """
 
         # Store field's final rotation
         self.__x_degree = stop_x_degree
@@ -502,84 +374,45 @@ class LabyrinthEnv(gym.Env):
             time.sleep(wait_time)
             self.__last_action_timestamp_sec = timestamp + wait_time
             self.__render()
-            
-        # Observation_space
-        self.__observation_space = np.array([
-            round(self.__ball_position.x, 3), #Runden auf 3 nachkommastellen
-            round(self.__ball_position.y, 3),
-            #round(self.__ball_physics.get_velocity().x, 3),
-            #round(self.__ball_physics.get_velocity().y, 3),
-            round(self.__last_ball_position.x, 3),
-            round(self.__last_ball_position.y, 3),
-            self.__x_degree,
-            self.__y_degree
-        ], dtype=np.float32)
 
         # Ball reached destination?
-        is_destination_x = (self.__ball_position.x > self.__destination_x[0]) and (self.__ball_position.x < self.__destination_x[1])
-        is_destination_y = (self.__ball_position.y > self.__destination_y[0]) and (self.__ball_position.y < self.__destination_y[1])
-        is_ball_at_destination = is_destination_x and is_destination_y
+        is_at_destination_x = (self.__ball_position[0] > self.__destination_x[0]) and (self.__ball_position[0] < self.__destination_x[1])
+        is_at_destination_y = (self.__ball_position[1] > self.__destination_y[0]) and (self.__ball_position[1] < self.__destination_y[1])
+        is_at_destination = is_at_destination_x and is_at_destination_y
 
         # Ball has fallen into a hole?
         if self.__geometry.layout.number_holes > 0:
-            is_ball_in_hole = self.__ball_physics.is_ball_in_hole
-            is_ball_to_close_hole = self.__is_close_to_hole()
+            is_in_hole = self.__ball_physics.is_in_hole
+            is_near_hole = self.__is_near_hole()
         else:
-            is_ball_in_hole = False
-            is_ball_to_close_hole = False
+            is_in_hole = False
+            is_near_hole = False
+            
+        # Next state (new observation space)
+        self.__observation_space = self.__get_observation()
 
         # Reward
-        # TODO Replace by layout.number_holes > 0? What about Layout.HOLES_21?
-        if self.__geometry.layout.number_holes > 0:
-            # Layouts with holes
-            if is_ball_at_destination:
-                reward = self.__reward_area.reward_dict['is_ball_at_destination']
-                print("Ball reached destination")
-            elif is_ball_in_hole:
-                reward = self.__reward_area.reward_dict['is_ball_in_hole']
-                print("Ball lost")
-            elif is_ball_to_close_hole:
-                reward = self.__reward_area.reward_dict['is_ball_to_close_hole']
-                print("Ball close to hole")
-            elif self.__is_moved_in_correct_direction():
-                reward = self.__reward_area.reward_dict['interim_reward'](self.__progress, self.__reward_area.areas)
-            elif self.__right_direction:
-                reward = self.__reward_area.reward_dict['right_direction']
-            else:
-                reward = self.__reward_area.reward_dict['default']
+        reward = self.__rewards_rules.step(
+            state = state,
+            action = action,
+            next_state = self.__observation_space,
+            is_near_hole = is_near_hole,
+            is_in_hole = is_in_hole,
+            is_at_destination = is_at_destination)
+        
+        # Episode completed or truncated (i.e., max. number actions applied)?
+        done = (is_at_destination or is_in_hole) and (self.__geometry.layout.number_holes > 0)
+        self.__number_actions += 1
+        truncated = (self.__number_actions >= self.__max_number_actions)
 
-        else:
-            # Layouts with 0 holes
-            interim_reward = self.__is_moved_in_correct_direction()
-            progress = self.__reward_for_layout_0_holes()
-            if is_ball_at_destination:
-                print("Ball reached destination")
-                reward = self.__reward_area.reward_dict['destination']
-            elif interim_reward or self.__right_direction:
-                reward = self.__reward_area.reward_dict['interim'].get(progress, self.__reward_area.reward_dict['interim']['default'])
-                if reward == 100:
-                    print("Ball is close to center")
-            else:
-                reward = self.__reward_area.reward_dict['default'].get(progress, self.__reward_area.reward_dict['default']['default'])
-
-        # Episode completed or truncated?
-        done = (is_ball_at_destination or is_ball_in_hole) and (self.__geometry.layout.number_holes > 0)
-        self.__number_actions += 1 # Action history
-
-        if self.__number_actions >= self.__max_number_actions:
-            truncated = True
-        else:
-            truncated = False
-
-        return self.__observation_space, reward, done, truncated, self.__progress
-
+        return self.__observation_space, reward, done, truncated, {}
 
 # -----------------------------------------------------------------------------
 # Main (sample)
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnv(layout=Layout.HOLES_0_VIRTUAL, render_mode='3D')
+    env = LabyrinthEnv(layout=Layout.HOLES_8, render_mode='3D')
     env.reset()
 
     """for action in [0, 4, 6, 6]:

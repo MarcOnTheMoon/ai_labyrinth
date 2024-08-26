@@ -8,13 +8,13 @@ VPython in Anaconda by the command 'conda install -c conda-forge vpython'.
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.25
+@version: 2024.08.26
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
+import time
 from vpython import scene, box, cylinder, sphere, rotate, compound, textures
 from vpython import vector as vec
 from math import pi
-import time
 from LabLayouts import Layout, Geometry
 
 import os
@@ -64,7 +64,7 @@ class Render3D:
             Height of the display area in pixel. The default is 600.
         scene_range : float, optional
             Virtual distance of the camera viewing the scene. The default is 20.
-        ball_position: vec(x, y, z)
+        ball_position: numpy.float32[2]
             sets the starting position of the ball
 
         Returns
@@ -87,8 +87,8 @@ class Render3D:
 
         # Set geometry and render objects
         self.__ball_radius = geometry.ball.radius
-        if ball_position != None:
-            self.__ball_position = ball_position
+        if ball_position is not None:
+            self.__ball_position = vec(ball_position[0], ball_position[1], 0)
         else:
             self.__ball_position = vec(0,0,0)
         self.__x_degree = 0.0

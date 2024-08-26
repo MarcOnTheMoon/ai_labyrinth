@@ -6,7 +6,7 @@ Lengths are stated without unit, but are interpreted as [cm].
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.25
+@version: 2024.08.26
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import random
@@ -59,14 +59,17 @@ class Layout(Enum):
 # -----------------------------------------------------------------------------
 
 class Geometry:
-    
+    """
+    Representation of complete labyrinth geometry.
+    """
+
     # ========== Settings =====================================================
     # TODO Replace all these 'settings' by parameters and commented out code
 
     # Set start areas for random start position as [x_min, x_max, y_min, y_max]
-#    start_area = [-6.06, 6.06, -5.76, 5.76]         # Layout.HOLES_0_VIRTUAL, close to destination
+#    start_area = np.array([-6.06, 6.06, -5.76, 5.76], dtype=np.float32)         # Layout.HOLES_0_VIRTUAL, close to destination
     start_area = np.array([-13.06, 13.06, -10.76, 10.76], dtype=np.float32)     # Layout.HOLES_0_VIRTUAL, whole board
-#    start_area = [-1.3, 2.3, 6.76, 10.76]           # Layout.HOLES_2_VIRTUAL
+#    start_area = np.array([-1.3, 2.3, 6.76, 10.76], dtype=np.float32)           # Layout.HOLES_2_VIRTUAL
     
     # Set random set for random start position
     random.seed(1)
@@ -75,14 +78,13 @@ class Geometry:
 
     # Define start start positions and destination areas
     start_positions = {
-        Layout.HOLES_0_VIRTUAL  : vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
-        Layout.HOLES_0          : vec(random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0),
-        #Layout.HOLES_2_VIRTUAL : vec(x, y, 0),
-        Layout.HOLES_2_VIRTUAL  : vec(-1.52,  9.25, 0),
-        Layout.HOLES_2          : vec(-0.79, 9.86, 0),
-        Layout.HOLES_8          : vec( 0.13, 10.53, 0),
-        #Layout.HOLES_8         : vec(13, -5.0, 0),                   # Closer to the destination position
-        Layout.HOLES_21         : vec( 3.2,   10.47,  0)
+        Layout.HOLES_0_VIRTUAL  : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
+        Layout.HOLES_0          : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
+        Layout.HOLES_2_VIRTUAL  : np.array([-1.52, 9.25, 0], dtype=np.float32),
+        Layout.HOLES_2          : np.array([-0.79, 9.86, 0], dtype=np.float32),
+        Layout.HOLES_8          : np.array([0.13, 10.53, 0], dtype=np.float32),
+        #Layout.HOLES_8         : np.array([13, -5.0, 0], dtype=np.float32),                   # Closer to the destination position
+        Layout.HOLES_21         : np.array([3.2, 10.47, 0], dtype=np.float32)
         }
     destinations_xy = {
         Layout.HOLES_0_VIRTUAL  : [[-0.25, 0.25], [-0.25, 0.25]],
@@ -96,9 +98,6 @@ class Geometry:
 
     # ========== Constructor ==================================================
 
-    """
-    Representation of complete labyrinth geometry.
-    """
     def __init__(self, layout=Layout.HOLES_8):
         """
         Constructor.
@@ -133,6 +132,7 @@ class Box:
     """
     Representation of the box housing the tiltable field.
     """
+    
     def __init__(self, height=9.5, boarder=0.8, wheel_radius=1.7, wheel_depth=1.5):
         """
         Constructor.
@@ -169,6 +169,7 @@ class Field:
     The field is represented by its dimensions and rotations around the x- and
     y-axes.
     """
+    
     def __init__(self, size_x=27.4, size_y=22.8, plate_depth=0.3):
         """
         Constructor.
@@ -206,6 +207,7 @@ class Walls:
     """
     Representation of walls defining the ball's track.
     """
+    
     def __init__(self, layout, thickness=0.58, height=0.6):
         """
         Constructor.
@@ -361,6 +363,7 @@ class Holes:
     
     These are the holes that balls can fall into, which ends the game.
     """
+    
     def __init__(self, layout, radius=0.75, depth=0.3):
         """
         Constructor.
@@ -449,6 +452,7 @@ class Ball:
     The default values correspond to a ball from the game series Labyrinth and
     GraviTrax, having a diameter of 12.7 mm.
     """
+    
     def __init__(self, radius=0.635):
         """
         Constructor.
