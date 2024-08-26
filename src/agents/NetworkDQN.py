@@ -4,7 +4,7 @@ Deep Q-Network for a DQN agent solving labyrinth environments.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.26
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import torch.nn as nn
@@ -41,19 +41,19 @@ class QNet(nn.Module):
         """
         # Build neural network
         super(QNet, self).__init__()                    # Necessary to properly initialize inheritance
-        self.fc1 = nn.Linear(state_size, fc1_units)     # 1st fully connected layer
-        self.bn1 = nn.BatchNorm1d(fc1_units)            # Batch normalization
-        self.fc2 = nn.Linear(fc1_units, fc2_units)      # 2nd fully connected layer
-        self.bn2 = nn.BatchNorm1d(fc2_units)
-        self.fc3 = nn.Linear(fc2_units, fc3_units)      # 3rd fully connected layer
-        self.bn3 = nn.BatchNorm1d(fc3_units)
-        self.fc4 = nn.Linear(fc3_units, action_size)    # 4th fully connected layer
+        self.__fc1 = nn.Linear(state_size, fc1_units)     # 1st fully connected layer
+        self.__bn1 = nn.BatchNorm1d(fc1_units)            # Batch normalization
+        self.__fc2 = nn.Linear(fc1_units, fc2_units)      # 2nd fully connected layer
+        self.__bn2 = nn.BatchNorm1d(fc2_units)
+        self.__fc3 = nn.Linear(fc2_units, fc3_units)      # 3rd fully connected layer
+        self.__bn3 = nn.BatchNorm1d(fc3_units)
+        self.__fc4 = nn.Linear(fc3_units, action_size)    # 4th fully connected layer
 
         # Init weights (using He-initialization with uniform distribution)
-        nn.init.kaiming_uniform_(self.fc1.weight)
-        nn.init.kaiming_uniform_(self.fc2.weight)
-        nn.init.kaiming_uniform_(self.fc3.weight)
-        nn.init.kaiming_uniform_(self.fc4.weight)
+        nn.init.kaiming_uniform_(self.__fc1.weight)
+        nn.init.kaiming_uniform_(self.__fc2.weight)
+        nn.init.kaiming_uniform_(self.__fc3.weight)
+        nn.init.kaiming_uniform_(self.__fc4.weight)
 
     # ========== Get network output for specific input (feed-forward) =========
 
@@ -71,12 +71,12 @@ class QNet(nn.Module):
 
         Returns
         -------
-        self.fc4(x): torch.Tensor
+        self.__fc4(x): torch.Tensor
             Computed Q-values for the input state.
 
         """
         # TODO Are input values not normalized?! Normalize input values?
-        x = F.leaky_relu(self.bn1(self.fc1(state))) # Pass through 1st layer, batch normalization, and activation function
-        x = F.leaky_relu(self.bn2(self.fc2(x)))
-        x = F.leaky_relu(self.bn3(self.fc3(x)))
-        return self.fc4(x)
+        x = F.leaky_relu(self.__bn1(self.__fc1(state))) # Pass through 1st layer, batch normalization, and activation function
+        x = F.leaky_relu(self.__bn2(self.__fc2(x)))
+        x = F.leaky_relu(self.__bn3(self.__fc3(x)))
+        return self.__fc4(x)
