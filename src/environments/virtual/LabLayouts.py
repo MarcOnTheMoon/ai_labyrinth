@@ -98,14 +98,14 @@ class Geometry:
 
     # ========== Constructor ==================================================
 
-    def __init__(self, layout=Layout.HOLES_8):
+    def __init__(self, layout):
         """
         Constructor.
 
         Parameters
         ----------
         layout : enum Layout
-            Layout of holes and walls. The default is Layout.HOLES_8.
+            Layout of holes and walls
 
         Returns
         -------
