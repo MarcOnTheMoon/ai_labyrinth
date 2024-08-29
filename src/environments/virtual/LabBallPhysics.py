@@ -4,7 +4,7 @@ Models realistic behavior of the ball on the field for a labyrinth OpenAI gym en
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.26
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from vpython import vector as vec
@@ -14,7 +14,7 @@ import numpy as np
 from LabRender3D import Render3D
 from LabLayouts import Layout, Geometry
 
-# TODO Walls and corners from vpython vector to numpy array for better performance?
+# TODO Corners: vpython vector to numpy array for better performance. (Walls only used once to init corners.)
 
 class BallPhysics:
 

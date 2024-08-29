@@ -4,10 +4,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>500</x>
-      <y>500</y>
+      <x>120</x>
+      <y>440</y>
       <w>1160</w>
-      <h>420</h>
+      <h>380</h>
     </coordinates>
     <panel_attributes>AgentDQN
 --
@@ -32,8 +32,6 @@
 + step(state, action, reward, next_state, done)
 + save(path)
 + load(path)
-+ save(path)
-+ load(path)
 - __batch_temporal_difference_step()
 </panel_attributes>
     <additional_attributes/>
@@ -41,8 +39,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1440</x>
-      <y>230</y>
+      <x>1060</x>
+      <y>170</y>
       <w>230</w>
       <h>60</h>
     </coordinates>
@@ -53,8 +51,8 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>500</x>
-      <y>230</y>
+      <x>120</x>
+      <y>170</y>
       <w>540</w>
       <h>190</h>
     </coordinates>
@@ -75,8 +73,8 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>750</x>
-      <y>410</y>
+      <x>370</x>
+      <y>350</y>
       <w>40</w>
       <h>110</h>
     </coordinates>
@@ -88,8 +86,8 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1080</x>
-      <y>230</y>
+      <x>700</x>
+      <y>170</y>
       <w>310</w>
       <h>190</h>
     </coordinates>
@@ -108,8 +106,8 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1230</x>
-      <y>410</y>
+      <x>850</x>
+      <y>350</y>
       <w>40</w>
       <h>110</h>
     </coordinates>
@@ -121,20 +119,26 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1440</x>
-      <y>360</y>
+      <x>1060</x>
+      <y>270</y>
       <w>220</w>
-      <h>60</h>
+      <h>90</h>
     </coordinates>
-    <panel_attributes>LabyrinthMain
+    <panel_attributes>LabyrinthMain.py::
+--
+
+--
+
+--
++ __main__()
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1550</x>
-      <y>410</y>
+      <x>1170</x>
+      <y>350</y>
       <w>90</w>
       <h>110</h>
     </coordinates>
@@ -145,21 +149,21 @@ main uses</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1550</x>
-      <y>280</y>
+      <x>1170</x>
+      <y>220</y>
       <w>90</w>
-      <h>100</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=-
 main uses
 </panel_attributes>
-    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>680</x>
-      <y>130</y>
+      <x>300</x>
+      <y>70</y>
       <w>180</w>
       <h>40</h>
     </coordinates>
@@ -170,8 +174,8 @@ main uses
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>760</x>
-      <y>160</y>
+      <x>380</x>
+      <y>100</y>
       <w>30</w>
       <h>90</h>
     </coordinates>

@@ -6,7 +6,7 @@ This file is work-in-progress and NOT ready for use, yet.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.25
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 from LabLayouts import Layout
@@ -36,7 +36,7 @@ class RewardsByThresholds():
         self.thresholds = self.__thresh_reward_dictionary(layout)
         
         # Counter
-        # The "reward counter" is confusing. What is this? A counter? An index to an array? ...?
+        # The "reward counter" is confusing. What is this? A counter? An index to an array? ...? -> Answer: Not a counter, but index (number thresholds successfully passed)
         # TODO Set to 0 on environment.reset()
         self.__is_moved_in_correct_direction_counter = 0   # Interim reward counter
         

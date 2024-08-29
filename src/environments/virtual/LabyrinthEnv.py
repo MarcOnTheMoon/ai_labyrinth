@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.26
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -112,21 +112,11 @@ class LabyrinthEnv(gym.Env):
         )
 
         # Declare action space (see class documentation above)
-        # TODO Why different action space for Layout.HOLES_2? This is not consistent.
         self.__action_to_angle_degree = np.array([-1, -0.5, 0, 0.5, 1], dtype=np.float32)
-        if (self.__geometry.layout == Layout.HOLES_2):
-            self.__action_to_angle_degree = np.array([-1.5, -1, -0.5, 0, 0.5, 1, 1.5], dtype=np.float32)
         self.num_actions_per_component = len(self.__action_to_angle_degree)
 
         # Define max. actions per episode for truncated
-        # TODO Why distinguish? Would there be any harm in setting highest value 800 for all cases?
-        # TODO What about Layout.HOLES_21?
-        if self.__geometry.layout.number_holes == 0:
-            self.__max_number_actions = 300
-        elif self.__geometry.layout.number_holes == 2:
-            self.__max_number_actions = 500
-        else: #if self.__geometry.layout == Layout.HOLES_8:
-            self.__max_number_actions = 800
+        self.__max_number_actions = 800
 
         self.__first_episode = True
 
@@ -142,12 +132,11 @@ class LabyrinthEnv(gym.Env):
             Array of observed values (see class documentation)
 
         """
-        # TODO Why round decimals?
         return np.array([
-            round(self.__ball_position[0], 3),   # Round 3 decimals
-            round(self.__ball_position [1], 3),
-            round(self.__last_ball_position[0], 3),
-            round(self.__last_ball_position[1], 3),
+            self.__ball_position[0],
+            self.__ball_position [1],
+            self.__last_ball_position[0],
+            self.__last_ball_position[1],
             self.__x_degree,
             self.__y_degree
         ], dtype=np.float32)
@@ -172,6 +161,7 @@ class LabyrinthEnv(gym.Env):
         """
         # Set start position
         # TODO I do not understand __first_episode. How initialized for first episode? Why not initialized the same way?
+        # TODO Answer: If no __first_episode, ball 'jumps' while rendering, because it is initialized randomly in Geometry. => Prevent visual jump.
         if self.__first_episode == False:
             match self.__geometry.layout:
                 case Layout.HOLES_0_VIRTUAL | Layout.HOLES_0:
@@ -189,7 +179,7 @@ class LabyrinthEnv(gym.Env):
                     self.__ball_start_position[0] = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
                     self.__ball_start_position[1] = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
                 case _:
-                    # TODO What about Layout.HOLES_2_VIRTUAL?
+                    # TODO What about Layout.HOLES_2_VIRTUAL? -> Place ball at start (1st episode) randomly for all layouts.
                     raise Exception(f'Layout not supported: {self.__geometry.layout}')
         else:
             self.__first_episode = False

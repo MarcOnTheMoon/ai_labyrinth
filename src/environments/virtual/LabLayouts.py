@@ -6,7 +6,7 @@ Lengths are stated without unit, but are interpreted as [cm].
 @authors: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.26
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import random
@@ -67,9 +67,7 @@ class Geometry:
     # TODO Replace all these 'settings' by parameters and commented out code
 
     # Set start areas for random start position as [x_min, x_max, y_min, y_max]
-#    start_area = np.array([-6.06, 6.06, -5.76, 5.76], dtype=np.float32)         # Layout.HOLES_0_VIRTUAL, close to destination
-    start_area = np.array([-13.06, 13.06, -10.76, 10.76], dtype=np.float32)     # Layout.HOLES_0_VIRTUAL, whole board
-#    start_area = np.array([-1.3, 2.3, 6.76, 10.76], dtype=np.float32)           # Layout.HOLES_2_VIRTUAL
+    start_area = np.array([-6.06, 6.06, -5.76, 5.76], dtype=np.float32)         # Layout.HOLES_0_VIRTUAL, close to destination
     
     # Set random set for random start position
     random.seed(1)

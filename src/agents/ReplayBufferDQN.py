@@ -4,7 +4,7 @@ Represents the replay buffer for the DQN agent.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import numpy as np
@@ -33,7 +33,7 @@ class ReplayBuffer:
         """
         # TODO Why use deque (add/remove at left and right => FIFO and LIFO) instead of queue (FIFO)? Is queue faster?
         self.__memory = deque(maxlen = buffer_size)     # Deque allows efficient addition and removal of elements
-        self.__batch_size = batch_size
+        self.batch_size = batch_size
         self.__experience = namedtuple('Experience', field_names = ['state', 'action', 'reward', 'next_state', 'done'])
 
     # ========== Add element (experience) =====================================
@@ -91,7 +91,7 @@ class ReplayBuffer:
 
         """
         # Get batch_size random experiences from the buffer
-        experiences = random.sample(self.__memory, k = self.__batch_size)
+        experiences = random.sample(self.__memory, k = self.batch_size)
 
         # Create NumPy arrays of entries within batch of experiences
         # TODO Faster to have 5 queues or deques (i.e., for states, actions, and so on, each)?
@@ -121,5 +121,4 @@ class ReplayBuffer:
         Number of experiences stored
             
         """
-        # TODO Where used? (Original comment was: "Error messages without")
         return len(self.__memory)

@@ -4,7 +4,7 @@ Deep Q-Learning (DQN) agent for labyrinth OpenAI gym environment.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.23
+@version: 2024.08.29
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import random
@@ -54,7 +54,7 @@ class AgentDQN:
         gamma: float
             Discount factor for past rewards. gamma -> 1: long-term rewards should be given more consideration. gamma -> 0: short-term, immediate optimization of the reward.
         learning_rate: float
-            Learning rate for the optimizer
+            Learning rate 'alpha' for the optimizer
         learn_period: int
             Indicates how often the Q-network should be trained (e.g., 1 = after each executed action)
 
@@ -153,9 +153,8 @@ class AgentDQN:
 
         """
         # Choose random or greedy action? (Some randomness during evaluation yields better results.)
-        # TODO Expression 'random_value < 0.0' is always False, because Random value is in [0, 1]!
         random_value = random.random()  # Random value in [0, 1]
-        is_random = (mode == 'train' and random_value < self.__epsilon) or (mode == 'evaluate' and random_value < 0.0)
+        is_random = (mode == 'train' and random_value < self.__epsilon)
         
         # Choose action (randomly or greedy)
         if is_random:
@@ -206,8 +205,8 @@ class AgentDQN:
         self.__training_steps_count += 1
         if self.__training_steps_count == self.__learn_period:
             self.__training_steps_count = 0
-            # TODO Why at least 200 samples in replay buffer required? Why this value?
-            if len(self.__memory) > 200:
+            # TODO Rather or additionally let memory.get_random_batch() handle situations with too little data in buffer?
+            if len(self.__memory) > 3 * self.__memory.batch_size:
                 self.__batch_temporal_difference_step()
 
     # -------------------------------------------------------------------------
@@ -272,7 +271,7 @@ class AgentDQN:
             print(f'Loss (each 100 training steps): {loss}')
             
         # Train neural network one step (i.e., minimize TD -> 0)
-        # TODO What about hyperparameter alpha? Not required when minimizing loss of neural network?
+        # Note: Hyperparameter alpha is the learning rate (set while initializing the optimizer)
         self.__optimizer.zero_grad()    # Reset optimizer's gradients to zero. Gradients are accumulated with each call to backward(). If gradients are not reset, they accumulate with each backpropagation step, leading to incorrect updates.
         loss.backward()                 # Calculat gradient by backpropagation
         self.__optimizer.step()         # Updates the network based on calculated gradients
