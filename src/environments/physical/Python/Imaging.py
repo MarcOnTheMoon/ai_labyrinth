@@ -1,7 +1,7 @@
 """
 Image processing for AI labyrinth application.
 
-@author: Marc Hensel
+@author: Marc Hensel, Sandra Lassahn
 @contact: http://www.haw-hamburg.de/marc-hensel
 
 @copyright: 2024, Marc Hensel
@@ -58,9 +58,9 @@ class Imaging():
         Parameters
         ----------
         minArea : int, optional
-            Minimum area of a blob. (Default: 150)
+            Minimum area of a blob. (Default: 100)
         maxArea : int, optional
-            Maximum area of a blob. (Default: 700)
+            Maximum area of a blob. (Default: 1,750)
         minCircularity : float, optional
             Minimum roundness of a blob. (Default: 0.6)
         maxCircularity : float, optional
@@ -72,8 +72,8 @@ class Imaging():
 
         """
         params = cv2.SimpleBlobDetector_Params()
-        params.filterByColor = True
-        params.blobColor = 255
+        params.filterByColor = False  # color filter used manually
+        params.filterByArea = True
         params.minArea = minArea
         params.maxArea = maxArea
         params.filterByCircularity = True
@@ -81,8 +81,8 @@ class Imaging():
         params.maxCircularity = maxCircularity
         params.filterByConvexity = False
         params.filterByInertia = False
-        self.__blobDetector = cv2.SimpleBlobDetector_create(params) 
-        
+        self.__blobDetector = cv2.SimpleBlobDetector_create(params)
+
     # ----------------------------------------------------------------------
     # Release resources
     # ----------------------------------------------------------------------
@@ -139,14 +139,27 @@ class Imaging():
             Blob's radius, if only one blob is detected (or None).
 
         """
-        grayImage = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
-        binImage = self.__thresholdAndDilate(grayImage)
-        binImage, ballCenter, ballRadius = self.__blobDetection(binImage)
-        
+        # Convert image to HSV color space
+        hsvImage = cv2.cvtColor(self.image, cv2.COLOR_BGR2HSV)
+
+        # Define color range for green (based on ball color)
+        lower_green = np.array([40, 40, 40])
+        upper_green = np.array([90, 255, 255])
+
+        # Create a mask for green color
+        mask = cv2.inRange(hsvImage, lower_green, upper_green)
+        result = cv2.bitwise_and(self.image, self.image, mask=mask)
+
+        # Convert result to grayscale for further processing
+        grayResult = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
+
+        # Apply blob detection on the masked green image
+        binImage, ballCenter, ballRadius = self.__blobDetection(grayResult)
+
         return binImage, ballCenter, ballRadius
 
     # ----------------------------------------------------------------------
-
+    # NOT USED Now
     def __thresholdAndDilate(self, srcImage):
         """
         Apply threshold and dilate blobs.
@@ -180,7 +193,9 @@ class Imaging():
         return binImage
 
     # ----------------------------------------------------------------------
-        
+    # Blob detection on filtered image
+    # ----------------------------------------------------------------------
+
     def __blobDetection(self, binImage):
         """
         Detect blobs in binary image.
@@ -212,7 +227,6 @@ class Imaging():
         binImage = cv2.drawKeypoints(binImage, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         
         # Determine keypoint representing moving ball
-        # TODO Find and return ball (max. size?)
         if len(keypoints) > 0:
             maxKeypoint = keypoints[0]
             for key in keypoints:

@@ -237,6 +237,8 @@ class LabyrinthMachine():
             True if the episode has ended, else False.
         truncated : boolean
             True if the episode is terminated due to too many actions being taken.
+        progress: int
+            area where the ball is located, for evaluation needed
         info : int
             Information: not used
 
@@ -315,7 +317,7 @@ class LabyrinthMachine():
         self.__number_actions += 1
         truncated = (self.__number_actions >= self.__max_number_actions)
 
-        return self.__observation_space, reward, done, truncated, {}
+        return self.__observation_space, reward, done, truncated, self.__rewards_rules.get_progress(), {}
 
 
 # -----------------------------------------------------------------------------

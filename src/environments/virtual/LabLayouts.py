@@ -27,18 +27,21 @@ class Layout(Enum):
     
     Layouts with the suffix 'VIRTUAL' do not exist for the physical device,
     however, they are kept because trained data is available for these layouts
-    in the virtual environment.    
+    in the virtual environment.
+
+    Enumeration elements must differ in terms of parameters; otherwise,
+    they will be mapped to the same value, and not all game boards can be used.
     """
-    HOLES_0_VIRTUAL = (0)
-    HOLES_2_VIRTUAL = (2)
-    HOLES_0  = (0)
-    HOLES_2  = (2)
-    HOLES_8  = (8)
-    HOLES_21 = (21)
+    HOLES_0_VIRTUAL = (0, True)
+    HOLES_2_VIRTUAL = (2, True)
+    HOLES_0  = (0, False)
+    HOLES_2  = (2, False)
+    HOLES_8  = (8, False)
+    HOLES_21 = (21, False)
     
     # ========== Constructor ==================================================
     
-    def __init__(self, number_holes):
+    def __init__(self, number_holes, virtual):
         """
         Constructor initializing attributes.
 
@@ -87,11 +90,11 @@ class Geometry:
     destinations_xy = {
         Layout.HOLES_0_VIRTUAL  : [[-0.25, 0.25], [-0.25, 0.25]],
         Layout.HOLES_0          : [[-0.25, 0.25], [-0.25, 0.25]],
-        Layout.HOLES_2_VIRTUAL  : [[-1.9, 1.56], [-6.62, -5.5]],
+        Layout.HOLES_2_VIRTUAL  : [[-1.9, 1.56], [-6.62, -5.86]],
         Layout.HOLES_2          : [[-0.24, 2.73], [-11.4, -10.08]],
-        Layout.HOLES_8          : [[-5.9, -3.83], [-11.4, -9.52]],
+        Layout.HOLES_8          : [[-5.9, -4.33], [-11.4, -9.52]],
         #Layout.HOLES_8         : [[0.16, 4.59], [-6.95, -3.85]],   # Closer to the start position
-        Layout.HOLES_21         : [[-4.2, -2.55], [-11.4, -8.91]]
+        Layout.HOLES_21         : [[-4.2, -3.3], [-11.4, -8.91]]
         }
 
     # ========== Constructor ==================================================

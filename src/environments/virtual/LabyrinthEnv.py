@@ -173,13 +173,21 @@ class LabyrinthEnv(gym.Env):
                     startpoint = [-0.79, 9.86]
                     self.__ball_start_position[0] = startpoint[0] + random.uniform(-0.4, 0.4)
                     self.__ball_start_position[1] = startpoint[1] + random.uniform(-0.4, 0.4)
+                case Layout.HOLES_2_VIRTUAL:
+                    startpoint = [-1.52, 9.25]
+                    self.__ball_start_position[0] = startpoint[0] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[1] = startpoint[1] + random.uniform(-0.4, 0.4)
                 case Layout.HOLES_8:
                     startpoints = [[-5.82, -5.23], [-12.6, -7.03], [-9.8, -1.49], [-3.8, 1.29], [-12.85, 3.92], [0.13, 10.53]]
                     start_index = random.randint(0, len(startpoints )-1)
                     self.__ball_start_position[0] = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
                     self.__ball_start_position[1] = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
+                case Layout.HOLES_21:
+                    startpoints = [[3.2,   10.47], [-8.43, 5.14], [-6.53, -0.38], [-10.6, -7.25], [-3.59, -2.53]]
+                    start_index = random.randint(0, len(startpoints) - 1)
+                    self.__ball_start_position[0] = startpoints[start_index][0] + random.uniform(-0.4, 0.4)
+                    self.__ball_start_position[1] = startpoints[start_index][1] + random.uniform(-0.4, 0.4)
                 case _:
-                    # TODO What about Layout.HOLES_2_VIRTUAL? -> Place ball at start (1st episode) randomly for all layouts.
                     raise Exception(f'Layout not supported: {self.__geometry.layout}')
         else:
             self.__first_episode = False
@@ -189,8 +197,8 @@ class LabyrinthEnv(gym.Env):
         self.__y_degree = 0.0
 
         # Ball
-        self.__ball_position = self.__ball_start_position
-        self.__last_ball_position = self.__ball_start_position
+        self.__ball_position = self.__ball_start_position.copy()
+        self.__last_ball_position = self.__ball_start_position.copy()
         self.__ball_physics.reset(position=self.__ball_start_position)
 
         # Rendering (ball in hole became invisible)
@@ -280,6 +288,8 @@ class LabyrinthEnv(gym.Env):
             True if the episode has ended, else False.
         truncated : boolean
             True if the episode is terminated due to too many actions being taken.
+        progress: int
+            area where the ball is located, for evaluation needed
         info : dict
             Information: not used
 
@@ -299,7 +309,7 @@ class LabyrinthEnv(gym.Env):
         is_rotate_field = (stop_x_degree != start_x_degree) or (stop_y_degree != start_y_degree)
 
         # Remember last position before doing action
-        self.__last_ball_position = self.__ball_position
+        self.__last_ball_position = self.__ball_position.copy() #IMPORTANT: without copy the referenz is copied not the current value
         
         # New ball position
         if is_rotate_field == False:
@@ -395,19 +405,18 @@ class LabyrinthEnv(gym.Env):
         self.__number_actions += 1
         truncated = (self.__number_actions >= self.__max_number_actions)
 
-        return self.__observation_space, reward, done, truncated, {}
+        return self.__observation_space, reward, done, truncated, self.__rewards_rules.get_progress(), {}
 
 # -----------------------------------------------------------------------------
 # Main (sample)
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    env = LabyrinthEnv(layout=Layout.HOLES_8, render_mode='3D')
+    env = LabyrinthEnv(layout=Layout.HOLES_0_VIRTUAL, render_mode='3D')
     env.reset()
-
     """for action in [0, 4, 6, 6]:
         env.step(action)"""
     for action in range(5):
         env.step(1)
     for action in range(30):
-        env.step(9)
+        print(env.step(9))
