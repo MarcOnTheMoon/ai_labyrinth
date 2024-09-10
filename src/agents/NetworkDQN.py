@@ -29,13 +29,13 @@ class QNet(nn.Module):
             Dimension of the environment's observation space (i.e., network inputs)
         action_size: int
             Dimension of the environment's action space (i.e., network output classes)
-                    qnet: Dict
+        qnet: Dict
             number of neurons in each layer of the neural network, max 3 layers
                 "fc1": int,
                     First hidden layer size
-                "fc2": int,
+                "fc2": int, (optional)
                     Second hidden layer size
-                "fc3": int
+                "fc3": int (optional)
                     Third hidden layer size
 
         Returns
