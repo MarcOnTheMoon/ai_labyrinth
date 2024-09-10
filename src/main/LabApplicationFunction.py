@@ -32,8 +32,6 @@ import sys
 project_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(project_dir, '../models/')
 sys.path.append(model_path)
-#model_path = '../models/' # Path to load and store weight data
-
 
 project_dir = os.path.dirname(os.path.abspath(__file__))
 prototype_dir = os.path.join(project_dir, '../environments/virtual')
