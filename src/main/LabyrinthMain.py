@@ -432,7 +432,10 @@ class ApplicationGUI(QWidget):
             self.__error_label.setVisible(True)
         else:
             # Check correct Checkboxes
-            if not (self.__virt_cb.isChecked() or self.__proto_cb.isChecked()) or not (self.__train_cb.isChecked() or self.__eval_cb.isChecked()) or (self.__train_cb.isChecked() and not (self.__continue_train_cb.isChecked() or self.__no_continue_train_cb.isChecked())):
+            if not (0.0 <= float(epsilon) <= 1.0) or not (0.0 <= float(epsilon_decay_rate) <= 1.0) or not (0.0 <= float(epsilon_min) <= 1.0) or not (0.0 <= float(learning_rate) <= 1.0) or not (0.0 <= float(gamma) <= 1.0):
+                    self.__error_label.setText("Some input parameters are outside the permitted definition range")
+                    self.__error_label.setVisible(True)
+            elif not (self.__virt_cb.isChecked() or self.__proto_cb.isChecked()) or not (self.__train_cb.isChecked() or self.__eval_cb.isChecked()) or (self.__train_cb.isChecked() and not (self.__continue_train_cb.isChecked() or self.__no_continue_train_cb.isChecked())):
                 self.__error_label.setText("Select at least one checkbox in each quenstion group")
                 self.__error_label.setVisible(True)
             else:
