@@ -104,14 +104,14 @@ class Imaging():
 
     def nextFrame(self):
         """
-        Get next camera frame and image of extracted pinball area.
+        Get next camera frame and image of extracted labyrinth area.
 
         Returns
         -------
         numpy.ndarray
             Camera frame.
         numpy.ndarray
-            Image of extracted pinball area.
+            Image of extracted labyrinth area.
 
         """
         self.frame, self.image = self.acquisition.nextFrame()
