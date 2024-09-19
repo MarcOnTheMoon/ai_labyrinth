@@ -6,7 +6,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>189</x>
-      <y>84</y>
+      <y>77</y>
       <w>273</w>
       <h>448</h>
     </coordinates>
@@ -58,7 +58,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>511</x>
-      <y>84</y>
+      <y>77</y>
       <w>126</w>
       <h>28</h>
     </coordinates>
@@ -70,7 +70,7 @@
     <id>Relation</id>
     <coordinates>
       <x>455</x>
-      <y>91</y>
+      <y>84</y>
       <w>70</w>
       <h>21</h>
     </coordinates>
@@ -81,7 +81,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>511</x>
-      <y>385</y>
+      <y>371</y>
       <w>126</w>
       <h>28</h>
     </coordinates>
@@ -93,7 +93,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>511</x>
-      <y>427</y>
+      <y>413</y>
       <w>126</w>
       <h>28</h>
     </coordinates>
@@ -105,7 +105,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>511</x>
-      <y>469</y>
+      <y>455</y>
       <w>126</w>
       <h>28</h>
     </coordinates>
@@ -117,7 +117,7 @@
     <id>UMLClass</id>
     <coordinates>
       <x>511</x>
-      <y>133</y>
+      <y>126</y>
       <w>203</w>
       <h>196</h>
     </coordinates>
@@ -146,7 +146,7 @@ _layout_mapping: Dict_
     <id>Relation</id>
     <coordinates>
       <x>455</x>
-      <y>196</y>
+      <y>189</y>
       <w>70</w>
       <h>28</h>
     </coordinates>
@@ -159,39 +159,64 @@ m2=1</panel_attributes>
     <id>Relation</id>
     <coordinates>
       <x>567</x>
-      <y>322</y>
+      <y>315</y>
       <w>28</w>
-      <h>77</h>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>630</x>
-      <y>322</y>
+      <y>315</y>
       <w>42</w>
-      <h>140</h>
+      <h>133</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>30.0;10.0;30.0;170.0;10.0;170.0</additional_attributes>
+    <additional_attributes>30.0;10.0;30.0;160.0;10.0;160.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
       <x>630</x>
-      <y>322</y>
-      <w>84</w>
-      <h>182</h>
+      <y>315</y>
+      <w>63</w>
+      <h>175</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>90.0;10.0;90.0;230.0;10.0;230.0</additional_attributes>
+    <additional_attributes>60.0;10.0;60.0;220.0;10.0;220.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>497</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>Layout
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>315</y>
+      <w>84</w>
+      <h>217</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>90.0;10.0;90.0;280.0;10.0;280.0</additional_attributes>
   </element>
 </diagram>

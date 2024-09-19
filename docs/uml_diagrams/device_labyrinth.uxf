@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <diagram program="umlet" version="15.0.0">
-  <zoom_level>5</zoom_level>
+  <zoom_level>6</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>395</x>
-      <y>220</y>
-      <w>70</w>
-      <h>20</h>
+      <x>324</x>
+      <y>156</y>
+      <w>84</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>AppFunction
 </panel_attributes>
@@ -16,10 +16,10 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>145</x>
-      <y>115</y>
-      <w>205</w>
-      <h>225</h>
+      <x>24</x>
+      <y>42</y>
+      <w>246</w>
+      <h>270</h>
     </coordinates>
     <panel_attributes>LabyrinthMachine
 --
@@ -55,10 +55,10 @@
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>425</y>
-      <w>45</w>
-      <h>20</h>
+      <x>306</x>
+      <y>414</y>
+      <w>54</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -68,10 +68,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>500</x>
-      <y>210</y>
-      <w>160</w>
-      <h>90</h>
+      <x>450</x>
+      <y>156</y>
+      <w>192</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>ServoCommunication
 --
@@ -90,10 +90,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>260</x>
-      <y>335</y>
-      <w>20</w>
-      <h>45</h>
+      <x>162</x>
+      <y>306</y>
+      <w>24</w>
+      <h>54</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -103,10 +103,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>345</x>
-      <y>250</y>
-      <w>165</w>
-      <h>20</h>
+      <x>264</x>
+      <y>180</y>
+      <w>198</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -116,10 +116,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>415</x>
-      <y>385</y>
-      <w>245</w>
-      <h>140</h>
+      <x>348</x>
+      <y>366</y>
+      <w>294</w>
+      <h>168</h>
     </coordinates>
     <panel_attributes>Imaging
 --
@@ -145,10 +145,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>145</x>
-      <y>500</y>
-      <w>215</w>
-      <h>85</h>
+      <x>24</x>
+      <y>504</y>
+      <w>258</w>
+      <h>102</h>
     </coordinates>
     <panel_attributes>GUI
 --
@@ -166,10 +166,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>275</x>
-      <y>465</y>
-      <w>20</w>
-      <h>45</h>
+      <x>180</x>
+      <y>462</y>
+      <w>24</w>
+      <h>54</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -179,10 +179,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>380</x>
-      <y>555</y>
-      <w>280</w>
-      <h>105</h>
+      <x>306</x>
+      <y>570</y>
+      <w>336</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>ImageAcquisition
 --
@@ -203,10 +203,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>515</x>
-      <y>520</y>
-      <w>20</w>
-      <h>45</h>
+      <x>468</x>
+      <y>528</y>
+      <w>24</w>
+      <h>54</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -216,10 +216,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>145</x>
-      <y>595</y>
-      <w>105</w>
-      <h>65</h>
+      <x>24</x>
+      <y>618</y>
+      <w>126</w>
+      <h>78</h>
     </coordinates>
     <panel_attributes>Camera
 --
@@ -236,10 +236,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>245</x>
-      <y>605</y>
-      <w>145</w>
-      <h>20</h>
+      <x>144</x>
+      <y>630</y>
+      <w>174</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -249,10 +249,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>425</x>
-      <y>90</y>
-      <w>235</w>
-      <h>85</h>
+      <x>360</x>
+      <y>12</y>
+      <w>282</w>
+      <h>102</h>
     </coordinates>
     <panel_attributes>ArduinoCOM
 --
@@ -271,10 +271,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>575</x>
-      <y>170</y>
-      <w>20</w>
-      <h>50</h>
+      <x>540</x>
+      <y>108</y>
+      <w>24</w>
+      <h>60</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -284,10 +284,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>145</x>
-      <y>370</y>
-      <w>240</w>
-      <h>100</h>
+      <x>24</x>
+      <y>348</y>
+      <w>288</w>
+      <h>120</h>
     </coordinates>
     <panel_attributes>App
 --
@@ -308,10 +308,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>345</x>
-      <y>225</y>
-      <w>60</w>
-      <h>20</h>
+      <x>264</x>
+      <y>162</y>
+      <w>72</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -321,22 +321,22 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>395</x>
-      <y>325</y>
-      <w>70</w>
-      <h>20</h>
+      <x>324</x>
+      <y>264</y>
+      <w>84</w>
+      <h>24</h>
     </coordinates>
-    <panel_attributes>Geometry
+    <panel_attributes>Layout
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>345</x>
-      <y>330</y>
-      <w>60</w>
-      <h>20</h>
+      <x>264</x>
+      <y>270</y>
+      <w>72</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -346,10 +346,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>345</x>
-      <y>300</y>
-      <w>60</w>
-      <h>20</h>
+      <x>264</x>
+      <y>240</y>
+      <w>72</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
@@ -359,10 +359,10 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>395</x>
-      <y>190</y>
-      <w>70</w>
-      <h>20</h>
+      <x>324</x>
+      <y>126</y>
+      <w>84</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>Arduino Application
 </panel_attributes>
@@ -371,22 +371,22 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>425</x>
-      <y>170</y>
-      <w>15</w>
+      <x>360</x>
+      <y>108</y>
+      <w>18</w>
       <h>30</h>
     </coordinates>
     <panel_attributes>lt=-
 </panel_attributes>
-    <additional_attributes>10.0;40.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>395</x>
-      <y>295</y>
-      <w>70</w>
-      <h>20</h>
+      <x>324</x>
+      <y>234</y>
+      <w>84</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>RewardsByAreas
 </panel_attributes>
@@ -395,10 +395,10 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>420</x>
-      <y>275</y>
-      <w>15</w>
-      <h>30</h>
+      <x>354</x>
+      <y>210</y>
+      <w>18</w>
+      <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;40.0</additional_attributes>
@@ -406,13 +406,38 @@ m2=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>395</x>
-      <y>260</y>
-      <w>70</w>
-      <h>20</h>
+      <x>324</x>
+      <y>192</y>
+      <w>84</w>
+      <h>24</h>
     </coordinates>
     <panel_attributes>/Rewards/
 {abstract}
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>264</x>
+      <y>300</y>
+      <w>66</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>318</x>
+      <y>294</y>
+      <w>96</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>LabLayouts::Geometry
 </panel_attributes>
     <additional_attributes/>
   </element>

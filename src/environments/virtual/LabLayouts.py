@@ -77,14 +77,14 @@ class Geometry:
     
     # ========== Field layouts ================================================
 
-    # Define start start positions and destination areas
+    # Define start positions and destination areas
     start_positions = {
         Layout.HOLES_0_VIRTUAL  : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
         Layout.HOLES_0          : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
         Layout.HOLES_2_VIRTUAL  : np.array([-1.52, 9.25, 0], dtype=np.float32),
         Layout.HOLES_2          : np.array([-0.79, 9.86, 0], dtype=np.float32),
         Layout.HOLES_8          : np.array([0.13, 10.53, 0], dtype=np.float32),
-        #Layout.HOLES_8         : np.array([13, -5.0, 0], dtype=np.float32),                   # Closer to the destination position
+        #Layout.HOLES_8         : np.array([13, -5.0, 0], dtype=np.float32)     # Closer to the destination position
         Layout.HOLES_21         : np.array([3.2, 10.47, 0], dtype=np.float32)
         }
     destinations_xy = {
