@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="15.0.0">
+  <help_text/>
+  <zoom_level>7</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>189</x>
+      <y>77</y>
+      <w>273</w>
+      <h>448</h>
+    </coordinates>
+    <panel_attributes>LabyrinthMain.py::ApplicationGUI
+--
+- __virt_cb: QCheckBox
+- __proto_cb: QCheckBox
+- __train_cb: QCheckBox
+- __eval_cb: QCheckBox
+- __continue_training_group: QGroupBox
+- __continue_train_cb: QCheckBox
+- __no_continue_train_cb: QCheckBox
+- __plate_cb: QComboBox
+- __labyrinth_image_label: QLabel
+- __num_layers_input: QSpinBox
+- __layer1_label: QLabel
+- __layer2_label: QLabel
+- __layer3_label: QLabel
+- __neurons_layer1_input: QLineEdit
+- __neurons_layer2_input: QLineEdit
+- __neurons_layer3_input: QLineEdit
+- __param_group: QGroupBox
+- __episodes_input: QLineEdit
+- __seed_input: QLineEdit
+- __epsilon_input: QLineEdit
+- __epsilon_decay_rate_input: QLineEdit
+- __epsilon_min_input: QLineEdit
+- __batch_size_input: QLineEdit
+- __replay_buffer_size_input: QLineEdit
+- __gamma_input: QLineEdit
+- __learning_rate_input: QLineEdit
+- __learn_period_input: QLineEdit
+- __error_label: QLabel
+--
+- __init__()
+- __toggle_environment(self, state: Qt.CheckState): None
+- __toggle_mode(self, state: Qt.CheckState): None
+- __toggle_continue_train(self, state: Qt.CheckState): None
+- __update_labyrinth_image(self): None
+- __update_parameter_neurons(self): None
+- __update_neurons_inputs(self, value: int): None
+- __start_game(self): None
+--
++ __main__()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>77</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>PyQt6::QtWidgets::QWidget
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>455</x>
+      <y>84</y>
+      <w>70</w>
+      <h>21</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>371</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>AgentDQN
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>413</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>LabyrinthEnv
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>455</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>LabyrinthMachine
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>126</y>
+      <w>203</w>
+      <h>196</h>
+    </coordinates>
+    <panel_attributes>AppFunction
+--
+_layout_mapping: Dict_
+- __layout: String
+- __environment: String
+- __continue_training: bool
+- __episodes: int
+- __seed: int
+- __agentsparameter: Dict
+--
+- __init__(parameter: Dict)
+- __evaluate_init(): Environment, AgentDQN
+- __evaluate(env, agent): None
+- __train_init(): Environment, AgentDQN
+- __train(env, agent): scores
+- __plot_scores(scores)
++ evaluate_main()
++ train_main()
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>455</x>
+      <y>189</y>
+      <w>70</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;80.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>567</x>
+      <y>315</y>
+      <w>28</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>315</y>
+      <w>42</w>
+      <h>133</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>30.0;10.0;30.0;160.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>315</y>
+      <w>63</w>
+      <h>175</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>60.0;10.0;60.0;220.0;10.0;220.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>511</x>
+      <y>497</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>Layout
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>315</y>
+      <w>84</w>
+      <h>217</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>90.0;10.0;90.0;280.0;10.0;280.0</additional_attributes>
+  </element>
+</diagram>

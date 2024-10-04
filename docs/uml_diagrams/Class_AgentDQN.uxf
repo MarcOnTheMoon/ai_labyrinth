@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="15.1">
-  <zoom_level>10</zoom_level>
+<diagram program="umlet" version="15.0.0">
+  <zoom_level>7</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>120</x>
-      <y>440</y>
-      <w>1160</w>
-      <h>380</h>
+      <x>98</x>
+      <y>392</y>
+      <w>616</w>
+      <h>273</h>
     </coordinates>
     <panel_attributes>AgentDQN
 --
 - __action_size: int
+- __state_size: int
 - __epsilon: float
 - __epsilon_decay_rate: float
 - __epsilon_min: float
@@ -25,8 +26,8 @@
 - __optimizer: torch.optim.Adam
 - __loss: torch.nn.MSELoss
 --
-- __init__(state_size, action_sice, epsilon=1.0, epsilon_decay_rate=.9, epsilon_min=.1, batch_size=64, replay_buffer_size=100_000, gamma=.99, learning_rate=5e-4, learn_period=1)
-- __init_q_net(state_size: int, action_size: int)
+- __init__(state_size: int, action_sice: int, parameter: Dict)
+- __init_q_net(qnet: Dict)
 + decay_epsilon()
 + select_action(state, mode='train'): int
 + step(state, action, reward, next_state, done)
@@ -39,57 +40,35 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1060</x>
-      <y>170</y>
-      <w>230</w>
-      <h>60</h>
+      <x>770</x>
+      <y>245</y>
+      <w>126</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>LabyrinthEnv
 </panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <id>UMLClass</id>
-    <coordinates>
-      <x>120</x>
-      <y>170</y>
-      <w>540</w>
-      <h>190</h>
-    </coordinates>
-    <panel_attributes>QNet
---
-- __fc1: torch.nn.Linear
-- __fc2: torch.nn.Linear
-- __fc3: torch.nn.Linear
-- __fc4: torch.nn.Linear
-- __bn1: torch.nn.BatchNorm1d
-- __bn2: torch.nn.BatchNorm1d
-- __bn3: torch.nn.BatchNorm1d
---
-- __init__(state_size, action_size, fc1_units=4096, fc2_units=2048, fc3_units=512)
-+ forward(state): torch.Tensor</panel_attributes>
-    <additional_attributes/>
-  </element>
-  <element>
     <id>Relation</id>
     <coordinates>
-      <x>370</x>
-      <y>350</y>
-      <w>40</w>
-      <h>110</h>
+      <x>189</x>
+      <y>336</y>
+      <w>28</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;90.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>700</x>
-      <y>170</y>
-      <w>310</w>
-      <h>190</h>
+      <x>329</x>
+      <y>203</y>
+      <w>210</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>ReplayBuffer
 --
@@ -106,25 +85,25 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>850</x>
-      <y>350</y>
-      <w>40</w>
-      <h>110</h>
+      <x>434</x>
+      <y>336</y>
+      <w>28</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;90.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;80.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1060</x>
-      <y>270</y>
-      <w>220</w>
-      <h>90</h>
+      <x>560</x>
+      <y>84</y>
+      <w>154</w>
+      <h>63</h>
     </coordinates>
-    <panel_attributes>LabyrinthMain.py::
+    <panel_attributes>LabyrinthMain.py::ApplicationGUI
 --
 
 --
@@ -135,37 +114,12 @@ m2=1</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1170</x>
-      <y>350</y>
-      <w>90</w>
-      <h>110</h>
-    </coordinates>
-    <panel_attributes>lt=-
-main uses</panel_attributes>
-    <additional_attributes>10.0;90.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
-    <id>Relation</id>
-    <coordinates>
-      <x>1170</x>
-      <y>220</y>
-      <w>90</w>
-      <h>70</h>
-    </coordinates>
-    <panel_attributes>lt=-
-main uses
-</panel_attributes>
-    <additional_attributes>10.0;50.0;10.0;10.0</additional_attributes>
-  </element>
-  <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>300</x>
-      <y>70</y>
-      <w>180</w>
-      <h>40</h>
+      <x>140</x>
+      <y>126</y>
+      <w>126</w>
+      <h>28</h>
     </coordinates>
     <panel_attributes>torch::nn:Module
 </panel_attributes>
@@ -174,12 +128,160 @@ main uses
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>380</x>
-      <y>100</y>
-      <w>30</w>
-      <h>90</h>
+      <x>196</x>
+      <y>147</y>
+      <w>21</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>560</x>
+      <y>203</y>
+      <w>154</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>AppFunction
+--
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>140</y>
+      <w>28</w>
+      <h>77</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>770</x>
+      <y>189</y>
+      <w>126</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>LabyrinthMachine
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>770</x>
+      <y>301</y>
+      <w>126</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>Layout
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>707</x>
+      <y>315</y>
+      <w>77</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>623</x>
+      <y>336</y>
+      <w>28</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>707</x>
+      <y>203</y>
+      <w>77</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>707</x>
+      <y>259</y>
+      <w>77</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>98</x>
+      <y>203</y>
+      <w>210</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>QNet
+--
++ fc1: torch.nn.Linear
++ fc2: torch.nn.Linear
++ fc3: torch.nn.Linear
++ fc4: torch.nn.Linear
++ bn1: torch.nn.BatchNorm1d
++ bn2: torch.nn.BatchNorm1d
++ bn3: torch.nn.BatchNorm1d
+--
+- __init__(state_size, action_size, qnet: Dict)
++ forward(state): torch.Tensor</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>574</x>
+      <y>28</y>
+      <w>126</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>PyQt6::QtWidgets:QWidget
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>630</x>
+      <y>49</y>
+      <w>21</w>
+      <h>49</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
   </element>
 </diagram>

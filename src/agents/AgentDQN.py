@@ -20,18 +20,7 @@ class AgentDQN:
 
     # ========== Constructor ==================================================
 
-    def __init__(
-            self,
-            state_size,
-            action_size,
-            epsilon = 1.0,
-            epsilon_decay_rate = .9, #for 0 holes .9, for 2 or 8 holes .98
-            epsilon_min = .1, #for 0 holes .1, for 2 or 8 holes 0.15
-            batch_size = 64,
-            replay_buffer_size = 100_000,
-            gamma = 0.99,
-            learning_rate = 5e-4,
-            learn_period = 1):
+    def __init__(self, state_size, action_size, parameter):
         """
         Constructor.
 
@@ -41,22 +30,29 @@ class AgentDQN:
             Size of environment's observation space
         action_size: int
             Size of environment's action space
-        epsilon: float
-            Exploration rate ε - initial Epsilon greedy parameter,  1 = explore 100% of the time at the beginning
-        epsilon_decay_rate: float
-            Rate that reduce chance of random action, decay rate of epsilon greedy policy
-        epsilon_min: float
-            Describes how low the exploration rate ε can drop, minimal epsilon value
-        batch_size: int
-            Batch size for the training
-        replay_buffer_size: int
-            Size of the replay buffer
-        gamma: float
-            Discount factor for past rewards. gamma -> 1: long-term rewards should be given more consideration. gamma -> 0: short-term, immediate optimization of the reward.
-        learning_rate: float
-            Learning rate 'alpha' for the optimizer
-        learn_period: int
-            Indicates how often the Q-network should be trained (e.g., 1 = after each executed action)
+        parameter: Dict
+            "epsilon": float,
+                    Exploration rate ε - initial Epsilon greedy parameter,  1 = explore 100% of the time at the beginning
+            "epsilon_decay_rate": float,
+                    Rate that reduce chance of random action, decay rate of epsilon greedy policy
+            "epsilon_min": float,
+                    Describes how low the exploration rate ε can drop, minimal epsilon value
+            "batch_size": int,
+                    Batch size for the training
+            "replay_buffer_size": int,
+                    Size of the replay buffer
+            "gamma": float,
+                    Discount factor for past rewards. gamma -> 1: long-term rewards should be given more consideration. gamma -> 0: short-term, immediate optimization of the reward.
+            "learning_rate": float,
+                    Learning rate 'alpha' for the optimizer
+            "learn_period": int,
+                    Indicates how often the Q-network should be trained (e.g., 1 = after each executed action)
+            "fc1": int,
+                    number of neurons in the first layer of the neural network
+            "fc2": int (optional),
+                    number of neurons in the second layer of the neural network
+            "fc3": int
+                    number of neurons in the third layer of the neural network
 
         Returns
         -------
@@ -64,45 +60,48 @@ class AgentDQN:
 
         """
         # Environment
+        self.__state_size = state_size
         self.__action_size = action_size
 
         # Epsilon greedy strategy
-        self.__epsilon = epsilon
-        self.__epsilon_decay_rate = epsilon_decay_rate
-        self.__epsilon_min = epsilon_min
+        self.__epsilon = parameter.get("epsilon")
+        self.__epsilon_decay_rate = parameter.get("epsilon_decay_rate")
+        self.__epsilon_min = parameter.get("epsilon_min")
 
         # Q-Network
-        self.__learn_period = learn_period      # Training frequency (number of actions after which to train the network)
-        self.__learning_rate = learning_rate
-        self.__init_q_net(state_size=state_size, action_size=action_size)   # Initialize Q-network
+        self.__learn_period = parameter.get("learn_period")    # Training frequency (number of actions after which to train the network)
+        self.__learning_rate = parameter.get("learning_rate")
+        qnet = {"fc1": parameter.get("fc1"), "fc2": parameter.get("fc2"), "fc3": parameter.get("fc3")}
+        self.__init_q_net(qnet)  # Initialize Q-network
 
         # Replay memory and further training attributes
-        self.__memory = ReplayBuffer(replay_buffer_size, batch_size)
-        self.__training_steps_count = 0     # Counter for training steps
-        self.__gamma = gamma                # Reinforcement learning discount factor
+        self.__memory = ReplayBuffer(parameter.get("replay_buffer_size"), parameter.get("batch_size"))
+        self.__training_steps_count = 0         # Counter for training steps
+        self.__gamma = parameter.get("gamma")   # Reinforcement learning discount factor
 
         # Console output
         self.__print_loss_counter = 0    # Counter for printing the learning error
 
     # ========== Q-network ====================================================
 
-    def __init_q_net(self, state_size, action_size):
+    def __init_q_net(self, qnet):
         """
         Initialization of the Q-network, optimizer, and loss function.
 
         Parameters
         ----------
-        state_size: int
-            Size of environment's observation space
-        action_size: int
-            Size of environment's action space
+        qnet: Dict
+            number of neurons in each layer of the neural network, max 3 layers
+                "fc1": int,
+                "fc2": int,
+                "fc3": int
 
         Returns
         -------
         None.
 
         """
-        self.__q_net = QNet(state_size, action_size)
+        self.__q_net = QNet(self.__state_size, self.__action_size, qnet)
         self.__optimizer = optim.Adam(self.__q_net.parameters(), lr=self.__learning_rate)
         self.__loss = torch.nn.MSELoss()
 

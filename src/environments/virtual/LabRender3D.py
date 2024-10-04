@@ -40,12 +40,12 @@ class Render3D:
 
     # Define texture file names
     textures = {
-        Layout.HOLES_0_VIRTUAL  : 'textures/Holes_0_virtual.png',
-        Layout.HOLES_2_VIRTUAL  : 'textures/Holes_2_virtual.png',
-        Layout.HOLES_0          : 'textures/Holes_0.png',
-        Layout.HOLES_2          : 'textures/Holes_2.png',
-        Layout.HOLES_8          : 'textures/Holes_8.png',
-        Layout.HOLES_21         : 'textures/Holes_21.png'
+        Layout.HOLES_0_VIRTUAL  : 'textures/HOLES_0_VIRTUAL.png',
+        Layout.HOLES_2_VIRTUAL  : 'textures/HOLES_2_VIRTUAL.png',
+        Layout.HOLES_0          : 'textures/HOLES_0.png',
+        Layout.HOLES_2          : 'textures/HOLES_2.png',
+        Layout.HOLES_8          : 'textures/HOLES_8.png',
+        Layout.HOLES_21         : 'textures/HOLES_21.png'
     }
 
     # ========== Constructor ==================================================

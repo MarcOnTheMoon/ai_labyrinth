@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<diagram program="umlet" version="15.1">
+<diagram program="umlet" version="15.0.0">
   <help_text>// Uncomment the following line to change the fontsize and font:
 fontsize=10
 // fontfamily=SansSerif //possible: SansSerif,Serif,Monospaced
@@ -28,9 +28,9 @@ fontsize=10
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>708</x>
-      <y>192</y>
-      <w>216</w>
+      <x>348</x>
+      <y>468</y>
+      <w>120</w>
       <h>48</h>
     </coordinates>
     <panel_attributes>LabyrinthEnv
@@ -40,9 +40,9 @@ fontsize=10
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>708</x>
-      <y>324</y>
-      <w>216</w>
+      <x>600</x>
+      <y>468</y>
+      <w>144</w>
       <h>48</h>
     </coordinates>
     <panel_attributes>LabLayouts::Geometry
@@ -52,23 +52,23 @@ fontsize=10
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>588</x>
-      <y>336</y>
-      <w>144</w>
-      <h>36</h>
+      <x>600</x>
+      <y>504</y>
+      <w>36</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;100.0;10.0</additional_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1068</x>
-      <y>192</y>
-      <w>684</w>
-      <h>372</h>
+      <x>96</x>
+      <y>36</y>
+      <w>672</w>
+      <h>360</h>
     </coordinates>
     <panel_attributes>Render3D
 --
@@ -101,35 +101,35 @@ _+ textures: Dict_
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>912</x>
-      <y>324</y>
-      <w>180</w>
-      <h>48</h>
+      <x>600</x>
+      <y>384</y>
+      <w>144</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=-
 Geometry initializes</panel_attributes>
-    <additional_attributes>130.0;20.0;10.0;20.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>912</x>
-      <y>204</y>
-      <w>180</w>
-      <h>36</h>
+      <x>396</x>
+      <y>384</y>
+      <w>60</w>
+      <h>108</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1
 m2=0..1</panel_attributes>
-    <additional_attributes>10.0;10.0;130.0;10.0</additional_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>120</x>
-      <y>192</y>
-      <w>480</w>
-      <h>348</h>
+      <x>180</x>
+      <y>588</y>
+      <w>456</w>
+      <h>336</h>
     </coordinates>
     <panel_attributes>BallPhysics
 --
@@ -160,27 +160,71 @@ m2=0..1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>588</x>
-      <y>204</y>
-      <w>144</w>
+      <x>396</x>
+      <y>504</y>
+      <w>36</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>456</x>
+      <y>480</y>
+      <w>168</w>
       <h>36</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
 m1=1
 m2=1</panel_attributes>
-    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+    <additional_attributes>10.0;10.0;120.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>120</x>
+      <y>468</y>
+      <w>120</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>Layout</panel_attributes>
+    <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>804</x>
-      <y>228</y>
-      <w>36</w>
-      <h>120</h>
+      <x>228</x>
+      <y>480</y>
+      <w>144</w>
+      <h>36</h>
     </coordinates>
-    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
-m1=1
-m2=1</panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;100.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>180</x>
+      <y>384</y>
+      <w>36</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>180</x>
+      <y>504</y>
+      <w>36</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;70.0;10.0;10.0</additional_attributes>
   </element>
 </diagram>

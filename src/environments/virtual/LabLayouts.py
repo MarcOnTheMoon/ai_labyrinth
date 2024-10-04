@@ -27,18 +27,21 @@ class Layout(Enum):
     
     Layouts with the suffix 'VIRTUAL' do not exist for the physical device,
     however, they are kept because trained data is available for these layouts
-    in the virtual environment.    
+    in the virtual environment.
+
+    Enumeration elements must differ in terms of parameters; otherwise,
+    they will be mapped to the same value, and not all game boards can be used.
     """
-    HOLES_0_VIRTUAL = (0)
-    HOLES_2_VIRTUAL = (2)
-    HOLES_0  = (0)
-    HOLES_2  = (2)
-    HOLES_8  = (8)
-    HOLES_21 = (21)
+    HOLES_0_VIRTUAL = (0, True)
+    HOLES_2_VIRTUAL = (2, True)
+    HOLES_0  = (0, False)
+    HOLES_2  = (2, False)
+    HOLES_8  = (8, False)
+    HOLES_21 = (21, False)
     
     # ========== Constructor ==================================================
     
-    def __init__(self, number_holes):
+    def __init__(self, number_holes, virtual):
         """
         Constructor initializing attributes.
 
@@ -74,24 +77,24 @@ class Geometry:
     
     # ========== Field layouts ================================================
 
-    # Define start start positions and destination areas
+    # Define start positions and destination areas
     start_positions = {
         Layout.HOLES_0_VIRTUAL  : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
         Layout.HOLES_0          : np.array([random.uniform(start_area[0], start_area[1]), random.uniform(start_area[2], start_area[3]), 0], dtype=np.float32),
         Layout.HOLES_2_VIRTUAL  : np.array([-1.52, 9.25, 0], dtype=np.float32),
         Layout.HOLES_2          : np.array([-0.79, 9.86, 0], dtype=np.float32),
         Layout.HOLES_8          : np.array([0.13, 10.53, 0], dtype=np.float32),
-        #Layout.HOLES_8         : np.array([13, -5.0, 0], dtype=np.float32),                   # Closer to the destination position
+        #Layout.HOLES_8         : np.array([13, -5.0, 0], dtype=np.float32)     # Closer to the destination position
         Layout.HOLES_21         : np.array([3.2, 10.47, 0], dtype=np.float32)
         }
     destinations_xy = {
         Layout.HOLES_0_VIRTUAL  : [[-0.25, 0.25], [-0.25, 0.25]],
         Layout.HOLES_0          : [[-0.25, 0.25], [-0.25, 0.25]],
-        Layout.HOLES_2_VIRTUAL  : [[-1.9, 1.56], [-6.62, -5.5]],
+        Layout.HOLES_2_VIRTUAL  : [[-1.9, 1.56], [-6.62, -5.86]],
         Layout.HOLES_2          : [[-0.24, 2.73], [-11.4, -10.08]],
-        Layout.HOLES_8          : [[-5.9, -3.83], [-11.4, -9.52]],
+        Layout.HOLES_8          : [[-5.9, -4.33], [-11.4, -9.52]],
         #Layout.HOLES_8         : [[0.16, 4.59], [-6.95, -3.85]],   # Closer to the start position
-        Layout.HOLES_21         : [[-4.2, -2.55], [-11.4, -8.91]]
+        Layout.HOLES_21         : [[-4.2, -3.3], [-11.4, -8.91]]
         }
 
     # ========== Constructor ==================================================
