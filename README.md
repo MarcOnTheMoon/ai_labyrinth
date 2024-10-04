@@ -13,6 +13,7 @@ I like to play. And since you visit this repository, most probably so do you!
 Apart from this, I am also educating future engineers at Hamburg University of Applied Sciences (HAW Hamburg). As lecturer I try to offer my students projects where they can apply and integrate different fields of technology. In the best case these activities are motivating and fun, let students develop relevant competencies for their profession, and result in attractive demonstrators for other students and the general public.
 
 In this context we started working on several different self-learning systems controlled by Artificial Intelligence (AI), or more concrete applied __Deep Reinforcement Learning__ (DRL). These activities are still comparably new and we haven't completed a fully-functional system, yet. However, we have made some good progress that we are willing to share with you.
+<br clear=all>
 
 ## Overview
 In one of our systems we apply Deep Reinforcement Learning to navigate balls through the famous __BRIO Labyrinth game__. We approach this task by a software simulation of the labyrinth as well as by motorizing the actual physical game:
