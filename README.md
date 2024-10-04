@@ -48,6 +48,4 @@ The activities done so far and hopefully still to come are collaborations of mys
 My warm thanks go to [Allied Vision Technologies GmbH](https://www.alliedvision.com/) for provding industrial cameras, and to [Kowa Optimed Deutschland GmbH](https://www.kowa-lenses.com/) for providing camera lenses. Your valuable support and high-quality components helpe us to take the next steps into a fully-automated physical device.
 
 ## Contact
-Marc Hensel, University of Applied Sciences Hamburg (HAW Hamburg)
-
-http://www.haw-hamburg.de/marc-hensel
+[Marc Hensel](http://www.haw-hamburg.de/marc-hensel), University of Applied Sciences Hamburg (HAW Hamburg)
