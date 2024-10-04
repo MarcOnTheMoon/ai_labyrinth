@@ -1,7 +1,7 @@
 # Playing the BRIO Labyrinth with Reinforcement Learning
 
 > [!IMPORTANT]
-> This respository is __work-in-progress__ of student theses.<br>
+> This repository is __work-in-progress__ of student theses.<br>
 > It is subject to change, __not__ a reviewed publication of final results.
 
 ## What's it about?
@@ -26,7 +26,7 @@ In a first Master thesis, Sandra Lassahn has made a very good first step into th
 
 - Virtual environment (with 3D rendering and several labyrinth layouts)
 - AI agents successfully solving several labyrinth layouts
-- Morotized physical labyrinth (controlled by Arduino and Python app on connected laptop)
+- Motorized physical labyrinth (controlled by Arduino and Python app on connected laptop)
 - Solved first simple task on physical device 
 
 ## Next steps
@@ -46,7 +46,7 @@ The activities done so far and hopefully still to come are collaborations of mys
 - Sandra Lassahn (theses: virtual environment, functional AI models, motorized labyrinth)
 
 ## Supporters
-My warm thanks go to [Allied Vision Technologies GmbH](https://www.alliedvision.com/) for provding industrial cameras, and to [Kowa Optimed Deutschland GmbH](https://www.kowa-lenses.com/) for providing camera lenses. Your valuable support and high-quality components helpe us to take the next steps into a fully-automated physical device.
+My warm thanks go to [Allied Vision Technologies GmbH](https://www.alliedvision.com/) for providing industrial cameras, and to [Kowa Optimed Deutschland GmbH](https://www.kowa-lenses.com/) for providing camera lenses. Your valuable support and high-quality components help us to take the next steps into a fully-automated physical device.
 
 ## Contact
 [Marc Hensel](http://www.haw-hamburg.de/marc-hensel), University of Applied Sciences Hamburg (HAW Hamburg)
