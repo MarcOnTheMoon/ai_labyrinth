@@ -15,7 +15,7 @@ Apart from this, I am also educating future engineers at Hamburg University of A
 In this context we started working on several different self-learning systems controlled by Artificial Intelligence (AI), or more concrete applied __Deep Reinforcement Learning__ (DRL). These activities are still comparably new and we haven't completed a fully-functional system, yet. However, we have made some good progress that we are willing to share with you.
 
 ## Overview
-In one of our systems we apply Deep Reinforcement Learning to navigate balls through the famous __BRIO Labyrinth game__. We approach this tasks by a software simulation of the labyrinth as well as by motorizing the actual physical game:
+In one of our systems we apply Deep Reinforcement Learning to navigate balls through the famous __BRIO Labyrinth game__. We approach this task by a software simulation of the labyrinth as well as by motorizing the actual physical game:
 
 - _Virtual environment:_ The software simulation allows to develop AI models with moderate effort and time. Moreover, people can experiment with Deep Reinforcement Learning without building an automated physical device.
 - _Physical environment:_ The automated hardware shall serve to demonstrate AI models and/or the training process. Isn't it much more impressive to see a physical game playing, instead of a computer animation? Apart from this, it adds engineering tasks such as image processing, electronics, 3D-prints, and others.
