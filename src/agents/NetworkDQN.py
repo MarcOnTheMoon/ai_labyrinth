@@ -4,7 +4,7 @@ Deep Q-Network for a DQN agent solving labyrinth environments.
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.29
+@version: 2024.08.30
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import torch.nn as nn
@@ -12,6 +12,14 @@ import torch.nn.functional as F
 
 # TODO Replace by Tensorflow/Keras as standard lib for all projects?
 # TODO Use GPU, if available
+
+# TODO Adapt to layers actually used in training (see following comments)
+# 0 holes virtual:
+#   Geschwindigkeit im Zustandsraum: 128, 128 (wurde ohne seed trainiert)
+#   Letzte Position im Zustandsraum: 512, 128
+# 0 holes:          512, 128 (fc1, fc2)
+# 2 holes virtual:  128, 128 (fc1, fc2)
+# 8 holes:          2048, 1024, 256 (fc1, fc2, fc3)
 
 class QNet(nn.Module):
 
