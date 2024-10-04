@@ -1,4 +1,4 @@
-# AI-controlled Labyrinth Game
+# Playing the BRIO Labyrinth with Reinforcement Learning
 
 > [!IMPORTANT]
 > This respository is __work-in-progress__ of student theses.<br>
