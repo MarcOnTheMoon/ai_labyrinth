@@ -30,7 +30,7 @@ In a first Master thesis, Sandra Lassahn has made a very good first step into th
 - Solved first simple task on physical device 
 
 ## Next steps
-Now that we made a first step into the topic, there are 1,000 ideas of what to improve, how to improve, and continue to develop. Let's not go into all these details here. Instead, as next major leap we want to fully automate the physical device to solve some more tasks. One key technologies to apply will be image processing needed to capture the system's state (e.g., location of the ball).
+Now that we made a first step into the topic, there are 1,000 ideas of what to improve, how to improve, and continue to develop. Let's not go into all these details here. Instead, as next major leap we want to fully automate the physical device to solve some more tasks. One key technology to apply will be image processing needed to capture the system's state (e.g., location of the ball).
 
 ## Uploaded material
 - [X] Reports ([Master thesis](docs/reports))
@@ -43,7 +43,7 @@ Now that we made a first step into the topic, there are 1,000 ideas of what to i
 The activities done so far and hopefully still to come are collaborations of myself and my magnificent students of our [Department at HAW Hamburg](https://www.haw-hamburg.de/hochschule/technik-und-informatik/departments/informations-und-elektrotechnik/studium/studiengaenge/):
 
 - Marc Hensel (software, review & refactoring, 3D-prints)
-- Sandra Lassahn (theses: virtual environment, functional AI models, motorized labyrinth)
+- Sandra Lassahn (thesis: virtual environment, functional AI models, motorized labyrinth)
 
 ## Supporters
 My warm thanks go to [Allied Vision Technologies GmbH](https://www.alliedvision.com/) for providing industrial cameras, and to [Kowa Optimed Deutschland GmbH](https://www.kowa-lenses.com/) for providing camera lenses. Your valuable support and high-quality components help us to take the next steps into a fully-automated physical device.
