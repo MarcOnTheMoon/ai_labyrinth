@@ -1,5 +1,5 @@
 """
-BRIO labyrinth OpenAI gym environment.
+Physical labyrinth OpenAI gym environment.
 
 The environment follows the gym documentation (last visited: 24.03.2024):
 https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
