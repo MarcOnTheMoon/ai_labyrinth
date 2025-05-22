@@ -1,4 +1,4 @@
-# Playing the BRIO Labyrinth with Reinforcement Learning
+# Playing a Physical Labyrinth with Reinforcement Learning
 
 > [!IMPORTANT]
 > This repository is __work-in-progress__ of student theses.<br>
@@ -16,7 +16,7 @@ In this context we started working on several different self-learning systems co
 <br clear=all>
 
 ## Overview
-In one of our systems we apply Deep Reinforcement Learning to navigate balls through the famous __BRIO Labyrinth game__. We approach this task by a software simulation of the labyrinth as well as by motorizing the actual physical game:
+In one of our systems we apply Deep Reinforcement Learning to navigate balls through a famous __Labyrinth game__. We approach this task by a software simulation of the labyrinth as well as by motorizing the actual physical game:
 
 - _Virtual environment:_ The software simulation allows to develop AI models with moderate effort and time. Moreover, people can experiment with Deep Reinforcement Learning without building an automated physical device.
 - _Physical environment:_ The automated hardware shall serve to demonstrate AI models and/or the training process. Isn't it much more impressive to see a physical game playing, instead of a computer animation? Apart from this, it adds engineering tasks such as image processing, electronics, 3D-prints, and others.
