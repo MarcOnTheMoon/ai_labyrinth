@@ -7,7 +7,7 @@ https://gymnasium.farama.org/tutorials/gymnasium_basics/environment_creation/
 @authors: Sandra Lassahn, Marc Hensel
 @contact: http://www.haw-hamburg.de/marc-hensel
 @copyright: 2024
-@version: 2024.08.29
+@version: 2024.11.17
 @license: CC BY-NC-SA 4.0, see https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en
 """
 import gymnasium as gym
@@ -84,7 +84,7 @@ class LabyrinthEnv(gym.Env):
         assert type(layout) == Layout
         self.__geometry = Geometry(layout=layout)
 
-        # Object to determine rewards of an step
+        # Object to determine rewards of a step
         self.__rewards_rules = RewardsByAreas(layout=layout)
 
         # Field rotation
